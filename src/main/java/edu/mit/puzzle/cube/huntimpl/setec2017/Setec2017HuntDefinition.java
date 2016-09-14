@@ -3,6 +3,7 @@ package edu.mit.puzzle.cube.huntimpl.setec2017;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.auto.value.AutoValue;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
@@ -80,12 +81,31 @@ public class Setec2017HuntDefinition implements HuntDefinition {
     // TODO: create a team property for inventory items
 
     @AutoValue
-    abstract static class UnlockConstraint {
+    abstract static class VisibilityConstraint {
+        private static final ImmutableList<String> VISIBILITY_STATUS_ORDER = ImmutableList.of(
+                "INVISIBLE", "VISIBLE", "UNLOCKED", "SOLVED");
+
         @AutoValue.Builder
         abstract static class Builder {
-            abstract Builder setAutomaticUnlock(boolean automaticUnlock);
+            // If true, then this visibility constraint will never be satisfied. All other
+            // constraints in this object will be ignored.
+            abstract Builder setRequiresManualAction(boolean requiresManualAction);
+
+            // A sum constraint is satisfied when the sum of the levels of a set of characters is
+            // greater than or equal to a number. All sum constraints must be satisfied for this
+            // visibility constraint to be satisfied.
             abstract ImmutableMap.Builder<ImmutableSet<Character>, Integer> sumConstraintsBuilder();
+
+            // A max constraint is satisfied when the largest of the levels of a set of characters
+            // is greater than or equal to a number. All max constraints must be satisfied for this
+            // visibility constraint to be satisfied.
             abstract ImmutableMap.Builder<ImmutableSet<Character>, Integer> maxConstraintsBuilder();
+
+            // A puzzle visibility status constraint is satisfied when a puzzle has the given
+            // visibility status, or has a visibility status that follows the given visibility
+            // status in the visibility status order. All puzzle visibility constraints must be
+            // satisfied for this visibility constraint to be satisfied.
+            abstract ImmutableMap.Builder<String, String> puzzleVisibilityStatusConstraintsBuilder();
 
             Builder addSumConstraint(int levels, Character... characters) {
                 sumConstraintsBuilder().put(ImmutableSet.copyOf(characters), levels);
@@ -97,20 +117,29 @@ public class Setec2017HuntDefinition implements HuntDefinition {
                 return this;
             }
 
-            abstract UnlockConstraint build();
+            Builder addPuzzleVisibilityStatusConstraint(String puzzleId, String visibility) {
+                puzzleVisibilityStatusConstraintsBuilder().put(puzzleId, visibility);
+                return this;
+            }
+
+            abstract VisibilityConstraint build();
         }
 
         static Builder builder() {
-            return new AutoValue_Setec2017HuntDefinition_UnlockConstraint.Builder()
-                    .setAutomaticUnlock(true);
+            return new AutoValue_Setec2017HuntDefinition_VisibilityConstraint.Builder()
+                    .setRequiresManualAction(false);
         }
 
-        abstract boolean getAutomaticUnlock();
+        abstract boolean getRequiresManualAction();
         abstract ImmutableMap<ImmutableSet<Character>, Integer> getSumConstraints();
         abstract ImmutableMap<ImmutableSet<Character>, Integer> getMaxConstraints();
+        abstract ImmutableMap<String, String> getPuzzleVisibilityStatusConstraints();
 
-        boolean isSatisfied(CharacterLevelsProperty characterLevels) {
-            if (!getAutomaticUnlock()) {
+        boolean isSatisfied(
+                CharacterLevelsProperty characterLevels,
+                Map<String, String> puzzleIdToVisibilityStatus
+        ) {
+            if (getRequiresManualAction()) {
                 return false;
             }
 
@@ -140,6 +169,18 @@ public class Setec2017HuntDefinition implements HuntDefinition {
                     }
                 }
                 if (max < minimumLevel) {
+                    return false;
+                }
+            }
+
+            for (Map.Entry<String, String> entry : getPuzzleVisibilityStatusConstraints().entrySet()) {
+                String puzzleId = entry.getKey();
+                String constraintStatus = entry.getValue();
+                String status = puzzleIdToVisibilityStatus.get(puzzleId);
+                if (status == null) {
+                    status = VISIBILITY_STATUS_SET.getDefaultVisibilityStatus();
+                }
+                if (VISIBILITY_STATUS_ORDER.indexOf(status) < VISIBILITY_STATUS_ORDER.indexOf(constraintStatus)) {
                     return false;
                 }
             }
@@ -175,20 +216,25 @@ public class Setec2017HuntDefinition implements HuntDefinition {
 
     @AutoValue
     abstract static class Setec2017Puzzle {
-        static Setec2017Puzzle create(
-                Puzzle puzzle,
-                UnlockConstraint unlockConstraint,
-                SolveReward solveReward
-        ) {
-            return new AutoValue_Setec2017HuntDefinition_Setec2017Puzzle(
-                    puzzle,
-                    unlockConstraint,
-                    solveReward
-            );
+        @AutoValue.Builder
+        abstract static class Builder {
+            abstract Builder setPuzzle(Puzzle puzzle);
+            abstract Builder setVisibleConstraint(VisibilityConstraint visibleConstraint);
+            abstract Builder setUnlockedConstraint(VisibilityConstraint unlockedConstraint);
+            abstract Builder setSolveReward(SolveReward solveReward);
+            abstract Setec2017Puzzle build();
+        }
+
+        static Builder builder() {
+            return new AutoValue_Setec2017HuntDefinition_Setec2017Puzzle.Builder()
+                    .setVisibleConstraint(VisibilityConstraint.builder().build())
+                    .setUnlockedConstraint(VisibilityConstraint.builder().build())
+                    .setSolveReward(SolveReward.builder().build());
         }
 
         abstract Puzzle getPuzzle();
-        abstract UnlockConstraint getUnlockConstraint();
+        abstract VisibilityConstraint getVisibleConstraint();
+        abstract VisibilityConstraint getUnlockedConstraint();
         abstract SolveReward getSolveReward();
     }
 
@@ -199,19 +245,44 @@ public class Setec2017HuntDefinition implements HuntDefinition {
                 .collect(Collectors.toList());
     }
 
-    private static void unlockPuzzles(HuntStatusStore huntStatusStore, String teamId) {
+    private static void updateVisibility(HuntStatusStore huntStatusStore, String teamId) {
         CharacterLevelsProperty characterLevels = huntStatusStore
                 .getTeam(teamId)
                 .getTeamProperty(CharacterLevelsProperty.class);
+
+        Map<String, String> puzzleIdToVisibilityStatus =
+                huntStatusStore.getVisibilitiesForTeam(teamId).stream()
+                .collect(Collectors.toMap(Visibility::getPuzzleId, Visibility::getStatus));
+
+        Map<String, String> puzzleIdToVisibilityStatusUpdate = new HashMap<>();
+
         for (Setec2017Puzzle puzzle : Setec2017Puzzles.PUZZLES.values()) {
-            if (puzzle.getUnlockConstraint().isSatisfied(characterLevels)) {
-                huntStatusStore.setVisibility(
-                        teamId,
-                        puzzle.getPuzzle().getPuzzleId(),
-                        "UNLOCKED",
-                        false
-                );
+            if (puzzle.getUnlockedConstraint().isSatisfied(
+                    characterLevels,
+                    puzzleIdToVisibilityStatus
+            )) {
+                puzzleIdToVisibilityStatusUpdate.put(puzzle.getPuzzle().getPuzzleId(), "UNLOCKED");
+            } else if (puzzle.getVisibleConstraint().isSatisfied(
+                    characterLevels,
+                    puzzleIdToVisibilityStatus
+            )) {
+                puzzleIdToVisibilityStatusUpdate.put(puzzle.getPuzzle().getPuzzleId(), "VISIBLE");
             }
+        }
+
+        // TODO: introduce a HuntStatusStore method for updating a batch of visibilities all at
+        // once, and then sending out their VisibilityChangeEvents after they're all updated.
+        // Without this optimization, I'm concerned that the stack depth of event handling and
+        // unlocking could become very deep when many puzzles change visibility at once.
+        for (Map.Entry<String, String> entry : puzzleIdToVisibilityStatusUpdate.entrySet()) {
+            String puzzleId = entry.getKey();
+            String visibilityStatus = entry.getValue();
+            huntStatusStore.setVisibility(
+                    teamId,
+                    puzzleId,
+                    visibilityStatus,
+                    false
+            );
         }
     }
 
@@ -231,7 +302,7 @@ public class Setec2017HuntDefinition implements HuntDefinition {
                             CharacterLevelsProperty.class,
                             CharacterLevelsProperty.create(ImmutableMap.of())
                     );
-                    unlockPuzzles(huntStatusStore, teamId);
+                    updateVisibility(huntStatusStore, teamId);
                 }
             }
         });
@@ -278,9 +349,9 @@ public class Setec2017HuntDefinition implements HuntDefinition {
                                 return CharacterLevelsProperty.create(ImmutableMap.copyOf(newLevels));
                             }
                     );
-                    unlockPuzzles(huntStatusStore, visibility.getTeamId());
                 }
             }
+            updateVisibility(huntStatusStore, visibility.getTeamId());
         });
 
         eventProcessor.addEventProcessor(FullReleaseEvent.class, event -> {

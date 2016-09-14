@@ -54,7 +54,7 @@ public class Setec2017HuntRunTest extends RestletTest {
     }
 
     @Test
-    public void testHintRun() throws IOException {
+    public void testRun() throws IOException {
         postHuntStart();
 
         assertThat(getCharacterLevel(Character.FIGHTER)).isEqualTo(0);
@@ -65,6 +65,8 @@ public class Setec2017HuntRunTest extends RestletTest {
         json = getVisibility("testerteam", "f1");
         assertThat(json.get("status").asText()).isEqualTo("UNLOCKED");
         json = getVisibility("testerteam", "f3");
+        assertThat(json.get("status").asText()).isEqualTo("VISIBLE");
+        json = getVisibility("testerteam", "f4");
         assertThat(json.get("status").asText()).isEqualTo("INVISIBLE");
         json = getVisibility("testerteam", "dynast");
         assertThat(json.get("status").asText()).isEqualTo("INVISIBLE");
@@ -77,12 +79,34 @@ public class Setec2017HuntRunTest extends RestletTest {
         assertThat(getCharacterLevel(Character.FIGHTER)).isEqualTo(1);
         assertThat(getCharacterLevel(Character.WIZARD)).isEqualTo(0);
         assertThat(getGold()).isEqualTo(1);
+        json = getVisibility("testerteam", "f1");
+        assertThat(json.get("status").asText()).isEqualTo("SOLVED");
+        json = getVisibility("testerteam", "f3");
+        assertThat(json.get("status").asText()).isEqualTo("UNLOCKED");
+        json = getVisibility("testerteam", "f4");
+        assertThat(json.get("status").asText()).isEqualTo("VISIBLE");
+        json = getVisibility("testerteam", "f5");
+        assertThat(json.get("status").asText()).isEqualTo("INVISIBLE");
+
+        currentUserCredentials = TESTERTEAM_CREDENTIALS;
+        postNewSubmission("testerteam", "f2", "FIGHTER1");
+        currentUserCredentials = ADMIN_CREDENTIALS;
+        postUpdateSubmission(2, "CORRECT");
+
+        json = getVisibility("testerteam", "f3");
+        assertThat(json.get("status").asText()).isEqualTo("UNLOCKED");
+        json = getVisibility("testerteam", "f4");
+        assertThat(json.get("status").asText()).isEqualTo("UNLOCKED");
+        json = getVisibility("testerteam", "f5");
+        assertThat(json.get("status").asText()).isEqualTo("VISIBLE");
+        json = getVisibility("testerteam", "f6");
+        assertThat(json.get("status").asText()).isEqualTo("INVISIBLE");
 
         json = post(
                 "/hintrequests",
                 HintRequest.builder()
                         .setTeamId("testerteam")
-                        .setPuzzleId("f2")
+                        .setPuzzleId("f3")
                         .setRequest("help")
                         .build()
         );
