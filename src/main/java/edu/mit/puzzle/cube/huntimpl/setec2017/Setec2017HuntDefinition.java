@@ -7,6 +7,7 @@ import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Table;
 
 import edu.mit.puzzle.cube.core.HuntDefinition;
@@ -267,9 +268,7 @@ public class Setec2017HuntDefinition implements HuntDefinition {
         @Override
         public void process(Event event) {
             super.process(event);
-            for (String teamId : getVisibilityAffectedTeams(event)) {
-                updateVisibility(teamId);
-            }
+            updateVisibility(getVisibilityAffectedTeams(event));
         }
 
         @Override
@@ -279,8 +278,8 @@ public class Setec2017HuntDefinition implements HuntDefinition {
                 super.process(event);
                 affectedTeams.addAll(getVisibilityAffectedTeams(event));
             }
-            for (String teamId : affectedTeams) {
-                updateVisibility(teamId);
+            if (!affectedTeams.isEmpty()) {
+                updateVisibility(affectedTeams);
             }
         }
     }
@@ -290,32 +289,42 @@ public class Setec2017HuntDefinition implements HuntDefinition {
         return new Setec2017CompositeEventProcessor();
     }
 
-    private void updateVisibility(String teamId) {
-        CharacterLevelsProperty characterLevels = huntStatusStore
-                .getTeam(teamId)
-                .getTeamProperty(CharacterLevelsProperty.class);
-
-        Map<String, String> puzzleIdToVisibilityStatus =
-                huntStatusStore.getVisibilitiesForTeam(teamId).stream()
-                .collect(Collectors.toMap(Visibility::getPuzzleId, Visibility::getStatus));
+    private void updateVisibility(Set<String> teamIds) {
+        Map<String,CharacterLevelsProperty> teamToCharacterLevels = Maps.toMap(
+                teamIds,
+                teamId -> huntStatusStore.getTeam(teamId).getTeamProperty(CharacterLevelsProperty.class));
+        Map<String,Map<String,String>> teamToPuzzleIdToVisibilityStatus = Maps.toMap(
+                teamIds,
+                teamId -> huntStatusStore.getVisibilitiesForTeam(teamId).stream()
+                        .collect(Collectors.toMap(Visibility::getPuzzleId, Visibility::getStatus)));
 
         Table<String, String, String> teamPuzzleStatusTable = HashBasedTable.create();
 
         for (Setec2017Puzzle puzzle : Setec2017Puzzles.PUZZLES.values()) {
-            if (puzzle.getUnlockedConstraint().isSatisfied(
-                    characterLevels,
-                    puzzleIdToVisibilityStatus
-            )) {
-                teamPuzzleStatusTable.put(teamId, puzzle.getPuzzle().getPuzzleId(), "UNLOCKED");
-            } else if (puzzle.getVisibleConstraint().isSatisfied(
-                    characterLevels,
-                    puzzleIdToVisibilityStatus
-            )) {
-                teamPuzzleStatusTable.put(teamId, puzzle.getPuzzle().getPuzzleId(), "VISIBLE");
+            VisibilityConstraint unlockedConstraint = puzzle.getUnlockedConstraint();
+            VisibilityConstraint visibleConstraint = puzzle.getVisibleConstraint();
+
+            for (String teamId : teamIds) {
+                CharacterLevelsProperty characterLevels = teamToCharacterLevels.get(teamId);
+                Map<String,String> puzzleIdToVisibilityStatus = teamToPuzzleIdToVisibilityStatus.get(teamId);
+
+                if (unlockedConstraint.isSatisfied(
+                        characterLevels,
+                        puzzleIdToVisibilityStatus
+                )) {
+                    teamPuzzleStatusTable.put(teamId, puzzle.getPuzzle().getPuzzleId(), "UNLOCKED");
+                } else if (visibleConstraint.isSatisfied(
+                        characterLevels,
+                        puzzleIdToVisibilityStatus
+                )) {
+                    teamPuzzleStatusTable.put(teamId, puzzle.getPuzzle().getPuzzleId(), "VISIBLE");
+                }
             }
         }
 
-        huntStatusStore.setVisibilityBatch(teamPuzzleStatusTable, false);
+        if (!teamPuzzleStatusTable.isEmpty()) {
+            huntStatusStore.setVisibilityBatch(teamPuzzleStatusTable, false);
+        }
     }
 
     @Override
