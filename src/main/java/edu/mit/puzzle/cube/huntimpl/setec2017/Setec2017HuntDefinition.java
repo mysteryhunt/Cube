@@ -3,12 +3,16 @@ package edu.mit.puzzle.cube.huntimpl.setec2017;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.auto.value.AutoValue;
+import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Table;
 
 import edu.mit.puzzle.cube.core.HuntDefinition;
 import edu.mit.puzzle.cube.core.events.CompositeEventProcessor;
+import edu.mit.puzzle.cube.core.events.Event;
 import edu.mit.puzzle.cube.core.events.FullReleaseEvent;
 import edu.mit.puzzle.cube.core.events.HintCompleteEvent;
 import edu.mit.puzzle.cube.core.events.HuntStartEvent;
@@ -26,13 +30,17 @@ import edu.mit.puzzle.cube.core.model.VisibilityStatusSet;
 import edu.mit.puzzle.cube.modules.model.StandardVisibilityStatusSet;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 public class Setec2017HuntDefinition implements HuntDefinition {
     private static final VisibilityStatusSet VISIBILITY_STATUS_SET = new StandardVisibilityStatusSet();
+
+    private HuntStatusStore huntStatusStore;
 
     @Override
     public VisibilityStatusSet getVisibilityStatusSet() {
@@ -245,49 +253,84 @@ public class Setec2017HuntDefinition implements HuntDefinition {
                 .collect(Collectors.toList());
     }
 
-    private static void updateVisibility(HuntStatusStore huntStatusStore, String teamId) {
-        CharacterLevelsProperty characterLevels = huntStatusStore
-                .getTeam(teamId)
-                .getTeamProperty(CharacterLevelsProperty.class);
+    private class Setec2017CompositeEventProcessor extends CompositeEventProcessor {
+        private Set<String> getVisibilityAffectedTeams(Event event) {
+            if (event instanceof HuntStartEvent || event instanceof FullReleaseEvent) {
+                return ImmutableSet.copyOf(huntStatusStore.getTeamIds());
+            }
+            if (event instanceof VisibilityChangeEvent) {
+                VisibilityChangeEvent visibilityChangeEvent = (VisibilityChangeEvent) event;
+                return ImmutableSet.of(visibilityChangeEvent.getVisibility().getTeamId());
+            }
+            return ImmutableSet.of();
+        }
 
-        Map<String, String> puzzleIdToVisibilityStatus =
-                huntStatusStore.getVisibilitiesForTeam(teamId).stream()
-                .collect(Collectors.toMap(Visibility::getPuzzleId, Visibility::getStatus));
+        @Override
+        public void process(Event event) {
+            super.process(event);
+            updateVisibility(getVisibilityAffectedTeams(event));
+        }
 
-        Map<String, String> puzzleIdToVisibilityStatusUpdate = new HashMap<>();
+        @Override
+        public void processBatch(List<? extends Event> events) {
+            Set<String> affectedTeams = new HashSet<>();
+            for (Event event : events) {
+                super.process(event);
+                affectedTeams.addAll(getVisibilityAffectedTeams(event));
+            }
+            if (!affectedTeams.isEmpty()) {
+                updateVisibility(affectedTeams);
+            }
+        }
+    }
+
+    @Override
+    public CompositeEventProcessor generateCompositeEventProcessor() {
+        return new Setec2017CompositeEventProcessor();
+    }
+
+    private void updateVisibility(Set<String> teamIds) {
+        Map<String,CharacterLevelsProperty> teamToCharacterLevels = Maps.toMap(
+                teamIds,
+                teamId -> huntStatusStore.getTeam(teamId).getTeamProperty(CharacterLevelsProperty.class));
+        Map<String,Map<String,String>> teamToPuzzleIdToVisibilityStatus = Maps.toMap(
+                teamIds,
+                teamId -> huntStatusStore.getVisibilitiesForTeam(teamId).stream()
+                        .collect(Collectors.toMap(Visibility::getPuzzleId, Visibility::getStatus)));
+
+        Table<String, String, String> teamPuzzleStatusTable = HashBasedTable.create();
 
         for (Setec2017Puzzle puzzle : Setec2017Puzzles.PUZZLES.values()) {
-            if (puzzle.getUnlockedConstraint().isSatisfied(
-                    characterLevels,
-                    puzzleIdToVisibilityStatus
-            )) {
-                puzzleIdToVisibilityStatusUpdate.put(puzzle.getPuzzle().getPuzzleId(), "UNLOCKED");
-            } else if (puzzle.getVisibleConstraint().isSatisfied(
-                    characterLevels,
-                    puzzleIdToVisibilityStatus
-            )) {
-                puzzleIdToVisibilityStatusUpdate.put(puzzle.getPuzzle().getPuzzleId(), "VISIBLE");
+            VisibilityConstraint unlockedConstraint = puzzle.getUnlockedConstraint();
+            VisibilityConstraint visibleConstraint = puzzle.getVisibleConstraint();
+
+            for (String teamId : teamIds) {
+                CharacterLevelsProperty characterLevels = teamToCharacterLevels.get(teamId);
+                Map<String,String> puzzleIdToVisibilityStatus = teamToPuzzleIdToVisibilityStatus.get(teamId);
+
+                if (unlockedConstraint.isSatisfied(
+                        characterLevels,
+                        puzzleIdToVisibilityStatus
+                )) {
+                    teamPuzzleStatusTable.put(teamId, puzzle.getPuzzle().getPuzzleId(), "UNLOCKED");
+                } else if (visibleConstraint.isSatisfied(
+                        characterLevels,
+                        puzzleIdToVisibilityStatus
+                )) {
+                    teamPuzzleStatusTable.put(teamId, puzzle.getPuzzle().getPuzzleId(), "VISIBLE");
+                }
             }
         }
 
-        // TODO: introduce a HuntStatusStore method for updating a batch of visibilities all at
-        // once, and then sending out their VisibilityChangeEvents after they're all updated.
-        // Without this optimization, I'm concerned that the stack depth of event handling and
-        // unlocking could become very deep when many puzzles change visibility at once.
-        for (Map.Entry<String, String> entry : puzzleIdToVisibilityStatusUpdate.entrySet()) {
-            String puzzleId = entry.getKey();
-            String visibilityStatus = entry.getValue();
-            huntStatusStore.setVisibility(
-                    teamId,
-                    puzzleId,
-                    visibilityStatus,
-                    false
-            );
+        if (!teamPuzzleStatusTable.isEmpty()) {
+            huntStatusStore.setVisibilityBatch(teamPuzzleStatusTable, false);
         }
     }
 
     @Override
     public void addToEventProcessor(CompositeEventProcessor eventProcessor, HuntStatusStore huntStatusStore) {
+        this.huntStatusStore = huntStatusStore;
+
         eventProcessor.addEventProcessor(HuntStartEvent.class, event -> {
             boolean changed = huntStatusStore.recordHuntRunStart();
             if (changed) {
@@ -302,7 +345,6 @@ public class Setec2017HuntDefinition implements HuntDefinition {
                             CharacterLevelsProperty.class,
                             CharacterLevelsProperty.create(ImmutableMap.of())
                     );
-                    updateVisibility(huntStatusStore, teamId);
                 }
             }
         });
@@ -351,7 +393,6 @@ public class Setec2017HuntDefinition implements HuntDefinition {
                     );
                 }
             }
-            updateVisibility(huntStatusStore, visibility.getTeamId());
         });
 
         eventProcessor.addEventProcessor(FullReleaseEvent.class, event -> {

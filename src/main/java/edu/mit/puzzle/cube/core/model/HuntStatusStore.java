@@ -317,7 +317,7 @@ public class HuntStatusStore {
         Optional<Integer> generatedId = DatabaseHelper.insert(
                 connectionFactory,
                 "INSERT INTO team_properties (teamId, propertyKey, propertyValue) SELECT ?, ?, ? " +
-                "WHERE NOT EXISTS (SELECT 1 FROM team_properties WHERE teamId = ? AND propertyKey = ?)",
+                        "WHERE NOT EXISTS (SELECT 1 FROM team_properties WHERE teamId = ? AND propertyKey = ?)",
                 Lists.newArrayList(teamId, propertyKey, propertyValue, teamId, propertyKey));
         if (generatedId.isPresent()) {
             return true;
@@ -471,7 +471,9 @@ public class HuntStatusStore {
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .collect(Collectors.toList());
-        eventProcessor.processBatch(changeEvents);
+        if (!changeEvents.isEmpty()) {
+            eventProcessor.processBatch(changeEvents);
+        }
         return !changeEvents.isEmpty();
     }
 
