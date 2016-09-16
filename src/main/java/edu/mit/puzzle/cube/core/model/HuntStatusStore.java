@@ -454,8 +454,7 @@ public class HuntStatusStore {
     public boolean setVisibility(
             String teamId,
             String puzzleId,
-            String status,
-            boolean isExternallyInitiated
+            String status
     ) {
         if (!visibilityStatusSet.isAllowedStatus(status)) {
             return false;
@@ -508,8 +507,7 @@ public class HuntStatusStore {
     }
 
     public boolean setVisibilityBatch(
-            Table<String,String,String> teamPuzzleStatusTable,
-            boolean isExternallyInitiated
+            Table<String,String,String> teamPuzzleStatusTable
     ) {
         Set<String> statuses = teamPuzzleStatusTable.values().stream()
                 .filter(visibilityStatusSet::isAllowedStatus)

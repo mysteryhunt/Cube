@@ -71,7 +71,7 @@ public class HuntStatusStoreTest {
     @Test
     public void setAndGetVisibility() {
         boolean statusChanged = huntStatusStore.setVisibility(
-                TEST_TEAM_ID, TEST_PUZZLE_ID, "UNLOCKED", false);
+                TEST_TEAM_ID, TEST_PUZZLE_ID, "UNLOCKED");
         assertTrue(statusChanged);
         assertEquals("UNLOCKED", huntStatusStore.getVisibility(TEST_TEAM_ID, TEST_PUZZLE_ID).getStatus());
 
@@ -85,10 +85,10 @@ public class HuntStatusStoreTest {
 
     @Test
     public void setVisibilityToSameStatus() {
-        huntStatusStore.setVisibility(TEST_TEAM_ID, TEST_PUZZLE_ID, "UNLOCKED", false);
+        huntStatusStore.setVisibility(TEST_TEAM_ID, TEST_PUZZLE_ID, "UNLOCKED");
         assertEquals("UNLOCKED", huntStatusStore.getVisibility(TEST_TEAM_ID, TEST_PUZZLE_ID).getStatus());
 
-        boolean statusChanged = huntStatusStore.setVisibility(TEST_TEAM_ID, TEST_PUZZLE_ID, "UNLOCKED", false);
+        boolean statusChanged = huntStatusStore.setVisibility(TEST_TEAM_ID, TEST_PUZZLE_ID, "UNLOCKED");
         assertFalse(statusChanged);
         assertEquals("UNLOCKED", huntStatusStore.getVisibility(TEST_TEAM_ID, TEST_PUZZLE_ID).getStatus());
 
@@ -103,7 +103,7 @@ public class HuntStatusStoreTest {
     @Test
     public void setVisibilityToLocked() {
         boolean statusChanged = huntStatusStore.setVisibility(TEST_TEAM_ID, TEST_PUZZLE_ID,
-                visibilityStatusSet.getDefaultVisibilityStatus(), false);
+                visibilityStatusSet.getDefaultVisibilityStatus());
         assertFalse(statusChanged);
         assertEquals(visibilityStatusSet.getDefaultVisibilityStatus(),
                 huntStatusStore.getVisibility(TEST_TEAM_ID, TEST_PUZZLE_ID).getStatus());
@@ -117,7 +117,7 @@ public class HuntStatusStoreTest {
     @Test
     public void setVisibilityWithIllegalCurrentStatus() {
         boolean statusChanged = huntStatusStore.setVisibility(
-                TEST_TEAM_ID, TEST_PUZZLE_ID, "SOLVED", false);
+                TEST_TEAM_ID, TEST_PUZZLE_ID, "SOLVED");
         assertFalse(statusChanged);
         assertEquals(visibilityStatusSet.getDefaultVisibilityStatus(),
                 huntStatusStore.getVisibility(TEST_TEAM_ID, TEST_PUZZLE_ID).getStatus());
@@ -132,7 +132,7 @@ public class HuntStatusStoreTest {
     @Test
     public void setVisibilityMultipleTimes() throws InterruptedException {
         boolean statusChanged = huntStatusStore.setVisibility(
-                TEST_TEAM_ID, TEST_PUZZLE_ID, "UNLOCKED", false);
+                TEST_TEAM_ID, TEST_PUZZLE_ID, "UNLOCKED");
         assertTrue(statusChanged);
         assertEquals("UNLOCKED", huntStatusStore.getVisibility(TEST_TEAM_ID, TEST_PUZZLE_ID).getStatus());
         Instant firstTimestamp = clock.instant();
@@ -141,7 +141,7 @@ public class HuntStatusStoreTest {
         Instant secondTimestamp = clock.instant();
 
         statusChanged = huntStatusStore.setVisibility(
-                TEST_TEAM_ID, TEST_PUZZLE_ID, "SOLVED", false);
+                TEST_TEAM_ID, TEST_PUZZLE_ID, "SOLVED");
         assertTrue(statusChanged);
         assertEquals("SOLVED", huntStatusStore.getVisibility(TEST_TEAM_ID, TEST_PUZZLE_ID).getStatus());
 
@@ -159,11 +159,11 @@ public class HuntStatusStoreTest {
     @Test
     public void setMultipleVisibilities() throws InterruptedException {
         huntStatusStore.setVisibility(
-                TEST_TEAM_ID, TEST_PUZZLE_ID, "UNLOCKED", false);
+                TEST_TEAM_ID, TEST_PUZZLE_ID, "UNLOCKED");
         huntStatusStore.setVisibility(
-                TEST_TEAM_ID, TEST_PUZZLE_ID, "SOLVED", false);
+                TEST_TEAM_ID, TEST_PUZZLE_ID, "SOLVED");
         huntStatusStore.setVisibility(
-                TEST_TEAM_ID, TEST_PUZZLE_ID_2, "UNLOCKED", false);
+                TEST_TEAM_ID, TEST_PUZZLE_ID_2, "UNLOCKED");
 
         List<Visibility> visibilities = huntStatusStore.getVisibilitiesForTeam(TEST_TEAM_ID);
         Visibility.Builder visibilityBuilder = Visibility.builder()
