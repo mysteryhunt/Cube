@@ -80,7 +80,7 @@ public class HuntStatusStoreTest {
         assertEquals(clock.instant(), history.get(0).getTimestamp());
         assertEquals("UNLOCKED", history.get(0).getStatus());
 
-        verify(eventProcessor, times(1)).process(any(Event.class));
+        verify(eventProcessor, times(1)).processBatch(any(List.class));
     }
 
     @Test
@@ -97,7 +97,7 @@ public class HuntStatusStoreTest {
         assertEquals(clock.instant(), history.get(0).getTimestamp());
         assertEquals("UNLOCKED", history.get(0).getStatus());
 
-        verify(eventProcessor, times(1)).process(any(Event.class));
+        verify(eventProcessor, times(1)).processBatch(any(List.class));
     }
 
     @Test
@@ -130,6 +130,21 @@ public class HuntStatusStoreTest {
     }
 
     @Test
+    public void setVisibilityWithIllegalCurrentStatusWithOverride() {
+        boolean statusChanged = huntStatusStore.setVisibility(
+                TEST_TEAM_ID, TEST_PUZZLE_ID, "SOLVED", true);
+        assertTrue(statusChanged);
+        assertEquals("SOLVED",
+                huntStatusStore.getVisibility(TEST_TEAM_ID, TEST_PUZZLE_ID).getStatus());
+
+        List<VisibilityChange> history = huntStatusStore.getVisibilityHistory(
+                TEST_TEAM_ID, TEST_PUZZLE_ID);
+        assertEquals(1, history.size());
+
+        verify(eventProcessor, times(1)).processBatch(any(List.class));
+    }
+
+    @Test
     public void setVisibilityMultipleTimes() throws InterruptedException {
         boolean statusChanged = huntStatusStore.setVisibility(
                 TEST_TEAM_ID, TEST_PUZZLE_ID, "UNLOCKED");
@@ -153,7 +168,7 @@ public class HuntStatusStoreTest {
         assertEquals(secondTimestamp, history.get(1).getTimestamp());
         assertEquals("SOLVED", history.get(1).getStatus());
 
-        verify(eventProcessor, times(2)).process(any(Event.class));
+        verify(eventProcessor, times(2)).processBatch(any(List.class));
     }
 
     @Test

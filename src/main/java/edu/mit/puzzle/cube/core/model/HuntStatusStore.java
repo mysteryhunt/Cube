@@ -7,6 +7,7 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.*;
 
+import com.google.common.collect.ImmutableList.Builder;
 import edu.mit.puzzle.cube.core.db.ConnectionFactory;
 import edu.mit.puzzle.cube.core.db.DatabaseHelper;
 import edu.mit.puzzle.cube.core.events.Event;
@@ -34,6 +35,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -433,7 +435,7 @@ public class HuntStatusStore {
         Optional<Integer> generatedId = DatabaseHelper.insert(
                 connectionFactory,
                 "INSERT INTO visibilities (teamId, puzzleId) SELECT ?, ? " +
-                "WHERE NOT EXISTS (SELECT 1 FROM visibilities WHERE teamId = ? AND puzzleId = ?)",
+                        "WHERE NOT EXISTS (SELECT 1 FROM visibilities WHERE teamId = ? AND puzzleId = ?)",
                 Lists.newArrayList(teamId, puzzleId, teamId, puzzleId));
         return generatedId.isPresent();
     }
@@ -456,70 +458,47 @@ public class HuntStatusStore {
             String puzzleId,
             String status
     ) {
-        if (!visibilityStatusSet.isAllowedStatus(status)) {
-            return false;
-        }
-        //Create with default status if necessary first
-        createExplicitDefaultVisibility(teamId, puzzleId);
+        return setVisibilityBatch(ImmutableTable.of(teamId, puzzleId, status), false);
+    }
 
-        Set<String> allowedCurrentStatuses = visibilityStatusSet.getAllowedAntecedents(status);
-        if (allowedCurrentStatuses.isEmpty()) {
-            return false;
-        }
-
-        String preparedUpdateSql = "UPDATE visibilities SET status = ? " +
-                "WHERE teamId = ? AND puzzleId = ?" + " AND ";
-        List<Object> preparedParameters = Lists.newArrayList(status, teamId, puzzleId);
-        preparedUpdateSql += "(" +
-                Joiner.on(" OR ").join(allowedCurrentStatuses.stream()
-                        .map(s -> "status = ?")
-                        .collect(Collectors.toList())) +
-                ")";
-        preparedParameters.addAll(allowedCurrentStatuses);
-
-        int updates = DatabaseHelper.update(
-                connectionFactory,
-                preparedUpdateSql,
-                preparedParameters
-        );
-
-        //If we made an update, log the history.
-        if (updates > 0) {
-            DatabaseHelper.update(
-                    connectionFactory,
-                    "INSERT INTO visibility_history (teamId, puzzleId, status, timestamp) VALUES (?, ?, ?, ?)",
-                    Lists.newArrayList(teamId, puzzleId, status, Timestamp.from(clock.instant())));
-
-            eventProcessor.process(
-                    VisibilityChangeEvent.builder()
-                        .setVisibility(Visibility.builder()
-                                .setTeamId(teamId)
-                                .setPuzzleId(puzzleId)
-                                .setStatus(status)
-                                .build())
-                        .build());
-
-            return true;
-        } else {
-            return false;
-        }
-
+    public boolean setVisibility(
+            String teamId,
+            String puzzleId,
+            String status,
+            boolean overrideWorkflowValidation
+    ) {
+        return setVisibilityBatch(ImmutableTable.of(teamId, puzzleId, status), overrideWorkflowValidation);
     }
 
     public boolean setVisibilityBatch(
             Table<String,String,String> teamPuzzleStatusTable
     ) {
-        Set<String> statuses = teamPuzzleStatusTable.values().stream()
-                .filter(visibilityStatusSet::isAllowedStatus)
-                .collect(Collectors.toSet());
+        return setVisibilityBatch(teamPuzzleStatusTable, false);
+    }
+
+    public boolean setVisibilityBatch(
+            Table<String,String,String> teamPuzzleStatusTable,
+            boolean overrideWorkflowValidation
+    ) {
+        Set<String> statuses = Sets.newHashSet(teamPuzzleStatusTable.values());
+
+        Set<String> disallowedStatuses = Sets.filter(statuses, status -> !visibilityStatusSet.isAllowedStatus(status));
+        if (!disallowedStatuses.isEmpty()) {
+            LOGGER.error("Attempted to set visibilities to invalid status(es): " + Joiner.on(", ").join(disallowedStatuses));
+            statuses.removeAll(disallowedStatuses);
+        }
+
+        if (!overrideWorkflowValidation) {
+            Set<String> unsettableStatuses = Sets.filter(statuses, status -> visibilityStatusSet.getAllowedAntecedents(status).isEmpty());
+            if (!unsettableStatuses.isEmpty()) {
+                LOGGER.warn("Attempted to set visibilities to unsettable status(es): " + Joiner.on(", ").join(unsettableStatuses));
+                statuses.removeAll(unsettableStatuses);
+            }
+        }
+
         List<Visibility> updatedVisibilities = Lists.newArrayList();
 
         for (String status : statuses) {
-            Set<String> allowedCurrentStatuses = visibilityStatusSet.getAllowedAntecedents(status);
-            if (allowedCurrentStatuses.isEmpty()) {
-                continue;
-            }
-
             Multimap<String,String> teamToPuzzles = HashMultimap.create();
             teamPuzzleStatusTable.cellSet().stream()
                     .filter(cell -> cell.getValue().equals(status))
@@ -527,18 +506,23 @@ public class HuntStatusStore {
             createExplicitDefaultVisibilities(teamToPuzzles);
 
             String preparedUpdateSql = "UPDATE visibilities SET status = ? " +
-                    "WHERE teamId = ? AND puzzleId = ?" + " AND (" +
-                    Joiner.on(" OR ").join(allowedCurrentStatuses.stream()
-                            .map(s -> "status = ?")
-                            .collect(Collectors.toList())) +
-                    ")";
+                    "WHERE teamId = ? AND puzzleId = ?";
+            Stream<Builder<Object>> builderStream = teamToPuzzles.entries().stream()
+                    .map(entry -> new Builder<Object>()
+                            .add(status)
+                            .add(entry.getKey())
+                            .add(entry.getValue()));
+            if (!overrideWorkflowValidation) {
+                Set<String> allowedCurrentStatuses = visibilityStatusSet.getAllowedAntecedents(status);
+                preparedUpdateSql += " AND (" +
+                        Joiner.on(" OR ").join(allowedCurrentStatuses.stream()
+                                .map(s -> "status = ?")
+                                .collect(Collectors.toList())) +
+                        ")";
+                builderStream = builderStream.map(builder -> builder.addAll(allowedCurrentStatuses));
+            }
 
-            List<List<Object>> parametersList = teamToPuzzles.entries().stream()
-                    .map(entry -> new ImmutableList.Builder<Object>()
-                                    .add(status)
-                                    .add(entry.getKey())
-                                    .add(entry.getValue()))
-                    .map(builder -> builder.addAll(allowedCurrentStatuses))
+            List<List<Object>> parametersList = builderStream
                     .map(ImmutableList.Builder::build)
                     .collect(Collectors.toList());
 
@@ -551,10 +535,10 @@ public class HuntStatusStore {
             List<Visibility> updatedVisibilitiesForStatus = IntStream.range(0, parametersList.size())
                     .filter(index -> updateCounts.get(index) > 0)
                     .mapToObj(index -> Visibility.builder()
-                                    .setStatus((String)parametersList.get(index).get(0))
-                                    .setTeamId((String)parametersList.get(index).get(1))
-                                    .setPuzzleId((String)parametersList.get(index).get(2))
-                                    .build())
+                            .setStatus((String) parametersList.get(index).get(0))
+                            .setTeamId((String) parametersList.get(index).get(1))
+                            .setPuzzleId((String) parametersList.get(index).get(2))
+                            .build())
                     .collect(Collectors.toList());
 
             updatedVisibilities.addAll(updatedVisibilitiesForStatus);
@@ -565,12 +549,12 @@ public class HuntStatusStore {
                 connectionFactory,
                 "INSERT INTO visibility_history (teamId, puzzleId, status, timestamp) VALUES (?, ?, ?, ?)",
                 updatedVisibilities.stream()
-                    .map(v -> Lists.<Object>newArrayList(
-                            v.getTeamId(),
-                            v.getPuzzleId(),
-                            v.getStatus(),
-                            timestamp
-                    )).collect(Collectors.toList())
+                        .map(v -> Lists.<Object>newArrayList(
+                                v.getTeamId(),
+                                v.getPuzzleId(),
+                                v.getStatus(),
+                                timestamp
+                        )).collect(Collectors.toList())
         );
 
         List<VisibilityChangeEvent> changeEvents = updatedVisibilities.stream()
