@@ -69,8 +69,7 @@ public class LinearExampleHuntDefinition implements HuntDefinition {
                 huntStatusStore.setVisibility(
                         submission.getTeamId(),
                         submission.getPuzzleId(),
-                        "SOLVED",
-                        false
+                        "SOLVED"
                 );
             }
         });
@@ -80,8 +79,7 @@ public class LinearExampleHuntDefinition implements HuntDefinition {
                 huntStatusStore.setVisibility(
                         teamId,
                         event.getPuzzleId(),
-                        "UNLOCKED",
-                        false
+                        "UNLOCKED"
                 );
             }
         });
@@ -93,7 +91,7 @@ public class LinearExampleHuntDefinition implements HuntDefinition {
                         ImmutableTable.builder();
                 huntStatusStore.getTeamIds().forEach(teamId ->
                         visibilityUpdateBatchBuilder.put(teamId, "puzzle1", "UNLOCKED"));
-                huntStatusStore.setVisibilityBatch(visibilityUpdateBatchBuilder.build(), false);
+                huntStatusStore.setVisibilityBatch(visibilityUpdateBatchBuilder.build());
             }
         });
 
@@ -105,7 +103,7 @@ public class LinearExampleHuntDefinition implements HuntDefinition {
 
                 if (status.equals("SOLVED") && puzzleId.equals(directPrereqEntry.getKey())) {
                     huntStatusStore.setVisibility(teamId, directPrereqEntry.getValue(),
-                            "UNLOCKED", false);
+                            "UNLOCKED");
                 }
             });
         }

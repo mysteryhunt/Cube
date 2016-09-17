@@ -65,9 +65,9 @@ public class HintExampleHuntDefinition implements HuntDefinition {
                 for (String teamId : huntStatusStore.getTeamIds()) {
                     // Everyone starts with all of the round puzzles unlocked. We'll unlock the meta
                     // after they solve at least one puzzle.
-                    huntStatusStore.setVisibility(teamId, "puzzle1", "UNLOCKED", false);
-                    huntStatusStore.setVisibility(teamId, "puzzle2", "UNLOCKED", false);
-                    huntStatusStore.setVisibility(teamId, "puzzle3", "UNLOCKED", false);
+                    huntStatusStore.setVisibility(teamId, "puzzle1", "UNLOCKED");
+                    huntStatusStore.setVisibility(teamId, "puzzle2", "UNLOCKED");
+                    huntStatusStore.setVisibility(teamId, "puzzle3", "UNLOCKED");
 
                     // Everyone starts with one hint token.
                     huntStatusStore.setTeamProperty(
@@ -84,8 +84,7 @@ public class HintExampleHuntDefinition implements HuntDefinition {
                 huntStatusStore.setVisibility(
                         submission.getTeamId(),
                         submission.getPuzzleId(),
-                        "SOLVED",
-                        false
+                        "SOLVED"
                 );
                 // Credit a hint token every time a team solves a puzzle.
                 huntStatusStore.mutateTeamProperty(
@@ -103,7 +102,7 @@ public class HintExampleHuntDefinition implements HuntDefinition {
 
             if (status.equals("SOLVED") && puzzleId.startsWith("puzzle")) {
                 // We'll unlock the meta after a team solves at least one round puzzle.
-                huntStatusStore.setVisibility(teamId, "meta", "UNLOCKED", false);
+                huntStatusStore.setVisibility(teamId, "meta", "UNLOCKED");
             }
         });
 
@@ -112,8 +111,7 @@ public class HintExampleHuntDefinition implements HuntDefinition {
                 huntStatusStore.setVisibility(
                         teamId,
                         event.getPuzzleId(),
-                        "UNLOCKED",
-                        false
+                        "UNLOCKED"
                 );
             }
         });

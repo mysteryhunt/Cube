@@ -99,8 +99,7 @@ public class ScoreExampleHuntDefinition implements HuntDefinition {
                 huntStatusStore.setVisibility(
                         submission.getTeamId(),
                         submission.getPuzzleId(),
-                        "SOLVED",
-                        false
+                        "SOLVED"
                 );
             }
         });
@@ -110,8 +109,7 @@ public class ScoreExampleHuntDefinition implements HuntDefinition {
                 huntStatusStore.setVisibility(
                         teamId,
                         event.getPuzzleId(),
-                        "UNLOCKED",
-                        false
+                        "UNLOCKED"
                 );
             }
         });
@@ -140,7 +138,7 @@ public class ScoreExampleHuntDefinition implements HuntDefinition {
             PUZZLE_INFO_MAP.entrySet().stream()
                     .filter(puzzleEntry -> event.getScore() >= puzzleEntry.getValue().pointPrereq)
                     .map(Map.Entry::getKey)
-                    .forEach(puzzleKey -> huntStatusStore.setVisibility(event.getTeamId(), puzzleKey, "UNLOCKED", false));
+                    .forEach(puzzleKey -> huntStatusStore.setVisibility(event.getTeamId(), puzzleKey, "UNLOCKED"));
         });
 
         eventProcessor.addEventProcessor(PeriodicTimerEvent.class, event -> {

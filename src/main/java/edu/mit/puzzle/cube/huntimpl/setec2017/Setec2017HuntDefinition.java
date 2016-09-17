@@ -323,7 +323,7 @@ public class Setec2017HuntDefinition implements HuntDefinition {
         }
 
         if (!teamPuzzleStatusTable.isEmpty()) {
-            huntStatusStore.setVisibilityBatch(teamPuzzleStatusTable, false);
+            huntStatusStore.setVisibilityBatch(teamPuzzleStatusTable);
         }
     }
 
@@ -355,8 +355,7 @@ public class Setec2017HuntDefinition implements HuntDefinition {
                 huntStatusStore.setVisibility(
                         submission.getTeamId(),
                         submission.getPuzzleId(),
-                        "SOLVED",
-                        false
+                        "SOLVED"
                 );
             }
         });
@@ -400,8 +399,7 @@ public class Setec2017HuntDefinition implements HuntDefinition {
                 huntStatusStore.setVisibility(
                         teamId,
                         event.getPuzzleId(),
-                        "UNLOCKED",
-                        false
+                        "UNLOCKED"
                 );
             }
         });

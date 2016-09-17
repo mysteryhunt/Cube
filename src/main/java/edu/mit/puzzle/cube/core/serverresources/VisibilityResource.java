@@ -57,7 +57,7 @@ public class VisibilityResource extends AbstractCubeResource {
                     "A valid status must be specified to update visibility");
         }
 
-        boolean changed = huntStatusStore.setVisibility(teamId, puzzleId, visibility.getStatus(), true);
+        boolean changed = huntStatusStore.setVisibility(teamId, puzzleId, visibility.getStatus());
         return PostResult.builder().setUpdated(changed).build();
     }
 }
