@@ -42,4 +42,9 @@ public class StandardVisibilityStatusSet implements VisibilityStatusSet {
             default:            throw new IllegalArgumentException();
         }
     }
+
+    @Override
+    public Set<String> getInvisibleStatuses() {
+        return ImmutableSet.of("INVISIBLE");
+    }
 }

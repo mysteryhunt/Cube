@@ -8,6 +8,13 @@ import java.util.List;
 @AutoValue
 public abstract class CubeRole {
 
+    public static final String SOLVING_TEAM_ROLE_NAME = "solvingteam";
+    public static final CubeRole SOLVING_TEAM = new AutoValue_CubeRole(
+            SOLVING_TEAM_ROLE_NAME,
+            ImmutableList.of(
+                    new PuzzlesPermission(PermissionAction.READ)
+            ));
+
     public static final String WRITING_TEAM_ROLE_NAME = "writingteam";
     public static final CubeRole WRITING_TEAM = new AutoValue_CubeRole(
             WRITING_TEAM_ROLE_NAME,
@@ -18,6 +25,7 @@ public abstract class CubeRole {
                     new SubmissionsPermission("*", PermissionAction.READ, PermissionAction.UPDATE),
                     new VisibilitiesPermission("*", PermissionAction.READ),
                     new HintsPermission("*", PermissionAction.READ, PermissionAction.UPDATE),
+                    new PuzzlesPermission(PermissionAction.READ),
                     new AnswersPermission()
             ));
 
@@ -29,6 +37,7 @@ public abstract class CubeRole {
             ));
 
     public static final ImmutableList<CubeRole> ALL_ROLES = ImmutableList.of(
+            SOLVING_TEAM,
             WRITING_TEAM,
             ADMIN
     );

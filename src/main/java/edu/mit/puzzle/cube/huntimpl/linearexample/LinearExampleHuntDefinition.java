@@ -4,6 +4,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
 import com.google.common.collect.ImmutableTable;
+
+import edu.mit.puzzle.cube.core.CubeStores;
 import edu.mit.puzzle.cube.core.HuntDefinition;
 import edu.mit.puzzle.cube.core.events.CompositeEventProcessor;
 import edu.mit.puzzle.cube.core.events.FullReleaseEvent;
@@ -61,8 +63,10 @@ public class LinearExampleHuntDefinition implements HuntDefinition {
     @Override
     public void addToEventProcessor(
             CompositeEventProcessor eventProcessor,
-            HuntStatusStore huntStatusStore
+            CubeStores cubeStores
     ) {
+        HuntStatusStore huntStatusStore = cubeStores.getHuntStatusStore();
+
         eventProcessor.addEventProcessor(SubmissionCompleteEvent.class, event -> {
             Submission submission = event.getSubmission();
             if (submission.getStatus().equals(SubmissionStatus.CORRECT)) {

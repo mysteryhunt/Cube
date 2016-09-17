@@ -86,6 +86,8 @@ public class CubeApplication extends Application {
                 connectionFactory
         );
         puzzleStore = new PuzzleStore(
+                connectionFactory,
+                eventProcessor,
                 huntDefinition.getPuzzles()
         );
         hintRequestStore = new HintRequestStore(
@@ -95,9 +97,17 @@ public class CubeApplication extends Application {
                 eventProcessor
         );
 
+        CubeStores cubeStores = CubeStores.create(
+                hintRequestStore,
+                huntStatusStore,
+                puzzleStore,
+                submissionStore,
+                userStore
+        );
+
         huntDefinition.addToEventProcessor(
                 eventProcessor,
-                huntStatusStore
+                cubeStores
         );
 
         timingEventService = new AbstractScheduledService() {
