@@ -131,8 +131,8 @@ public class HuntStatusStoreTest {
 
     @Test
     public void setVisibilityWithIllegalCurrentStatusWithOverride() {
-        boolean statusChanged = huntStatusStore.setVisibility(
-                TEST_TEAM_ID, TEST_PUZZLE_ID, "SOLVED", true);
+        boolean statusChanged = huntStatusStore.setVisibilityWithoutWorkflowValidation(
+                TEST_TEAM_ID, TEST_PUZZLE_ID, "SOLVED");
         assertTrue(statusChanged);
         assertEquals("SOLVED",
                 huntStatusStore.getVisibility(TEST_TEAM_ID, TEST_PUZZLE_ID).getStatus());

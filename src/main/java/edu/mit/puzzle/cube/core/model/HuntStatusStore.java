@@ -7,7 +7,6 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.*;
 
-import com.google.common.collect.ImmutableList.Builder;
 import edu.mit.puzzle.cube.core.db.ConnectionFactory;
 import edu.mit.puzzle.cube.core.db.DatabaseHelper;
 import edu.mit.puzzle.cube.core.events.Event;
@@ -458,27 +457,32 @@ public class HuntStatusStore {
             String puzzleId,
             String status
     ) {
-        return setVisibilityBatch(ImmutableTable.of(teamId, puzzleId, status), false);
+        return internalSetVisibilityBatch(ImmutableTable.of(teamId, puzzleId, status), true);
     }
 
-    public boolean setVisibility(
+    public boolean setVisibilityWithoutWorkflowValidation(
             String teamId,
             String puzzleId,
-            String status,
-            boolean overrideWorkflowValidation
+            String status
     ) {
-        return setVisibilityBatch(ImmutableTable.of(teamId, puzzleId, status), overrideWorkflowValidation);
+        return internalSetVisibilityBatch(ImmutableTable.of(teamId, puzzleId, status), false);
     }
 
     public boolean setVisibilityBatch(
             Table<String,String,String> teamPuzzleStatusTable
     ) {
-        return setVisibilityBatch(teamPuzzleStatusTable, false);
+        return internalSetVisibilityBatch(teamPuzzleStatusTable, true);
     }
 
-    public boolean setVisibilityBatch(
+    public boolean setVisibilityBatchWithoutWorkflowValidation(
+            Table<String,String,String> teamPuzzleStatusTable
+    ) {
+        return internalSetVisibilityBatch(teamPuzzleStatusTable, false);
+    }
+
+    private boolean internalSetVisibilityBatch(
             Table<String,String,String> teamPuzzleStatusTable,
-            boolean overrideWorkflowValidation
+            boolean useWorkflowValidation
     ) {
         Set<String> statuses = Sets.newHashSet(teamPuzzleStatusTable.values());
 
@@ -488,7 +492,7 @@ public class HuntStatusStore {
             statuses.removeAll(disallowedStatuses);
         }
 
-        if (!overrideWorkflowValidation) {
+        if (useWorkflowValidation) {
             Set<String> unsettableStatuses = Sets.filter(statuses, status -> visibilityStatusSet.getAllowedAntecedents(status).isEmpty());
             if (!unsettableStatuses.isEmpty()) {
                 LOGGER.warn("Attempted to set visibilities to unsettable status(es): " + Joiner.on(", ").join(unsettableStatuses));
@@ -507,12 +511,12 @@ public class HuntStatusStore {
 
             String preparedUpdateSql = "UPDATE visibilities SET status = ? " +
                     "WHERE teamId = ? AND puzzleId = ?";
-            Stream<Builder<Object>> builderStream = teamToPuzzles.entries().stream()
-                    .map(entry -> new Builder<Object>()
+            Stream<ImmutableList.Builder<Object>> builderStream = teamToPuzzles.entries().stream()
+                    .map(entry -> new ImmutableList.Builder<Object>()
                             .add(status)
                             .add(entry.getKey())
                             .add(entry.getValue()));
-            if (!overrideWorkflowValidation) {
+            if (useWorkflowValidation) {
                 Set<String> allowedCurrentStatuses = visibilityStatusSet.getAllowedAntecedents(status);
                 preparedUpdateSql += " AND (" +
                         Joiner.on(" OR ").join(allowedCurrentStatuses.stream()
