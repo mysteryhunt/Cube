@@ -47,7 +47,6 @@ public class ScoreExampleHuntDefinition implements HuntDefinition {
             puzzleInfoBuilder.put("puzzle" + i, new PuzzleInfo(reward, prereq));
             puzzlesBuilder.add(Puzzle.builder()
                     .setPuzzleId("puzzle" + i)
-                    .setDisplayName("Puzzle " + i)
                     .setAnswers(Answer.createSingle("ANSWER" + i))
                     .build()
             );

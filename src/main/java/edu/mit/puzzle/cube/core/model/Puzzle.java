@@ -109,9 +109,6 @@ public abstract class Puzzle {
         @JsonProperty("puzzleId")
         public abstract Builder setPuzzleId(String puzzleId);
 
-        @JsonProperty("displayName")
-        public abstract Builder setDisplayName(@Nullable String displayName);
-
         @JsonProperty("answers")
         public abstract Builder setAnswers(@Nullable List<Answer> answers);
 
@@ -149,7 +146,6 @@ public abstract class Puzzle {
     public static Puzzle create(String puzzleId, String answer) {
         return builder()
                 .setPuzzleId(puzzleId)
-                .setDisplayName(puzzleId)
                 .setAnswers(Answer.createSingle(answer))
                 .build();
     }
@@ -168,10 +164,6 @@ public abstract class Puzzle {
 
     @JsonProperty("puzzleId")
     public abstract String getPuzzleId();
-
-    @Nullable
-    @JsonProperty("displayName")
-    public abstract String getDisplayName();
 
     @Nullable
     @JsonProperty("answers")

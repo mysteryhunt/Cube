@@ -38,7 +38,6 @@ public class LinearExampleHuntDefinition implements HuntDefinition {
         for (int i = 1; i <= 7 ; ++i) {
             puzzlesBuilder.add(Puzzle.builder()
                     .setPuzzleId("puzzle" + i)
-                    .setDisplayName("Puzzle " + i)
                     .setAnswers(Answer.createSingle("ANSWER" + i))
                     .build()
             );

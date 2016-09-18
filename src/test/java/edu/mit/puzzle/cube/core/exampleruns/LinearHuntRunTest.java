@@ -46,7 +46,6 @@ public class LinearHuntRunTest extends RestletTest {
         postHuntStart();
 
         json = getVisibility("testerteam","puzzle1");
-        assertEquals("Puzzle 1", json.get("puzzleDisplayName").asText());
         assertEquals("UNLOCKED", json.get("status").asText());
         json = getVisibility("testerteam","puzzle2");
         assertEquals("INVISIBLE", json.get("status").asText());
