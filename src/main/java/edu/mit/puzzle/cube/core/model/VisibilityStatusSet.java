@@ -28,4 +28,6 @@ public interface VisibilityStatusSet {
         }
         return builder.build();
     }
+
+    public Set<String> getInvisibleStatuses();
 }

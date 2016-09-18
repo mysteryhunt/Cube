@@ -40,7 +40,7 @@ public class RolesAndInstanceLevelPermissionsTest {
                 .setTeamId("solvingteam")
                 .build();
         RolesAndInstanceLevelPermissions rolesAndPermissions = RolesAndInstanceLevelPermissions.forUser(user);
-        assertThat(rolesAndPermissions.getRoles()).isEmpty();
+        assertThat(rolesAndPermissions.getRoles()).containsExactly(CubeRole.SOLVING_TEAM);
         assertThat(rolesAndPermissions.getInstanceLevelPermissions()).contains(
                 new UsersPermission("solvingteam", PermissionAction.READ));
     }

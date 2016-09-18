@@ -158,7 +158,7 @@ public class UserStoreTest {
                 User.builder()
                         .setUsername(TEST_TEAM_ID)
                         .setTeamId(TEST_TEAM_ID)
-                        .setRoles(ImmutableList.<String>of())
+                        .setRoles(ImmutableList.of("solvingteam"))
                         .build()
         );
     }

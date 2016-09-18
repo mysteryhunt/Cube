@@ -86,6 +86,8 @@ public abstract class RestletTest {
                 connectionFactory
         );
         PuzzleStore puzzleStore = new PuzzleStore(
+                connectionFactory,
+                eventProcessor,
                 huntDefinition.getPuzzles()
         );
         HintRequestStore hintRequestStore = new HintRequestStore(
@@ -95,7 +97,15 @@ public abstract class RestletTest {
                 eventProcessor
         );
 
-        huntDefinition.addToEventProcessor(eventProcessor, huntStatusStore);
+        CubeStores cubeStores = CubeStores.create(
+                hintRequestStore,
+                huntStatusStore,
+                puzzleStore,
+                submissionStore,
+                userStore
+        );
+
+        huntDefinition.addToEventProcessor(eventProcessor, cubeStores);
 
         context.getAttributes().put(AbstractCubeResource.PUZZLE_STORE_KEY, puzzleStore);
         context.getAttributes().put(AbstractCubeResource.EVENT_PROCESSOR_KEY, eventProcessor);
@@ -143,7 +153,7 @@ public abstract class RestletTest {
             @Override
             public void addToEventProcessor(
                     CompositeEventProcessor eventProcessor,
-                    HuntStatusStore huntStatusStore
+                    CubeStores cubeStores
             ) {
             }
         };

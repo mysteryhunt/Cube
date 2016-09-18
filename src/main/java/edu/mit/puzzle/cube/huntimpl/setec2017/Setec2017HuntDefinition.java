@@ -10,6 +10,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Table;
 
+import edu.mit.puzzle.cube.core.CubeStores;
 import edu.mit.puzzle.cube.core.HuntDefinition;
 import edu.mit.puzzle.cube.core.events.CompositeEventProcessor;
 import edu.mit.puzzle.cube.core.events.Event;
@@ -328,8 +329,8 @@ public class Setec2017HuntDefinition implements HuntDefinition {
     }
 
     @Override
-    public void addToEventProcessor(CompositeEventProcessor eventProcessor, HuntStatusStore huntStatusStore) {
-        this.huntStatusStore = huntStatusStore;
+    public void addToEventProcessor(CompositeEventProcessor eventProcessor, CubeStores cubeStores) {
+        huntStatusStore = cubeStores.getHuntStatusStore();
 
         eventProcessor.addEventProcessor(HuntStartEvent.class, event -> {
             boolean changed = huntStatusStore.recordHuntRunStart();

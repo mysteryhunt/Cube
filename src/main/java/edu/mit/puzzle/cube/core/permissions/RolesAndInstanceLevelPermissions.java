@@ -48,7 +48,7 @@ public abstract class RolesAndInstanceLevelPermissions {
 
     public static RolesAndInstanceLevelPermissions forSolvingTeam(String teamId) {
         return new AutoValue_RolesAndInstanceLevelPermissions(
-                ImmutableList.<CubeRole>of(),
+                ImmutableList.<CubeRole>of(CubeRole.SOLVING_TEAM),
                 ImmutableList.of(
                         new UsersPermission(teamId, PermissionAction.READ),
                         new TeamsPermission(teamId, PermissionAction.READ),

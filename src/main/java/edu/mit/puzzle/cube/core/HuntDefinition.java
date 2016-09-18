@@ -27,7 +27,7 @@ public interface HuntDefinition {
 
     void addToEventProcessor(
             CompositeEventProcessor eventProcessor,
-            HuntStatusStore huntStatusStore);
+            CubeStores cubeStores);
 
     /**
      * @return true if this team may currently request a hint for this puzzle. Hunt definitions may

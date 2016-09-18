@@ -4,7 +4,9 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 
+import edu.mit.puzzle.cube.core.CubeStores;
 import edu.mit.puzzle.cube.core.HuntDefinition;
 import edu.mit.puzzle.cube.core.events.CompositeEventProcessor;
 import edu.mit.puzzle.cube.core.events.FullReleaseEvent;
@@ -16,6 +18,7 @@ import edu.mit.puzzle.cube.core.model.HintRequest;
 import edu.mit.puzzle.cube.core.model.HintRequestStatus;
 import edu.mit.puzzle.cube.core.model.HuntStatusStore;
 import edu.mit.puzzle.cube.core.model.Puzzle;
+import edu.mit.puzzle.cube.core.model.PuzzleStore;
 import edu.mit.puzzle.cube.core.model.Submission;
 import edu.mit.puzzle.cube.core.model.SubmissionStatus;
 import edu.mit.puzzle.cube.core.model.Team;
@@ -23,11 +26,16 @@ import edu.mit.puzzle.cube.core.model.VisibilityStatusSet;
 import edu.mit.puzzle.cube.modules.model.StandardVisibilityStatusSet;
 
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class HintExampleHuntDefinition implements HuntDefinition {
     private static final VisibilityStatusSet VISIBILITY_STATUS_SET = new StandardVisibilityStatusSet();
 
+    // TODO: clean up hunt definition dependency injection
+    PuzzleStore puzzleStore;
+
+    // The number of hint tokens currently held by a solving team.
     @AutoValue
     public abstract static class HintTokensProperty extends Team.Property {
         static {
@@ -40,6 +48,47 @@ public class HintExampleHuntDefinition implements HuntDefinition {
         }
 
         @JsonProperty("tokens") public abstract int getTokens();
+    }
+
+    // Determines whether hint requests are allowed for a puzzle.
+    @AutoValue
+    public abstract static class HintAllowedProperty extends Puzzle.Property {
+        static {
+            registerClass(HintAllowedProperty.class);
+        }
+
+        @JsonCreator
+        public static HintAllowedProperty create(@JsonProperty("hintAllowed") boolean hintAllowed) {
+            return new AutoValue_HintExampleHuntDefinition_HintAllowedProperty(hintAllowed);
+        }
+
+        @JsonProperty("hintAllowed") public abstract boolean getHintAllowed();
+
+        @Override
+        public Set<String> getVisibilityRequirement() {
+            return ImmutableSet.of("VISIBLE", "UNLOCKED", "SOLVED");
+        }
+    }
+
+    // The number of hint tokens rewarded when a puzzle is solved.
+    @AutoValue
+    public abstract static class TokenRewardProperty extends Puzzle.Property {
+        static {
+            registerClass(TokenRewardProperty.class);
+        }
+
+        @JsonCreator
+        public static TokenRewardProperty create(@JsonProperty("tokens") int tokens) {
+            return new AutoValue_HintExampleHuntDefinition_TokenRewardProperty(tokens);
+        }
+
+        @JsonProperty("tokens") public abstract int getTokens();
+
+        // Only reveal the token reward for a puzzle after that puzzle is solved.
+        @Override
+        public Set<String> getVisibilityRequirement() {
+            return ImmutableSet.of("SOLVED");
+        }
     }
 
     @Override
@@ -58,16 +107,27 @@ public class HintExampleHuntDefinition implements HuntDefinition {
     }
 
     @Override
-    public void addToEventProcessor(CompositeEventProcessor eventProcessor, HuntStatusStore huntStatusStore) {
+    public void addToEventProcessor(CompositeEventProcessor eventProcessor, CubeStores cubeStores) {
+        HuntStatusStore huntStatusStore = cubeStores.getHuntStatusStore();
+        puzzleStore = cubeStores.getPuzzleStore();
+
         eventProcessor.addEventProcessor(HuntStartEvent.class, event -> {
             boolean changed = huntStatusStore.recordHuntRunStart();
+
             if (changed) {
+                // Allow hints on all puzzles except for the meta.
+                for (String puzzleId : new String[]{"puzzle1", "puzzle2", "puzzle3"}) {
+                    puzzleStore.setPuzzleProperty(puzzleId, HintAllowedProperty.class, HintAllowedProperty.create(true));
+                }
+                puzzleStore.setPuzzleProperty("meta", HintAllowedProperty.class, HintAllowedProperty.create(false));
+
+                // Only puzzle 2 rewards a hint token.
+                puzzleStore.setPuzzleProperty("puzzle2", TokenRewardProperty.class, TokenRewardProperty.create(1));
+
                 for (String teamId : huntStatusStore.getTeamIds()) {
-                    // Everyone starts with all of the round puzzles unlocked. We'll unlock the meta
-                    // after they solve at least one puzzle.
                     huntStatusStore.setVisibility(teamId, "puzzle1", "UNLOCKED");
-                    huntStatusStore.setVisibility(teamId, "puzzle2", "UNLOCKED");
-                    huntStatusStore.setVisibility(teamId, "puzzle3", "UNLOCKED");
+                    huntStatusStore.setVisibility(teamId, "puzzle2", "VISIBLE");
+                    huntStatusStore.setVisibility(teamId, "meta", "VISIBLE");
 
                     // Everyone starts with one hint token.
                     huntStatusStore.setTeamProperty(
@@ -86,12 +146,16 @@ public class HintExampleHuntDefinition implements HuntDefinition {
                         submission.getPuzzleId(),
                         "SOLVED"
                 );
-                // Credit a hint token every time a team solves a puzzle.
-                huntStatusStore.mutateTeamProperty(
-                        submission.getTeamId(),
-                        HintTokensProperty.class,
-                        hintTokensProperty -> HintTokensProperty.create(hintTokensProperty.getTokens() + 1)
-                );
+                Puzzle puzzle = puzzleStore.getPuzzle(submission.getPuzzleId());
+                TokenRewardProperty tokenRewardProperty = puzzle.getPuzzleProperty(TokenRewardProperty.class);
+                if (tokenRewardProperty != null) {
+                    huntStatusStore.mutateTeamProperty(
+                            submission.getTeamId(),
+                            HintTokensProperty.class,
+                            hintTokensProperty -> HintTokensProperty.create(
+                                    hintTokensProperty.getTokens() + tokenRewardProperty.getTokens())
+                    );
+                }
             }
         });
 
@@ -100,9 +164,18 @@ public class HintExampleHuntDefinition implements HuntDefinition {
             String puzzleId = event.getVisibility().getPuzzleId();
             String status = event.getVisibility().getStatus();
 
-            if (status.equals("SOLVED") && puzzleId.startsWith("puzzle")) {
-                // We'll unlock the meta after a team solves at least one round puzzle.
-                huntStatusStore.setVisibility(teamId, "meta", "UNLOCKED");
+            if (status.equals("SOLVED")) {
+                if (puzzleId.startsWith("puzzle")) {
+                    // We'll unlock the meta after a team solves at least one round puzzle.
+                    huntStatusStore.setVisibility(teamId, "meta", "UNLOCKED");
+                }
+                if (puzzleId.equals("puzzle1")) {
+                    huntStatusStore.setVisibility(teamId, "puzzle2", "UNLOCKED");
+                    huntStatusStore.setVisibility(teamId, "puzzle3", "VISIBLE");
+                }
+                if (puzzleId.equals("puzzle2")) {
+                    huntStatusStore.setVisibility(teamId, "puzzle3", "UNLOCKED");
+                }
             }
         });
 
@@ -132,8 +205,9 @@ public class HintExampleHuntDefinition implements HuntDefinition {
 
     @Override
     public boolean handleHintRequest(HintRequest hintRequest, HuntStatusStore huntStatusStore) {
-        // Don't allow hints on the meta.
-        if (hintRequest.getPuzzleId().equals("meta")) {
+        Puzzle puzzle = puzzleStore.getPuzzle(hintRequest.getPuzzleId());
+        HintAllowedProperty hintAllowedProperty = puzzle.getPuzzleProperty(HintAllowedProperty.class);
+        if (!hintAllowedProperty.getHintAllowed()) {
             return false;
         }
         AtomicBoolean deductedToken = new AtomicBoolean(false);

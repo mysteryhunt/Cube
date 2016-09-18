@@ -6,6 +6,7 @@ import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
+import edu.mit.puzzle.cube.core.CubeStores;
 import edu.mit.puzzle.cube.core.HuntDefinition;
 import edu.mit.puzzle.cube.core.events.CompositeEventProcessor;
 import edu.mit.puzzle.cube.core.events.Event;
@@ -91,8 +92,10 @@ public class ScoreExampleHuntDefinition implements HuntDefinition {
     @Override
     public void addToEventProcessor(
             CompositeEventProcessor eventProcessor,
-            HuntStatusStore huntStatusStore
+            CubeStores cubeStores
     ) {
+        HuntStatusStore huntStatusStore = cubeStores.getHuntStatusStore();
+
         eventProcessor.addEventProcessor(SubmissionCompleteEvent.class, event -> {
             Submission submission = event.getSubmission();
             if (submission.getStatus().equals(SubmissionStatus.CORRECT)) {

@@ -47,15 +47,46 @@ public class HintHuntRunTest extends RestletTest {
         assertThat(getTokens()).isEqualTo(1);
 
         JsonNode json = getVisibility("testerteam", "meta");
-        assertThat(json.get("status").asText()).isEqualTo("INVISIBLE");
+        assertThat(json.get("status").asText()).isEqualTo("VISIBLE");
+
+        json = get("/puzzles/puzzle1");
+        assertThat(json
+                .get("puzzleProperties")
+                .get("HintAllowedProperty")
+                .get("hintAllowed").asBoolean()
+        ).isTrue();
+        assertThat(json.get("answers").get(0).get("canonicalAnswer").asText()).isEqualTo("ANSWER1");
+
+        json = get("/puzzles/puzzle2");
+        assertThat(json
+                .get("puzzleProperties")
+                .get("TokenRewardProperty")
+                .get("tokens").asInt()
+        ).isEqualTo(1);
 
         currentUserCredentials = TESTERTEAM_CREDENTIALS;
+
+        json = get("/puzzles/puzzle1");
+        assertThat(json
+                .get("puzzleProperties")
+                .get("HintAllowedProperty")
+                .get("hintAllowed").asBoolean()
+        ).isTrue();
+        assertThat(json.has("answers")).isFalse();
+
+        json = get("/puzzles/puzzle2");
+        assertThat(json
+                .get("puzzleProperties")
+                .has("TokenRewardProperty")
+        ).isFalse();
+
+        getExpectFailure("/puzzles/puzzle3");
+
         postNewSubmission("testerteam", "puzzle1", "ANSWER1");
         currentUserCredentials = ADMIN_CREDENTIALS;
         postUpdateSubmission(1, "CORRECT");
 
-        // We gain a hint token on every correct submission.
-        assertThat(getTokens()).isEqualTo(2);
+        assertThat(getTokens()).isEqualTo(1);
 
         json = getVisibility("testerteam", "meta");
         assertThat(json.get("status").asText()).isEqualTo("UNLOCKED");
@@ -72,7 +103,7 @@ public class HintHuntRunTest extends RestletTest {
                         .build()
         );
         assertThat(json.get("created").asBoolean()).isFalse();
-        assertThat(getTokens()).isEqualTo(2);
+        assertThat(getTokens()).isEqualTo(1);
 
         // Request a hint for puzzle 1. Should be rejected because we've already solved the puzzle.
         postExpectFailure(
@@ -83,7 +114,7 @@ public class HintHuntRunTest extends RestletTest {
                         .setRequest("help")
                         .build()
         );
-        assertThat(getTokens()).isEqualTo(2);
+        assertThat(getTokens()).isEqualTo(1);
 
         // Request a hint for puzzle 2. This will succeed, and a token will be deducted.
         json = post(
@@ -95,7 +126,7 @@ public class HintHuntRunTest extends RestletTest {
                         .build()
         );
         assertThat(json.get("created").asBoolean()).isTrue();
-        assertThat(getTokens()).isEqualTo(1);
+        assertThat(getTokens()).isEqualTo(0);
 
         // Reject the hint request. A token should be credited back to the team.
         currentUserCredentials = ADMIN_CREDENTIALS;
@@ -107,7 +138,7 @@ public class HintHuntRunTest extends RestletTest {
                         .setStatus(HintRequestStatus.REJECTED)
                         .build()
         );
-        assertThat(getTokens()).isEqualTo(2);
+        assertThat(getTokens()).isEqualTo(1);
 
         // Request another hint for puzzle 2. This will succeed, and a token will be deducted.
         currentUserCredentials = TESTERTEAM_CREDENTIALS;
@@ -120,7 +151,7 @@ public class HintHuntRunTest extends RestletTest {
                         .build()
         );
         assertThat(json.get("created").asBoolean()).isTrue();
-        assertThat(getTokens()).isEqualTo(1);
+        assertThat(getTokens()).isEqualTo(0);
 
         // Successfully complete the hint request.
         currentUserCredentials = ADMIN_CREDENTIALS;
@@ -133,19 +164,6 @@ public class HintHuntRunTest extends RestletTest {
                         .setStatus(HintRequestStatus.ANSWERED)
                         .build()
         );
-        assertThat(getTokens()).isEqualTo(1);
-
-        // Request a hint for puzzle 3.
-        currentUserCredentials = TESTERTEAM_CREDENTIALS;
-        json = post(
-                "/hintrequests",
-                HintRequest.builder()
-                        .setTeamId("testerteam")
-                        .setPuzzleId("puzzle3")
-                        .setRequest("help")
-                        .build()
-        );
-        assertThat(json.get("created").asBoolean()).isTrue();
         assertThat(getTokens()).isEqualTo(0);
 
         // Request another hint for puzzle 2. Will fail due to lack of tokens.
@@ -159,6 +177,45 @@ public class HintHuntRunTest extends RestletTest {
                         .build()
         );
         assertThat(json.get("created").asBoolean()).isFalse();
+        assertThat(getTokens()).isEqualTo(0);
+
+        currentUserCredentials = TESTERTEAM_CREDENTIALS;
+        postNewSubmission("testerteam", "puzzle2", "ANSWER2");
+        currentUserCredentials = ADMIN_CREDENTIALS;
+        postUpdateSubmission(2, "CORRECT");
+
+        currentUserCredentials = TESTERTEAM_CREDENTIALS;
+
+        assertThat(getTokens()).isEqualTo(1);
+
+        json = get("/puzzles/puzzle2");
+        assertThat(json
+                .get("puzzleProperties")
+                .get("TokenRewardProperty")
+                .get("tokens").asInt()
+        ).isEqualTo(1);
+
+        json = get("/puzzles/puzzle3");
+        assertThat(json
+                .get("puzzleProperties")
+                .get("HintAllowedProperty")
+                .get("hintAllowed").asBoolean()
+        ).isTrue();
+
+        // Change the meta HintAllowedProperty to allow hints.
+        currentUserCredentials = ADMIN_CREDENTIALS;
+        post("/puzzles/meta", "{\"puzzleId\": \"meta\", \"puzzleProperties\": {\"HintAllowedProperty\": {\"hintAllowed\": true}}}");
+
+        currentUserCredentials = TESTERTEAM_CREDENTIALS;
+        json = post(
+                "/hintrequests",
+                HintRequest.builder()
+                        .setTeamId("testerteam")
+                        .setPuzzleId("meta")
+                        .setRequest("help")
+                        .build()
+        );
+        assertThat(json.get("created").asBoolean()).isTrue();
         assertThat(getTokens()).isEqualTo(0);
     }
 }

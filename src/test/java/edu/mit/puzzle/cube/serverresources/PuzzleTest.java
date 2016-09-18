@@ -3,11 +3,11 @@ package edu.mit.puzzle.cube.serverresources;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.ImmutableList;
 
+import edu.mit.puzzle.cube.core.CubeStores;
 import edu.mit.puzzle.cube.core.HuntDefinition;
 import edu.mit.puzzle.cube.core.RestletTest;
 import edu.mit.puzzle.cube.core.db.CubeJdbcRealm;
 import edu.mit.puzzle.cube.core.events.CompositeEventProcessor;
-import edu.mit.puzzle.cube.core.model.HuntStatusStore;
 import edu.mit.puzzle.cube.core.model.Puzzle;
 import edu.mit.puzzle.cube.core.model.VisibilityStatusSet;
 import edu.mit.puzzle.cube.modules.model.StandardVisibilityStatusSet;
@@ -59,7 +59,7 @@ public class PuzzleTest extends RestletTest {
             @Override
             public void addToEventProcessor(
                     CompositeEventProcessor eventProcessor,
-                    HuntStatusStore huntStatusStore
+                    CubeStores cubeStores
             ) {
             }
         };
@@ -77,9 +77,9 @@ public class PuzzleTest extends RestletTest {
     public void testGetPuzzle() {
         setCurrentUserCredentials(WRITING_USER);
 
-        getExpectFailure("/puzzle/badpuzzleid");
+        getExpectFailure("/puzzles/badpuzzleid");
 
-        JsonNode puzzleJson = get("/puzzle/" + PUZZLE_ONE);
+        JsonNode puzzleJson = get("/puzzles/" + PUZZLE_ONE);
         assertThat(puzzleJson.get("puzzleId").asText()).isEqualTo(PUZZLE_ONE);
         assertThat(puzzleJson.get("answers").size()).isEqualTo(1);
         JsonNode answerJson = puzzleJson.get("answers").get(0);
@@ -87,15 +87,12 @@ public class PuzzleTest extends RestletTest {
         assertThat(answerJson.get("acceptableAnswers").size()).isEqualTo(1);
         assertThat(answerJson.get("acceptableAnswers").get(0).asText()).isEqualTo(ANSWER_ONE);
 
-        puzzleJson = get("/puzzle/" + PUZZLE_TWO);
+        puzzleJson = get("/puzzles/" + PUZZLE_TWO);
         assertThat(puzzleJson.get("puzzleId").asText()).isEqualTo(PUZZLE_TWO);
         assertThat(puzzleJson.get("answers").size()).isEqualTo(1);
         answerJson = puzzleJson.get("answers").get(0);
         assertThat(answerJson.get("canonicalAnswer").asText()).isEqualTo(ANSWER_TWO);
         assertThat(answerJson.get("acceptableAnswers").size()).isEqualTo(1);
         assertThat(answerJson.get("acceptableAnswers").get(0).asText()).isEqualTo(ANSWER_TWO);
-
-        setCurrentUserCredentials(TEAM);
-        getExpectFailure("/answer/" + PUZZLE_ONE);
     }
 }

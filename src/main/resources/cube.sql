@@ -57,6 +57,14 @@ CREATE TABLE puzzles (
        PRIMARY KEY(puzzleId)
 );
 
+CREATE TABLE puzzle_properties (
+       puzzleId VARCHAR(20),
+       propertyKey VARCHAR(20),
+       propertyValue TEXT,
+       PRIMARY KEY(puzzleId, propertyKey),
+       FOREIGN KEY(puzzleId) REFERENCES puzzles(puzzleId)
+);
+
 CREATE TABLE submissions (
        submissionId ${auto_increment_type},
        teamId VARCHAR(20),
