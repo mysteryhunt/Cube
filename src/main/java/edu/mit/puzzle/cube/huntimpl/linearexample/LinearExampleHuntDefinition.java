@@ -1,8 +1,12 @@
 package edu.mit.puzzle.cube.huntimpl.linearexample;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableTable;
 
 import edu.mit.puzzle.cube.core.CubeStores;
@@ -22,6 +26,7 @@ import edu.mit.puzzle.cube.modules.model.StandardVisibilityStatusSet;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class LinearExampleHuntDefinition implements HuntDefinition {
 
@@ -32,12 +37,33 @@ public class LinearExampleHuntDefinition implements HuntDefinition {
         return VISIBILITY_STATUS_SET;
     }
 
+    @AutoValue
+    public static abstract class DisplayNameProperty extends Puzzle.Property {
+
+        static {
+            registerClass(DisplayNameProperty.class);
+        }
+
+        @JsonCreator
+        public static DisplayNameProperty create(@JsonProperty("displayName") String displayName) {
+            return new AutoValue_LinearExampleHuntDefinition_DisplayNameProperty(displayName);
+        }
+
+        @JsonProperty("displayName") public abstract String getDisplayName();
+
+        @Override
+        public Set<String> getVisibilityRequirement() {
+            return ImmutableSet.of("UNLOCKED","SOLVED");
+        }
+    }
+
     private static final List<Puzzle> PUZZLES;
     static {
         ImmutableList.Builder<Puzzle> puzzlesBuilder = ImmutableList.builder();
         for (int i = 1; i <= 7 ; ++i) {
             puzzlesBuilder.add(Puzzle.builder()
                     .setPuzzleId("puzzle" + i)
+                    .setPuzzleProperties(ImmutableMap.of("DisplayNameProperty", DisplayNameProperty.create("puzzle" + i)))
                     .setAnswers(Answer.createSingle("ANSWER" + i))
                     .build()
             );
@@ -57,6 +83,14 @@ public class LinearExampleHuntDefinition implements HuntDefinition {
             directPrereqBuilder.put("puzzle" + i, "puzzle" + (i+1));
         }
         DIRECT_UNLOCK_PREREQS = directPrereqBuilder.build();
+    }
+    private static final Map<String,String> DIRECT_VISIBLE_PREREQS;
+    static {
+        ImmutableMap.Builder<String,String> directPrereqBuilder = ImmutableMap.builder();
+        for (int i = 1; i <= 5; ++i) {
+            directPrereqBuilder.put("puzzle" + i, "puzzle" + (i+2));
+        }
+        DIRECT_VISIBLE_PREREQS = directPrereqBuilder.build();
     }
 
     @Override
@@ -94,6 +128,8 @@ public class LinearExampleHuntDefinition implements HuntDefinition {
                         ImmutableTable.builder();
                 huntStatusStore.getTeamIds().forEach(teamId ->
                         visibilityUpdateBatchBuilder.put(teamId, "puzzle1", "UNLOCKED"));
+                huntStatusStore.getTeamIds().forEach(teamId ->
+                        visibilityUpdateBatchBuilder.put(teamId, "puzzle2", "VISIBLE"));
                 huntStatusStore.setVisibilityBatch(visibilityUpdateBatchBuilder.build());
             }
         });
@@ -107,6 +143,19 @@ public class LinearExampleHuntDefinition implements HuntDefinition {
                 if (status.equals("SOLVED") && puzzleId.equals(directPrereqEntry.getKey())) {
                     huntStatusStore.setVisibility(teamId, directPrereqEntry.getValue(),
                             "UNLOCKED");
+                }
+            });
+        }
+
+        for (Map.Entry<String,String> directVisibleEntry : DIRECT_VISIBLE_PREREQS.entrySet()) {
+            eventProcessor.addEventProcessor(VisibilityChangeEvent.class, event -> {
+                String teamId = event.getVisibility().getTeamId();
+                String puzzleId = event.getVisibility().getPuzzleId();
+                String status = event.getVisibility().getStatus();
+
+                if (status.equals("SOLVED") && puzzleId.equals(directVisibleEntry.getKey())) {
+                    huntStatusStore.setVisibility(teamId, directVisibleEntry.getValue(),
+                            "VISIBLE");
                 }
             });
         }

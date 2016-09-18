@@ -4,7 +4,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.guava.GuavaModule;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Table;
 
 import edu.mit.puzzle.cube.core.db.ConnectionFactory;
@@ -95,6 +97,27 @@ public class PuzzleStore {
         }
 
         return puzzle;
+    }
+
+    public Map<String, Puzzle> getPuzzles() {
+        Table<Integer, String, Object> puzzlePropertiesResults = DatabaseHelper.query(
+                connectionFactory,
+                "SELECT puzzleId, propertyKey, propertyValue FROM puzzle_properties",
+                Lists.newArrayList()
+        );
+        Map<String, Map<String, Puzzle.Property>> allPuzzleProperties =
+                deserializePuzzleProperties(puzzlePropertiesResults);
+        Map<String, Puzzle> puzzlesCopy = ImmutableMap.copyOf(puzzles);
+        puzzlesCopy = Maps.transformEntries(puzzlesCopy, (puzzleId, puzzle) -> {
+            Map<String, Puzzle.Property> puzzleProperties = allPuzzleProperties.get(puzzleId);
+            if (puzzleProperties != null && !puzzleProperties.isEmpty()) {
+                puzzle = puzzle.toBuilder()
+                        .setPuzzleProperties(puzzleProperties)
+                        .build();
+            }
+            return puzzle;
+        });
+        return puzzlesCopy;
     }
 
     public boolean setPuzzleProperty(
