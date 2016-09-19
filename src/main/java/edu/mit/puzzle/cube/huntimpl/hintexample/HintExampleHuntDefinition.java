@@ -6,9 +6,7 @@ import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 
-import edu.mit.puzzle.cube.core.CubeStores;
 import edu.mit.puzzle.cube.core.HuntDefinition;
-import edu.mit.puzzle.cube.core.events.CompositeEventProcessor;
 import edu.mit.puzzle.cube.core.events.FullReleaseEvent;
 import edu.mit.puzzle.cube.core.events.HintCompleteEvent;
 import edu.mit.puzzle.cube.core.events.HuntStartEvent;
@@ -16,9 +14,7 @@ import edu.mit.puzzle.cube.core.events.SubmissionCompleteEvent;
 import edu.mit.puzzle.cube.core.events.VisibilityChangeEvent;
 import edu.mit.puzzle.cube.core.model.HintRequest;
 import edu.mit.puzzle.cube.core.model.HintRequestStatus;
-import edu.mit.puzzle.cube.core.model.HuntStatusStore;
 import edu.mit.puzzle.cube.core.model.Puzzle;
-import edu.mit.puzzle.cube.core.model.PuzzleStore;
 import edu.mit.puzzle.cube.core.model.Submission;
 import edu.mit.puzzle.cube.core.model.SubmissionStatus;
 import edu.mit.puzzle.cube.core.model.Team;
@@ -29,11 +25,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class HintExampleHuntDefinition implements HuntDefinition {
+public class HintExampleHuntDefinition extends HuntDefinition {
     private static final VisibilityStatusSet VISIBILITY_STATUS_SET = new StandardVisibilityStatusSet();
-
-    // TODO: clean up hunt definition dependency injection
-    PuzzleStore puzzleStore;
 
     // The number of hint tokens currently held by a solving team.
     @AutoValue
@@ -107,10 +100,7 @@ public class HintExampleHuntDefinition implements HuntDefinition {
     }
 
     @Override
-    public void addToEventProcessor(CompositeEventProcessor eventProcessor, CubeStores cubeStores) {
-        HuntStatusStore huntStatusStore = cubeStores.getHuntStatusStore();
-        puzzleStore = cubeStores.getPuzzleStore();
-
+    public void addToEventProcessor() {
         eventProcessor.addEventProcessor(HuntStartEvent.class, event -> {
             boolean changed = huntStatusStore.recordHuntRunStart();
 
@@ -204,7 +194,7 @@ public class HintExampleHuntDefinition implements HuntDefinition {
     }
 
     @Override
-    public boolean handleHintRequest(HintRequest hintRequest, HuntStatusStore huntStatusStore) {
+    public boolean handleHintRequest(HintRequest hintRequest) {
         Puzzle puzzle = puzzleStore.getPuzzle(hintRequest.getPuzzleId());
         HintAllowedProperty hintAllowedProperty = puzzle.getPuzzleProperty(HintAllowedProperty.class);
         if (!hintAllowedProperty.getHintAllowed()) {

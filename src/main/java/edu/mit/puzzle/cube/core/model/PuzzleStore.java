@@ -7,6 +7,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Table;
 
+import edu.mit.puzzle.cube.core.HuntDefinition;
 import edu.mit.puzzle.cube.core.db.ConnectionFactory;
 import edu.mit.puzzle.cube.core.db.DatabaseHelper;
 import edu.mit.puzzle.cube.core.events.Event;
@@ -24,9 +25,13 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /**
  * A repository for all puzzle metadata, including the answers.
  */
+@Singleton
 public class PuzzleStore {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
             .registerModule(new GuavaModule());
@@ -34,6 +39,15 @@ public class PuzzleStore {
     private final ConnectionFactory connectionFactory;
     private final EventProcessor<Event> eventProcessor;
     private final Map<String, Puzzle> puzzles;
+
+    @Inject
+    public PuzzleStore(
+            ConnectionFactory connectionFactory,
+            EventProcessor<Event> eventProcessor,
+            HuntDefinition huntDefinition
+    ) {
+        this(connectionFactory, eventProcessor, huntDefinition.getPuzzles());
+    }
 
     public PuzzleStore(
             ConnectionFactory connectionFactory,
