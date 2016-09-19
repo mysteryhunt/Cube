@@ -21,9 +21,12 @@ import java.util.List;
 import java.util.Optional;
 
 import javax.annotation.Nullable;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+@Singleton
 public class SubmissionStore {
 
     private static Logger LOGGER = LoggerFactory.getLogger(SubmissionStore.class);
@@ -32,6 +35,7 @@ public class SubmissionStore {
     private final Clock clock;
     private final EventProcessor<Event> eventProcessor;
 
+    @Inject
     public SubmissionStore(
             ConnectionFactory connectionFactory,
             EventProcessor<Event> eventProcessor

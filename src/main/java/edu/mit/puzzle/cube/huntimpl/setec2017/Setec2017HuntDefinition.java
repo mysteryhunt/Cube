@@ -10,7 +10,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Table;
 
-import edu.mit.puzzle.cube.core.CubeStores;
 import edu.mit.puzzle.cube.core.HuntDefinition;
 import edu.mit.puzzle.cube.core.events.CompositeEventProcessor;
 import edu.mit.puzzle.cube.core.events.Event;
@@ -21,7 +20,6 @@ import edu.mit.puzzle.cube.core.events.SubmissionCompleteEvent;
 import edu.mit.puzzle.cube.core.events.VisibilityChangeEvent;
 import edu.mit.puzzle.cube.core.model.HintRequest;
 import edu.mit.puzzle.cube.core.model.HintRequestStatus;
-import edu.mit.puzzle.cube.core.model.HuntStatusStore;
 import edu.mit.puzzle.cube.core.model.Puzzle;
 import edu.mit.puzzle.cube.core.model.Submission;
 import edu.mit.puzzle.cube.core.model.SubmissionStatus;
@@ -38,10 +36,8 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
-public class Setec2017HuntDefinition implements HuntDefinition {
+public class Setec2017HuntDefinition extends HuntDefinition {
     private static final VisibilityStatusSet VISIBILITY_STATUS_SET = new StandardVisibilityStatusSet();
-
-    private HuntStatusStore huntStatusStore;
 
     @Override
     public VisibilityStatusSet getVisibilityStatusSet() {
@@ -329,9 +325,7 @@ public class Setec2017HuntDefinition implements HuntDefinition {
     }
 
     @Override
-    public void addToEventProcessor(CompositeEventProcessor eventProcessor, CubeStores cubeStores) {
-        huntStatusStore = cubeStores.getHuntStatusStore();
-
+    public void addToEventProcessor() {
         eventProcessor.addEventProcessor(HuntStartEvent.class, event -> {
             boolean changed = huntStatusStore.recordHuntRunStart();
             if (changed) {
@@ -420,7 +414,7 @@ public class Setec2017HuntDefinition implements HuntDefinition {
     }
 
     @Override
-    public boolean handleHintRequest(HintRequest hintRequest, HuntStatusStore huntStatusStore) {
+    public boolean handleHintRequest(HintRequest hintRequest) {
         AtomicBoolean deductedGold = new AtomicBoolean(false);
         huntStatusStore.mutateTeamProperty(
                 hintRequest.getTeamId(),

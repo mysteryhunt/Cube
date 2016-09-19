@@ -7,6 +7,7 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.*;
 
+import edu.mit.puzzle.cube.core.HuntDefinition;
 import edu.mit.puzzle.cube.core.db.ConnectionFactory;
 import edu.mit.puzzle.cube.core.db.DatabaseHelper;
 import edu.mit.puzzle.cube.core.events.Event;
@@ -36,8 +37,12 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 
+@Singleton
 public class HuntStatusStore {
     private static Logger LOGGER = LoggerFactory.getLogger(HuntStatusStore.class);
 
@@ -49,12 +54,13 @@ public class HuntStatusStore {
     private final VisibilityStatusSet visibilityStatusSet;
     private final EventProcessor<Event> eventProcessor;
 
+    @Inject
     public HuntStatusStore(
         ConnectionFactory connectionFactory,
-        VisibilityStatusSet visibilityStatusSet,
+        HuntDefinition huntDefinition,
         EventProcessor<Event> eventProcessor
     ) {
-        this(connectionFactory, Clock.systemUTC(), visibilityStatusSet, eventProcessor);
+        this(connectionFactory, Clock.systemUTC(), huntDefinition.getVisibilityStatusSet(), eventProcessor);
     }
 
     public HuntStatusStore(

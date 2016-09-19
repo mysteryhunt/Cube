@@ -12,16 +12,34 @@ import org.restlet.Response;
 import org.restlet.data.ChallengeResponse;
 import org.restlet.data.ChallengeScheme;
 import org.restlet.data.Method;
+import org.restlet.resource.Finder;
+import org.restlet.resource.ServerResource;
 import org.restlet.routing.Filter;
 import org.restlet.routing.Router;
 import org.restlet.security.ChallengeAuthenticator;
 import org.restlet.security.Verifier;
 
 public class CubeRestlet extends Filter {
-    public CubeRestlet(Context context) {
+    public CubeRestlet(Context context, CubeResourceComponent dagger) {
         super(context);
 
-        Router router = new Router(context);
+        Router router = new Router(context) {
+            @Override
+            public Finder createFinder(Class<? extends ServerResource> targetClass) {
+                Finder finder = super.createFinder(targetClass);
+                return new Finder(finder.getContext(), finder.getTargetClass()) {
+                    @Override
+                    public ServerResource find(Request request, Response response) {
+                        ServerResource res = finder.find(request, response);
+                        if (res instanceof AbstractCubeResource) {
+                            dagger.injectCubeResource((AbstractCubeResource) res);
+                        }
+                        return res;
+                    }
+                };
+            }
+        };
+
         router.attach("/authorized", AuthorizedResource.class);
         router.attach("/events", EventsResource.class);
         router.attach("/hintrequests", HintRequestsResource.class);
