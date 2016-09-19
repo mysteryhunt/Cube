@@ -34,6 +34,9 @@
                         <annotationProcessor>
                             com.google.auto.value.processor.AutoValueProcessor
                         </annotationProcessor>
+                        <annotationProcessor>
+                            dagger.internal.codegen.ComponentProcessor
+                        </annotationProcessor>
                     </annotationProcessors>
                 </configuration>
             </plugin>
