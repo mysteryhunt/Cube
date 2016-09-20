@@ -158,7 +158,29 @@ public class LinearHuntRunTest extends RestletTest {
         assertFalse(puzzle3Node.has("answers"));
 
         currentUserCredentials = ADMIN_CREDENTIALS;
+        post("/puzzles/puzzle2", "{\"puzzleId\": \"puzzle2\", \"puzzleProperties\": {\"DisplayNameProperty\": {\"displayName\": \"Updated puzzle 2\", \"visibilityRequirement\":[\"UNLOCKED\",\"SOLVED\"]}}}");
 
+        currentUserCredentials = TESTERTEAM_CREDENTIALS;
+        json = get("/puzzles?teamId=testerteam");
+        assertEquals(3, json.get("puzzles").size());
+        puzzle1Node = JsonUtils.getOnlyElementForPredicate(
+                json.get("puzzles"), n -> n.get("puzzleId").asText().equals("puzzle1"));
+        assertEquals("puzzle1", puzzle1Node.get("puzzleId").asText());
+        assertEquals("puzzle1", puzzle1Node.get("puzzleProperties").get("DisplayNameProperty").get("displayName").asText());
+        //FIXME: Should this puzzle have answers now?
+        assertFalse(puzzle1Node.has("answers"));
+        puzzle2Node = JsonUtils.getOnlyElementForPredicate(
+                json.get("puzzles"), n -> n.get("puzzleId").asText().equals("puzzle2"));
+        assertEquals("puzzle2", puzzle2Node.get("puzzleId").asText());
+        assertEquals("Updated puzzle 2", puzzle2Node.get("puzzleProperties").get("DisplayNameProperty").get("displayName").asText());
+        assertFalse(puzzle1Node.has("answers"));
+        puzzle3Node = JsonUtils.getOnlyElementForPredicate(
+                json.get("puzzles"), n -> n.get("puzzleId").asText().equals("puzzle3"));
+        assertEquals("puzzle3", puzzle3Node.get("puzzleId").asText());
+        assertEquals(0, puzzle3Node.get("puzzleProperties").size());
+        assertFalse(puzzle3Node.has("answers"));
+
+        currentUserCredentials = ADMIN_CREDENTIALS;
         postFullRelease("puzzle5");
         json = getVisibility("testerteam", "puzzle5");
         assertEquals("UNLOCKED", json.get("status").asText());

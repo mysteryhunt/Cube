@@ -1,8 +1,5 @@
 package edu.mit.puzzle.cube.huntimpl.linearexample;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
@@ -23,7 +20,6 @@ import edu.mit.puzzle.cube.modules.model.StandardVisibilityStatusSet;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public class LinearExampleHuntDefinition extends HuntDefinition {
 
@@ -34,33 +30,14 @@ public class LinearExampleHuntDefinition extends HuntDefinition {
         return VISIBILITY_STATUS_SET;
     }
 
-    @AutoValue
-    public static abstract class DisplayNameProperty extends Puzzle.Property {
-
-        static {
-            registerClass(DisplayNameProperty.class);
-        }
-
-        @JsonCreator
-        public static DisplayNameProperty create(@JsonProperty("displayName") String displayName) {
-            return new AutoValue_LinearExampleHuntDefinition_DisplayNameProperty(displayName);
-        }
-
-        @JsonProperty("displayName") public abstract String getDisplayName();
-
-        @Override
-        public Set<String> getVisibilityRequirement() {
-            return ImmutableSet.of("UNLOCKED","SOLVED");
-        }
-    }
-
     private static final List<Puzzle> PUZZLES;
     static {
         ImmutableList.Builder<Puzzle> puzzlesBuilder = ImmutableList.builder();
         for (int i = 1; i <= 7 ; ++i) {
             puzzlesBuilder.add(Puzzle.builder()
                     .setPuzzleId("puzzle" + i)
-                    .setPuzzleProperties(ImmutableMap.of("DisplayNameProperty", DisplayNameProperty.create("puzzle" + i)))
+                    .setPuzzleProperties(ImmutableMap.of("DisplayNameProperty",
+                            Puzzle.DisplayNameProperty.create("puzzle" + i, ImmutableSet.of("UNLOCKED","SOLVED"))))
                     .setAnswers(Answer.createSingle("ANSWER" + i))
                     .build()
             );
