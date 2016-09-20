@@ -1,5 +1,6 @@
 package edu.mit.puzzle.cube.core.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -69,6 +70,29 @@ public abstract class Puzzle {
         }
     }
 
+    @AutoValue
+    public static abstract class DisplayNameProperty extends Puzzle.Property {
+
+        static {
+            registerClass(DisplayNameProperty.class);
+        }
+
+        @JsonCreator
+        public static DisplayNameProperty create(
+                @JsonProperty("displayName") String displayName,
+                @JsonProperty("visibilityRequirement") Set<String> visibilityRequirement
+        ) {
+            return new AutoValue_Puzzle_DisplayNameProperty(
+                    displayName, ImmutableSet.copyOf(visibilityRequirement));
+        }
+
+        @JsonProperty("displayName") public abstract String getDisplayName();
+
+        @JsonIgnore(false)
+        @JsonProperty("visibilityRequirement")
+        public abstract Set<String> getVisibilityRequirement();
+    }
+
     public static class PuzzlePropertiesDeserializer extends StdDeserializer<Map<String, Property>> {
         private static final long serialVersionUID = 1L;
 
@@ -109,9 +133,6 @@ public abstract class Puzzle {
         @JsonProperty("puzzleId")
         public abstract Builder setPuzzleId(String puzzleId);
 
-        @JsonProperty("displayName")
-        public abstract Builder setDisplayName(@Nullable String displayName);
-
         @JsonProperty("answers")
         public abstract Builder setAnswers(@Nullable List<Answer> answers);
 
@@ -149,7 +170,6 @@ public abstract class Puzzle {
     public static Puzzle create(String puzzleId, String answer) {
         return builder()
                 .setPuzzleId(puzzleId)
-                .setDisplayName(puzzleId)
                 .setAnswers(Answer.createSingle(answer))
                 .build();
     }
@@ -168,10 +188,6 @@ public abstract class Puzzle {
 
     @JsonProperty("puzzleId")
     public abstract String getPuzzleId();
-
-    @Nullable
-    @JsonProperty("displayName")
-    public abstract String getDisplayName();
 
     @Nullable
     @JsonProperty("answers")

@@ -2,6 +2,7 @@ package edu.mit.puzzle.cube.core.exampleruns;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
+import edu.mit.puzzle.cube.JsonUtils;
 import edu.mit.puzzle.cube.core.HuntDefinition;
 import edu.mit.puzzle.cube.core.RestletTest;
 import edu.mit.puzzle.cube.core.db.CubeJdbcRealm;
@@ -16,6 +17,8 @@ import java.io.IOException;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class LinearHuntRunTest extends RestletTest {
     protected static final ChallengeResponse TESTERTEAM_CREDENTIALS =
@@ -43,13 +46,54 @@ public class LinearHuntRunTest extends RestletTest {
         json = getVisibility("testerteam","puzzle2");
         assertEquals("INVISIBLE", json.get("status").asText());
 
+        json = get("/puzzles?teamId=testerteam");
+        assertTrue(json.get("puzzles").isArray());
+        assertEquals(0, json.get("puzzles").size());
+
+        currentUserCredentials = TESTERTEAM_CREDENTIALS;
+
+        json = getVisibility("testerteam","puzzle1");
+        assertEquals("INVISIBLE", json.get("status").asText());
+        json = getVisibility("testerteam","puzzle2");
+        assertEquals("INVISIBLE", json.get("status").asText());
+        json = getVisibility("testerteam","puzzle3");
+        assertEquals("INVISIBLE", json.get("status").asText());
+
+        json = get("/puzzles?teamId=testerteam");
+        assertEquals(0, json.get("puzzles").size());
+
+        currentUserCredentials = ADMIN_CREDENTIALS;
+
         postHuntStart();
 
         json = getVisibility("testerteam","puzzle1");
-        assertEquals("Puzzle 1", json.get("puzzleDisplayName").asText());
         assertEquals("UNLOCKED", json.get("status").asText());
         json = getVisibility("testerteam","puzzle2");
+        assertEquals("VISIBLE", json.get("status").asText());
+        json = getVisibility("testerteam","puzzle3");
         assertEquals("INVISIBLE", json.get("status").asText());
+
+        currentUserCredentials = TESTERTEAM_CREDENTIALS;
+
+        json = getVisibility("testerteam","puzzle1");
+        assertEquals("UNLOCKED", json.get("status").asText());
+        json = getVisibility("testerteam","puzzle2");
+        assertEquals("VISIBLE", json.get("status").asText());
+        json = getVisibility("testerteam","puzzle3");
+        assertEquals("INVISIBLE", json.get("status").asText());
+
+        json = get("/puzzles?teamId=testerteam");
+        assertEquals(2, json.get("puzzles").size());
+        JsonNode puzzle1Node = JsonUtils.getOnlyElementForPredicate(
+                json.get("puzzles"), n -> n.get("puzzleId").asText().equals("puzzle1"));
+        assertEquals("puzzle1", puzzle1Node.get("puzzleId").asText());
+        assertEquals("puzzle1", puzzle1Node.get("puzzleProperties").get("DisplayNameProperty").get("displayName").asText());
+        assertFalse(puzzle1Node.has("answers"));
+        JsonNode puzzle2Node = JsonUtils.getOnlyElementForPredicate(
+                json.get("puzzles"), n -> n.get("puzzleId").asText().equals("puzzle2"));
+        assertEquals("puzzle2", puzzle2Node.get("puzzleId").asText());
+        assertEquals(0, puzzle2Node.get("puzzleProperties").size());
+        assertFalse(puzzle2Node.has("answers"));
 
         currentUserCredentials = TESTERTEAM_CREDENTIALS;
 
@@ -77,10 +121,66 @@ public class LinearHuntRunTest extends RestletTest {
         assertEquals("UNLOCKED", json.get("status").asText());
         assertThat(json.get("solvedAnswers").size()).isEqualTo(0);
 
+        json = getVisibility("testerteam", "puzzle3");
+        assertEquals("VISIBLE", json.get("status").asText());
+        assertThat(json.get("solvedAnswers").size()).isEqualTo(0);
+
         json = getVisibility("testerteam", "puzzle5");
         assertEquals("INVISIBLE", json.get("status").asText());
         assertThat(json.get("solvedAnswers").size()).isEqualTo(0);
 
+        currentUserCredentials = TESTERTEAM_CREDENTIALS;
+
+        json = getVisibility("testerteam","puzzle1");
+        assertEquals("SOLVED", json.get("status").asText());
+        json = getVisibility("testerteam","puzzle2");
+        assertEquals("UNLOCKED", json.get("status").asText());
+        json = getVisibility("testerteam","puzzle3");
+        assertEquals("VISIBLE", json.get("status").asText());
+
+        json = get("/puzzles?teamId=testerteam");
+        assertEquals(3, json.get("puzzles").size());
+        puzzle1Node = JsonUtils.getOnlyElementForPredicate(
+                json.get("puzzles"), n -> n.get("puzzleId").asText().equals("puzzle1"));
+        assertEquals("puzzle1", puzzle1Node.get("puzzleId").asText());
+        assertEquals("puzzle1", puzzle1Node.get("puzzleProperties").get("DisplayNameProperty").get("displayName").asText());
+        //FIXME: Should this puzzle have answers now?
+        assertFalse(puzzle1Node.has("answers"));
+        puzzle2Node = JsonUtils.getOnlyElementForPredicate(
+                json.get("puzzles"), n -> n.get("puzzleId").asText().equals("puzzle2"));
+        assertEquals("puzzle2", puzzle2Node.get("puzzleId").asText());
+        assertEquals("puzzle2", puzzle2Node.get("puzzleProperties").get("DisplayNameProperty").get("displayName").asText());
+        assertFalse(puzzle1Node.has("answers"));
+        JsonNode puzzle3Node = JsonUtils.getOnlyElementForPredicate(
+                json.get("puzzles"), n -> n.get("puzzleId").asText().equals("puzzle3"));
+        assertEquals("puzzle3", puzzle3Node.get("puzzleId").asText());
+        assertEquals(0, puzzle3Node.get("puzzleProperties").size());
+        assertFalse(puzzle3Node.has("answers"));
+
+        currentUserCredentials = ADMIN_CREDENTIALS;
+        post("/puzzles/puzzle2", "{\"puzzleId\": \"puzzle2\", \"puzzleProperties\": {\"DisplayNameProperty\": {\"displayName\": \"Updated puzzle 2\", \"visibilityRequirement\":[\"UNLOCKED\",\"SOLVED\"]}}}");
+
+        currentUserCredentials = TESTERTEAM_CREDENTIALS;
+        json = get("/puzzles?teamId=testerteam");
+        assertEquals(3, json.get("puzzles").size());
+        puzzle1Node = JsonUtils.getOnlyElementForPredicate(
+                json.get("puzzles"), n -> n.get("puzzleId").asText().equals("puzzle1"));
+        assertEquals("puzzle1", puzzle1Node.get("puzzleId").asText());
+        assertEquals("puzzle1", puzzle1Node.get("puzzleProperties").get("DisplayNameProperty").get("displayName").asText());
+        //FIXME: Should this puzzle have answers now?
+        assertFalse(puzzle1Node.has("answers"));
+        puzzle2Node = JsonUtils.getOnlyElementForPredicate(
+                json.get("puzzles"), n -> n.get("puzzleId").asText().equals("puzzle2"));
+        assertEquals("puzzle2", puzzle2Node.get("puzzleId").asText());
+        assertEquals("Updated puzzle 2", puzzle2Node.get("puzzleProperties").get("DisplayNameProperty").get("displayName").asText());
+        assertFalse(puzzle1Node.has("answers"));
+        puzzle3Node = JsonUtils.getOnlyElementForPredicate(
+                json.get("puzzles"), n -> n.get("puzzleId").asText().equals("puzzle3"));
+        assertEquals("puzzle3", puzzle3Node.get("puzzleId").asText());
+        assertEquals(0, puzzle3Node.get("puzzleProperties").size());
+        assertFalse(puzzle3Node.has("answers"));
+
+        currentUserCredentials = ADMIN_CREDENTIALS;
         postFullRelease("puzzle5");
         json = getVisibility("testerteam", "puzzle5");
         assertEquals("UNLOCKED", json.get("status").asText());

@@ -2,6 +2,8 @@ package edu.mit.puzzle.cube.huntimpl.linearexample;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableTable;
 
 import edu.mit.puzzle.cube.core.HuntDefinition;
@@ -34,7 +36,8 @@ public class LinearExampleHuntDefinition extends HuntDefinition {
         for (int i = 1; i <= 7 ; ++i) {
             puzzlesBuilder.add(Puzzle.builder()
                     .setPuzzleId("puzzle" + i)
-                    .setDisplayName("Puzzle " + i)
+                    .setPuzzleProperties(ImmutableMap.of("DisplayNameProperty",
+                            Puzzle.DisplayNameProperty.create("puzzle" + i, ImmutableSet.of("UNLOCKED","SOLVED"))))
                     .setAnswers(Answer.createSingle("ANSWER" + i))
                     .build()
             );
@@ -54,6 +57,14 @@ public class LinearExampleHuntDefinition extends HuntDefinition {
             directPrereqBuilder.put("puzzle" + i, "puzzle" + (i+1));
         }
         DIRECT_UNLOCK_PREREQS = directPrereqBuilder.build();
+    }
+    private static final Map<String,String> DIRECT_VISIBLE_PREREQS;
+    static {
+        ImmutableMap.Builder<String,String> directPrereqBuilder = ImmutableMap.builder();
+        for (int i = 1; i <= 5; ++i) {
+            directPrereqBuilder.put("puzzle" + i, "puzzle" + (i+2));
+        }
+        DIRECT_VISIBLE_PREREQS = directPrereqBuilder.build();
     }
 
     @Override
@@ -86,6 +97,8 @@ public class LinearExampleHuntDefinition extends HuntDefinition {
                         ImmutableTable.builder();
                 huntStatusStore.getTeamIds().forEach(teamId ->
                         visibilityUpdateBatchBuilder.put(teamId, "puzzle1", "UNLOCKED"));
+                huntStatusStore.getTeamIds().forEach(teamId ->
+                        visibilityUpdateBatchBuilder.put(teamId, "puzzle2", "VISIBLE"));
                 huntStatusStore.setVisibilityBatch(visibilityUpdateBatchBuilder.build());
             }
         });
@@ -99,6 +112,19 @@ public class LinearExampleHuntDefinition extends HuntDefinition {
                 if (status.equals("SOLVED") && puzzleId.equals(directPrereqEntry.getKey())) {
                     huntStatusStore.setVisibility(teamId, directPrereqEntry.getValue(),
                             "UNLOCKED");
+                }
+            });
+        }
+
+        for (Map.Entry<String,String> directVisibleEntry : DIRECT_VISIBLE_PREREQS.entrySet()) {
+            eventProcessor.addEventProcessor(VisibilityChangeEvent.class, event -> {
+                String teamId = event.getVisibility().getTeamId();
+                String puzzleId = event.getVisibility().getPuzzleId();
+                String status = event.getVisibility().getStatus();
+
+                if (status.equals("SOLVED") && puzzleId.equals(directVisibleEntry.getKey())) {
+                    huntStatusStore.setVisibility(teamId, directVisibleEntry.getValue(),
+                            "VISIBLE");
                 }
             });
         }

@@ -27,13 +27,6 @@ public class VisibilitiesResource extends AbstractCubeResource {
         Optional<String> puzzleId = Optional.ofNullable(getQueryValue("puzzleId"));
 
         List<Visibility> visibilities = huntStatusStore.getExplicitVisibilities(teamId, puzzleId);
-        visibilities = visibilities.stream()
-                .map(visibility -> visibility.toBuilder()
-                        .setPuzzleDisplayName(
-                                puzzleStore.getPuzzle(visibility.getPuzzleId()).getDisplayName())
-                        .build()
-                )
-                .collect(Collectors.toList());
         return Visibilities.builder()
                 .setVisibilities(visibilities)
                 .build();
