@@ -29,7 +29,7 @@ public class PuzzlesResource extends AbstractCubeResource {
             Map<String, Puzzle> unfilteredPuzzles = puzzleStore.getPuzzles();
             Map<String, Visibility> retrievedVisibilities = huntStatusStore.getVisibilitiesForTeam(teamId.get()).stream()
                     .collect(Collectors.toMap(
-                            v -> v.getPuzzleId(),
+                            Visibility::getPuzzleId,
                             Function.identity()
                     ));
             Map<String, Visibility> visibilities = Maps.asMap(
