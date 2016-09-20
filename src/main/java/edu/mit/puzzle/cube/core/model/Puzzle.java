@@ -218,7 +218,6 @@ public abstract class Puzzle {
                     })
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
         }
-        Puzzle built = builder.build();
-        return built;
+        return builder.build();
     }
 }
