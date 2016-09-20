@@ -3,11 +3,9 @@ package edu.mit.puzzle.cube.serverresources;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.ImmutableList;
 
-import edu.mit.puzzle.cube.core.CubeStores;
 import edu.mit.puzzle.cube.core.HuntDefinition;
 import edu.mit.puzzle.cube.core.RestletTest;
 import edu.mit.puzzle.cube.core.db.CubeJdbcRealm;
-import edu.mit.puzzle.cube.core.events.CompositeEventProcessor;
 import edu.mit.puzzle.cube.core.model.HintRequest;
 import edu.mit.puzzle.cube.core.model.HintRequestStatus;
 import edu.mit.puzzle.cube.core.model.Puzzle;
@@ -55,10 +53,7 @@ public class HintRequestsTest extends RestletTest {
             }
 
             @Override
-            public void addToEventProcessor(
-                    CompositeEventProcessor eventProcessor,
-                    CubeStores cubeStores
-            ) {
+            public void addToEventProcessor() {
             }
         };
     }

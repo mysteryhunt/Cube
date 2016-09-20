@@ -9,15 +9,12 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableTable;
 
-import edu.mit.puzzle.cube.core.CubeStores;
 import edu.mit.puzzle.cube.core.HuntDefinition;
-import edu.mit.puzzle.cube.core.events.CompositeEventProcessor;
 import edu.mit.puzzle.cube.core.events.FullReleaseEvent;
 import edu.mit.puzzle.cube.core.events.HuntStartEvent;
 import edu.mit.puzzle.cube.core.events.SubmissionCompleteEvent;
 import edu.mit.puzzle.cube.core.events.VisibilityChangeEvent;
 import edu.mit.puzzle.cube.core.model.Answer;
-import edu.mit.puzzle.cube.core.model.HuntStatusStore;
 import edu.mit.puzzle.cube.core.model.Puzzle;
 import edu.mit.puzzle.cube.core.model.Submission;
 import edu.mit.puzzle.cube.core.model.SubmissionStatus;
@@ -28,7 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class LinearExampleHuntDefinition implements HuntDefinition {
+public class LinearExampleHuntDefinition extends HuntDefinition {
 
     private static final VisibilityStatusSet VISIBILITY_STATUS_SET = new StandardVisibilityStatusSet();
 
@@ -94,12 +91,7 @@ public class LinearExampleHuntDefinition implements HuntDefinition {
     }
 
     @Override
-    public void addToEventProcessor(
-            CompositeEventProcessor eventProcessor,
-            CubeStores cubeStores
-    ) {
-        HuntStatusStore huntStatusStore = cubeStores.getHuntStatusStore();
-
+    public void addToEventProcessor() {
         eventProcessor.addEventProcessor(SubmissionCompleteEvent.class, event -> {
             Submission submission = event.getSubmission();
             if (submission.getStatus().equals(SubmissionStatus.CORRECT)) {

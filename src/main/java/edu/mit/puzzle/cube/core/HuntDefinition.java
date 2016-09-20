@@ -2,8 +2,10 @@ package edu.mit.puzzle.cube.core;
 
 import edu.mit.puzzle.cube.core.events.CompositeEventProcessor;
 import edu.mit.puzzle.cube.core.model.HintRequest;
+import edu.mit.puzzle.cube.core.model.HintRequestStore;
 import edu.mit.puzzle.cube.core.model.HuntStatusStore;
 import edu.mit.puzzle.cube.core.model.Puzzle;
+import edu.mit.puzzle.cube.core.model.PuzzleStore;
 import edu.mit.puzzle.cube.core.model.VisibilityStatusSet;
 
 import org.slf4j.Logger;
@@ -11,23 +13,28 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
-public interface HuntDefinition {
-    VisibilityStatusSet getVisibilityStatusSet();
+import javax.inject.Inject;
 
-    List<Puzzle> getPuzzles();
+public abstract class HuntDefinition {
+    @Inject public CompositeEventProcessor eventProcessor;
+    @Inject public HintRequestStore hintRequestStore;
+    @Inject public HuntStatusStore huntStatusStore;
+    @Inject public PuzzleStore puzzleStore;
+
+    public abstract VisibilityStatusSet getVisibilityStatusSet();
+
+    public abstract List<Puzzle> getPuzzles();
 
     /**
      * @return A newly constructed CompositeEventProcessor appropriate to the HuntDefinition.
      * Hunt definitions may override this in order to implement processBatch more efficiently
      * that the default implementation in EventProcessor.
      */
-    default CompositeEventProcessor generateCompositeEventProcessor() {
+    public CompositeEventProcessor generateCompositeEventProcessor() {
         return new CompositeEventProcessor();
     }
 
-    void addToEventProcessor(
-            CompositeEventProcessor eventProcessor,
-            CubeStores cubeStores);
+    public abstract void addToEventProcessor();
 
     /**
      * @return true if this team may currently request a hint for this puzzle. Hunt definitions may
@@ -36,11 +43,11 @@ public interface HuntDefinition {
      * <li>only allowing hints for a subset of puzzles
      * </ul>
      */
-    default boolean handleHintRequest(HintRequest hintRequest, HuntStatusStore huntStatusStore) {
+    public boolean handleHintRequest(HintRequest hintRequest) {
         return true;
     }
 
-    static HuntDefinition forClassName(String className) {
+    public static HuntDefinition forClassName(String className) {
         final Logger LOGGER = LoggerFactory.getLogger(HuntDefinition.class);
         HuntDefinition huntDefinition = null;
         try {

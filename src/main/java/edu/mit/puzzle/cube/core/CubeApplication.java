@@ -5,17 +5,7 @@ import com.google.common.util.concurrent.Service;
 
 import edu.mit.puzzle.cube.core.db.ConnectionFactory;
 import edu.mit.puzzle.cube.core.db.CubeJdbcRealm;
-import edu.mit.puzzle.cube.core.environments.DevelopmentEnvironment;
-import edu.mit.puzzle.cube.core.environments.ProductionEnvironment;
-import edu.mit.puzzle.cube.core.environments.ServiceEnvironment;
-import edu.mit.puzzle.cube.core.events.CompositeEventProcessor;
 import edu.mit.puzzle.cube.core.events.PeriodicTimerEvent;
-import edu.mit.puzzle.cube.core.model.HintRequestStore;
-import edu.mit.puzzle.cube.core.model.HuntStatusStore;
-import edu.mit.puzzle.cube.core.model.PuzzleStore;
-import edu.mit.puzzle.cube.core.model.SubmissionStore;
-import edu.mit.puzzle.cube.core.model.UserStore;
-import edu.mit.puzzle.cube.core.serverresources.AbstractCubeResource;
 
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.mgt.DefaultSecurityManager;
@@ -29,22 +19,16 @@ import org.restlet.service.CorsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.SQLException;
 import java.util.concurrent.TimeUnit;
 
 public class CubeApplication extends Application {
     private static Logger LOGGER = LoggerFactory.getLogger(CubeApplication.class);
 
-    private final SubmissionStore submissionStore;
-    private final HuntStatusStore huntStatusStore;
-    private final UserStore userStore;
-    private final PuzzleStore puzzleStore;
-    private final HintRequestStore hintRequestStore;
-    private final CompositeEventProcessor eventProcessor;
+    private final CubeComponent dagger;
 
     private final Service timingEventService;
 
-    public CubeApplication(CubeConfig config) throws SQLException {
+    public CubeApplication(CubeConfig config) {
         CorsService corsService = new CorsService();
         corsService.setAllowedOrigins(config.getCorsAllowedOrigins());
         corsService.setAllowedCredentials(true);
@@ -53,68 +37,21 @@ public class CubeApplication extends Application {
 
         setStatusService(new CubeStatusService(corsService));
 
-        HuntDefinition huntDefinition = HuntDefinition.forClassName(config.getHuntDefinitionClassName());
+        dagger = DaggerCubeComponent.builder()
+                .cubeConfigModule(new CubeConfigModule(config))
+                .build();
 
-        ServiceEnvironment serviceEnvironment = null;
-        switch (config.getServiceEnvironment()) {
-        case DEVELOPMENT:
-            serviceEnvironment = new DevelopmentEnvironment(huntDefinition);
-            break;
-        case PRODUCTION:
-            serviceEnvironment = new ProductionEnvironment(config);
-            break;
-        default:
-            LOGGER.error("Unimplemented service environment: " + config.getServiceEnvironment());
-            System.exit(1);
-        }
+        setupAuthentication(dagger.getConnectionFactory());
 
-        ConnectionFactory connectionFactory = serviceEnvironment.getConnectionFactory();
-
-        setupAuthentication(connectionFactory);
-
-        eventProcessor = huntDefinition.generateCompositeEventProcessor();
-        submissionStore = new SubmissionStore(
-                connectionFactory,
-                eventProcessor
-        );
-        huntStatusStore = new HuntStatusStore(
-                connectionFactory,
-                huntDefinition.getVisibilityStatusSet(),
-                eventProcessor
-        );
-        userStore = new UserStore(
-                connectionFactory
-        );
-        puzzleStore = new PuzzleStore(
-                connectionFactory,
-                eventProcessor,
-                huntDefinition.getPuzzles()
-        );
-        hintRequestStore = new HintRequestStore(
-                connectionFactory,
-                huntDefinition,
-                huntStatusStore,
-                eventProcessor
-        );
-
-        CubeStores cubeStores = CubeStores.create(
-                hintRequestStore,
-                huntStatusStore,
-                puzzleStore,
-                submissionStore,
-                userStore
-        );
-
-        huntDefinition.addToEventProcessor(
-                eventProcessor,
-                cubeStores
-        );
+        HuntDefinition huntDefinition = dagger.getHuntDefinition();
+        dagger.injectHuntDefinition(huntDefinition);
+        huntDefinition.addToEventProcessor();
 
         timingEventService = new AbstractScheduledService() {
             @Override
             protected void runOneIteration() throws Exception {
                 try {
-                    eventProcessor.process(PeriodicTimerEvent.builder().build());
+                    dagger.getCompositeEventProcessor().process(PeriodicTimerEvent.builder().build());
                 } catch (Exception e) {
                     LOGGER.error("Failure while processing periodic timer event", e);
                 }
@@ -146,15 +83,7 @@ public class CubeApplication extends Application {
 
     @Override
     public synchronized Restlet createInboundRoot() {
-        // Put dependencies into the context so that the Resource handlers can access them.
-        getContext().getAttributes().put(AbstractCubeResource.SUBMISSION_STORE_KEY, submissionStore);
-        getContext().getAttributes().put(AbstractCubeResource.HUNT_STATUS_STORE_KEY, huntStatusStore);
-        getContext().getAttributes().put(AbstractCubeResource.USER_STORE_KEY, userStore);
-        getContext().getAttributes().put(AbstractCubeResource.PUZZLE_STORE_KEY, puzzleStore);
-        getContext().getAttributes().put(AbstractCubeResource.HINT_REQUEST_STORE_KEY, hintRequestStore);
-        getContext().getAttributes().put(AbstractCubeResource.EVENT_PROCESSOR_KEY, eventProcessor);
-
-        return new CubeRestlet(getContext());
+        return new CubeRestlet(getContext(), dagger.getCubeResourceComponentBuilder().build());
     }
 
     public static void main (String[] args) throws Exception {

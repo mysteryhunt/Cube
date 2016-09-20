@@ -5,13 +5,13 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 
-import edu.mit.puzzle.cube.core.db.ConnectionFactory;
-import edu.mit.puzzle.cube.core.environments.DevelopmentEnvironment;
 import edu.mit.puzzle.cube.core.environments.ServiceEnvironment;
-import edu.mit.puzzle.cube.core.events.CompositeEventProcessor;
-import edu.mit.puzzle.cube.core.model.*;
+import edu.mit.puzzle.cube.core.model.Puzzle;
+import edu.mit.puzzle.cube.core.model.Team;
+import edu.mit.puzzle.cube.core.model.User;
+import edu.mit.puzzle.cube.core.model.Visibility;
+import edu.mit.puzzle.cube.core.model.VisibilityStatusSet;
 import edu.mit.puzzle.cube.core.permissions.CubeRole;
-import edu.mit.puzzle.cube.core.serverresources.AbstractCubeResource;
 import edu.mit.puzzle.cube.modules.model.StandardVisibilityStatusSet;
 
 import org.apache.shiro.SecurityUtils;
@@ -66,53 +66,17 @@ public abstract class RestletTest {
     @Before
     public void setUp() throws SQLException {
         context = new Context();
-        restlet = new CubeRestlet(context);
 
         HuntDefinition huntDefinition = createHuntDefinition();
-        serviceEnvironment = new DevelopmentEnvironment(huntDefinition);
-        ConnectionFactory connectionFactory = serviceEnvironment.getConnectionFactory();
+        CubeRestletTestComponent dagger = DaggerCubeRestletTestComponent.builder()
+                .cubeRestletTestModule(new CubeRestletTestModule(huntDefinition))
+                .build();
+        serviceEnvironment = dagger.getServiceEnvironment();
 
-        CompositeEventProcessor eventProcessor = huntDefinition.generateCompositeEventProcessor();
-        HuntStatusStore huntStatusStore = new HuntStatusStore(
-                connectionFactory,
-                huntDefinition.getVisibilityStatusSet(),
-                eventProcessor
-        );
-        SubmissionStore submissionStore = new SubmissionStore(
-                connectionFactory,
-                eventProcessor
-        );
-        UserStore userStore = new UserStore(
-                connectionFactory
-        );
-        PuzzleStore puzzleStore = new PuzzleStore(
-                connectionFactory,
-                eventProcessor,
-                huntDefinition.getPuzzles()
-        );
-        HintRequestStore hintRequestStore = new HintRequestStore(
-                connectionFactory,
-                huntDefinition,
-                huntStatusStore,
-                eventProcessor
-        );
+        restlet = new CubeRestlet(context, dagger.getCubeResourceComponentBuilder().build());
 
-        CubeStores cubeStores = CubeStores.create(
-                hintRequestStore,
-                huntStatusStore,
-                puzzleStore,
-                submissionStore,
-                userStore
-        );
-
-        huntDefinition.addToEventProcessor(eventProcessor, cubeStores);
-
-        context.getAttributes().put(AbstractCubeResource.PUZZLE_STORE_KEY, puzzleStore);
-        context.getAttributes().put(AbstractCubeResource.EVENT_PROCESSOR_KEY, eventProcessor);
-        context.getAttributes().put(AbstractCubeResource.HINT_REQUEST_STORE_KEY, hintRequestStore);
-        context.getAttributes().put(AbstractCubeResource.HUNT_STATUS_STORE_KEY, huntStatusStore);
-        context.getAttributes().put(AbstractCubeResource.SUBMISSION_STORE_KEY, submissionStore);
-        context.getAttributes().put(AbstractCubeResource.USER_STORE_KEY, userStore);
+        dagger.injectHuntDefinition(huntDefinition);
+        huntDefinition.addToEventProcessor();
 
         Realm realm = createAuthenticationRealm();
         SecurityManager securityManager = new DefaultSecurityManager(realm);
@@ -151,10 +115,7 @@ public abstract class RestletTest {
             }
 
             @Override
-            public void addToEventProcessor(
-                    CompositeEventProcessor eventProcessor,
-                    CubeStores cubeStores
-            ) {
+            public void addToEventProcessor() {
             }
         };
     }

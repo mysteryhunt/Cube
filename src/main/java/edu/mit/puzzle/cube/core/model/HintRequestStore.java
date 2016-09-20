@@ -16,29 +16,30 @@ import java.util.List;
 import java.util.Optional;
 
 import javax.annotation.Nullable;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 
+@Singleton
 public class HintRequestStore {
     private final ConnectionFactory connectionFactory;
     private final HuntDefinition huntDefinition;
-    private final HuntStatusStore huntStatusStore;
     private final EventProcessor<Event> eventProcessor;
     private final Clock clock;
 
+    @Inject
     public HintRequestStore(
             ConnectionFactory connectionFactory,
             HuntDefinition huntDefinition,
-            HuntStatusStore huntStatusStore,
             EventProcessor<Event> eventProcessor
     ) {
         this.connectionFactory = connectionFactory;
         this.clock = Clock.systemUTC();
         this.huntDefinition = huntDefinition;
-        this.huntStatusStore = huntStatusStore;
         this.eventProcessor = eventProcessor;
     }
 
     public boolean createHintRequest(HintRequest hintRequest) {
-        if (!huntDefinition.handleHintRequest(hintRequest, huntStatusStore)) {
+        if (!huntDefinition.handleHintRequest(hintRequest)) {
             return false;
         }
         return DatabaseHelper.insert(

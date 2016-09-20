@@ -6,9 +6,7 @@ import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
-import edu.mit.puzzle.cube.core.CubeStores;
 import edu.mit.puzzle.cube.core.HuntDefinition;
-import edu.mit.puzzle.cube.core.events.CompositeEventProcessor;
 import edu.mit.puzzle.cube.core.events.Event;
 import edu.mit.puzzle.cube.core.events.EventProcessor;
 import edu.mit.puzzle.cube.core.events.FullReleaseEvent;
@@ -33,8 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class ScoreExampleHuntDefinition implements HuntDefinition {
-
+public class ScoreExampleHuntDefinition extends HuntDefinition {
     private static final VisibilityStatusSet VISIBILITY_STATUS_SET = new StandardVisibilityStatusSet();
     private static final Map<String,PuzzleInfo> PUZZLE_INFO_MAP;
     private static final List<Puzzle> PUZZLES;
@@ -89,12 +86,7 @@ public class ScoreExampleHuntDefinition implements HuntDefinition {
     }
 
     @Override
-    public void addToEventProcessor(
-            CompositeEventProcessor eventProcessor,
-            CubeStores cubeStores
-    ) {
-        HuntStatusStore huntStatusStore = cubeStores.getHuntStatusStore();
-
+    public void addToEventProcessor() {
         eventProcessor.addEventProcessor(SubmissionCompleteEvent.class, event -> {
             Submission submission = event.getSubmission();
             if (submission.getStatus().equals(SubmissionStatus.CORRECT)) {
