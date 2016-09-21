@@ -72,7 +72,7 @@ public class HintHuntRunTest extends RestletTest {
                 .get("HintAllowedProperty")
                 .get("hintAllowed").asBoolean()
         ).isTrue();
-        assertThat(json.has("answers")).isFalse();
+        assertThat(json.get("answers").size()).isEqualTo(0);
 
         json = get("/puzzles/puzzle2");
         assertThat(json

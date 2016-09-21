@@ -88,12 +88,12 @@ public class LinearHuntRunTest extends RestletTest {
                 json.get("puzzles"), n -> n.get("puzzleId").asText().equals("puzzle1"));
         assertEquals("puzzle1", puzzle1Node.get("puzzleId").asText());
         assertEquals("puzzle1", puzzle1Node.get("puzzleProperties").get("DisplayNameProperty").get("displayName").asText());
-        assertFalse(puzzle1Node.has("answers"));
+        assertEquals(0, puzzle1Node.get("answers").size());
         JsonNode puzzle2Node = JsonUtils.getOnlyElementForPredicate(
                 json.get("puzzles"), n -> n.get("puzzleId").asText().equals("puzzle2"));
         assertEquals("puzzle2", puzzle2Node.get("puzzleId").asText());
         assertEquals(0, puzzle2Node.get("puzzleProperties").size());
-        assertFalse(puzzle2Node.has("answers"));
+        assertEquals(0, puzzle2Node.get("answers").size());
 
         currentUserCredentials = TESTERTEAM_CREDENTIALS;
 
@@ -144,18 +144,18 @@ public class LinearHuntRunTest extends RestletTest {
                 json.get("puzzles"), n -> n.get("puzzleId").asText().equals("puzzle1"));
         assertEquals("puzzle1", puzzle1Node.get("puzzleId").asText());
         assertEquals("puzzle1", puzzle1Node.get("puzzleProperties").get("DisplayNameProperty").get("displayName").asText());
-        //FIXME: Should this puzzle have answers now?
-        assertFalse(puzzle1Node.has("answers"));
+        assertEquals(1, puzzle1Node.get("answers").size());
+        assertEquals("ANSWER1", puzzle1Node.get("answers").get(0).get("canonicalAnswer").asText());
         puzzle2Node = JsonUtils.getOnlyElementForPredicate(
                 json.get("puzzles"), n -> n.get("puzzleId").asText().equals("puzzle2"));
         assertEquals("puzzle2", puzzle2Node.get("puzzleId").asText());
         assertEquals("puzzle2", puzzle2Node.get("puzzleProperties").get("DisplayNameProperty").get("displayName").asText());
-        assertFalse(puzzle1Node.has("answers"));
+        assertEquals(0, puzzle2Node.get("answers").size());
         JsonNode puzzle3Node = JsonUtils.getOnlyElementForPredicate(
                 json.get("puzzles"), n -> n.get("puzzleId").asText().equals("puzzle3"));
         assertEquals("puzzle3", puzzle3Node.get("puzzleId").asText());
         assertEquals(0, puzzle3Node.get("puzzleProperties").size());
-        assertFalse(puzzle3Node.has("answers"));
+        assertEquals(0, puzzle3Node.get("answers").size());
 
         currentUserCredentials = ADMIN_CREDENTIALS;
         post("/puzzles/puzzle2", "{\"puzzleId\": \"puzzle2\", \"puzzleProperties\": {\"DisplayNameProperty\": {\"displayName\": \"Updated puzzle 2\", \"visibilityRequirement\":[\"UNLOCKED\",\"SOLVED\"]}}}");
@@ -167,18 +167,18 @@ public class LinearHuntRunTest extends RestletTest {
                 json.get("puzzles"), n -> n.get("puzzleId").asText().equals("puzzle1"));
         assertEquals("puzzle1", puzzle1Node.get("puzzleId").asText());
         assertEquals("puzzle1", puzzle1Node.get("puzzleProperties").get("DisplayNameProperty").get("displayName").asText());
-        //FIXME: Should this puzzle have answers now?
-        assertFalse(puzzle1Node.has("answers"));
+        assertEquals(1, puzzle1Node.get("answers").size());
+        assertEquals("ANSWER1", puzzle1Node.get("answers").get(0).get("canonicalAnswer").asText());
         puzzle2Node = JsonUtils.getOnlyElementForPredicate(
                 json.get("puzzles"), n -> n.get("puzzleId").asText().equals("puzzle2"));
         assertEquals("puzzle2", puzzle2Node.get("puzzleId").asText());
         assertEquals("Updated puzzle 2", puzzle2Node.get("puzzleProperties").get("DisplayNameProperty").get("displayName").asText());
-        assertFalse(puzzle1Node.has("answers"));
+        assertEquals(0, puzzle2Node.get("answers").size());
         puzzle3Node = JsonUtils.getOnlyElementForPredicate(
                 json.get("puzzles"), n -> n.get("puzzleId").asText().equals("puzzle3"));
         assertEquals("puzzle3", puzzle3Node.get("puzzleId").asText());
         assertEquals(0, puzzle3Node.get("puzzleProperties").size());
-        assertFalse(puzzle3Node.has("answers"));
+        assertEquals(0, puzzle3Node.get("answers").size());
 
         currentUserCredentials = ADMIN_CREDENTIALS;
         postFullRelease("puzzle5");

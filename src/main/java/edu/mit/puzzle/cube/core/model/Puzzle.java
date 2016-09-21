@@ -14,9 +14,12 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.datatype.guava.GuavaModule;
 import com.google.auto.value.AutoValue;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import edu.mit.puzzle.cube.core.permissions.AnswersPermission;
 
 import org.apache.shiro.SecurityUtils;
@@ -204,7 +207,8 @@ public abstract class Puzzle {
     public Puzzle strip(Visibility visibility) {
         Puzzle.Builder builder = toBuilder();
         if (!SecurityUtils.getSubject().isPermitted(new AnswersPermission())) {
-            builder.setAnswers(null);
+            builder.setAnswers(ImmutableList.copyOf(
+                    Iterables.filter(getAnswers(), a -> visibility.getSolvedAnswers().contains(a.getCanonicalAnswer()))));
         }
         if (getPuzzleProperties() != null) {
             builder.setPuzzleProperties(getPuzzleProperties().entrySet().stream()
