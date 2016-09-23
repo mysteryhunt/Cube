@@ -96,6 +96,29 @@ public abstract class Puzzle {
         public abstract Set<String> getVisibilityRequirement();
     }
 
+    @AutoValue
+    public static abstract class AliasesProperty extends Puzzle.Property {
+
+        static {
+            registerClass(AliasesProperty.class);
+        }
+
+        @JsonCreator
+        public static AliasesProperty create(
+                @JsonProperty("aliases") Set<String> aliases,
+                @JsonProperty("visibilityRequirement") Set<String> visibilityRequirement
+        ) {
+            return new AutoValue_Puzzle_AliasesProperty(
+                    aliases, ImmutableSet.copyOf(visibilityRequirement));
+        }
+
+        @JsonProperty("aliases") public abstract Set<String> getAliases();
+
+        @JsonIgnore(false)
+        @JsonProperty("visibilityRequirement")
+        public abstract Set<String> getVisibilityRequirement();
+    }
+
     public static class PuzzlePropertiesDeserializer extends StdDeserializer<Map<String, Property>> {
         private static final long serialVersionUID = 1L;
 
