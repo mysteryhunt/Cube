@@ -18,8 +18,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import edu.mit.puzzle.cube.core.permissions.AnswersPermission;
 
 import org.apache.shiro.SecurityUtils;
@@ -40,12 +38,14 @@ import javax.annotation.Nullable;
  * or a live event, etc.
  *
  * Usually a puzzle is solved by entering a single answer, so the answers property will usually
- * have a length of 1. It is possible that some puzzles may be partially solvable and require
- * multiple distinct answers to be entered, in which case the answers property will have a length
- * greater than 1. It is also possible that solving a puzzle is determined by an external
- * interaction, not by entering an answer, in which case the answers property may be empty.
+ * contain only one answer. It is possible that some puzzles may be partially solvable and require
+ * multiple distinct answers to be entered, in which case the answers property will contain
+ * multiple answers. It is also possible that solving a puzzle is determined by an external
+ * interaction, not by entering an answer, in which case the answers property may not exist or be
+ * empty.
  *
- * The answers property will be omitted when returning puzzle metadata to solving teams.
+ * The answers property will be filtered to only contain answers a team has solved when returning
+ * puzzle metadata to solving teams.
  */
 @AutoValue
 @JsonDeserialize(builder = AutoValue_Puzzle.Builder.class)
@@ -96,6 +96,22 @@ public abstract class Puzzle {
         public abstract Set<String> getVisibilityRequirement();
     }
 
+    @AutoValue
+    public static abstract class AnswersProperty extends Puzzle.Property {
+        static {
+            registerClass(AnswersProperty.class);
+        }
+
+        @JsonCreator
+        public static AnswersProperty create(
+                @JsonProperty("answers") List<Answer> answers
+        ) {
+            return new AutoValue_Puzzle_AnswersProperty(ImmutableList.copyOf(answers));
+        }
+
+        @JsonProperty("answers") public abstract ImmutableList<Answer> getAnswers();
+    }
+
     public static class PuzzlePropertiesDeserializer extends StdDeserializer<Map<String, Property>> {
         private static final long serialVersionUID = 1L;
 
@@ -136,12 +152,16 @@ public abstract class Puzzle {
         @JsonProperty("puzzleId")
         public abstract Builder setPuzzleId(String puzzleId);
 
-        @JsonProperty("answers")
-        public abstract Builder setAnswers(@Nullable List<Answer> answers);
-
         @JsonDeserialize(using=PuzzlePropertiesDeserializer.class)
         @JsonProperty("puzzleProperties")
         public abstract Builder setPuzzleProperties(@Nullable Map<String, Property> puzzleProperties);
+
+        public abstract ImmutableMap.Builder<String, Property> puzzlePropertiesBuilder();
+
+        public <T extends Property> Builder addPuzzleProperty(Class<T> propertyClass, T value) {
+            puzzlePropertiesBuilder().put(propertyClass.getSimpleName(), value);
+            return this;
+        }
 
         abstract Puzzle autoBuild();
 
@@ -168,16 +188,23 @@ public abstract class Puzzle {
         return new AutoValue_Puzzle.Builder();
     }
 
+    public static Builder builder(String puzzleId, String answer) {
+        return new AutoValue_Puzzle.Builder()
+                .setPuzzleId(puzzleId)
+                .addPuzzleProperty(
+                        AnswersProperty.class,
+                        AnswersProperty.create(Answer.createSingle(answer))
+                );
+    }
+
     public abstract Builder toBuilder();
 
     public static Puzzle create(String puzzleId, String answer) {
-        return builder()
-                .setPuzzleId(puzzleId)
-                .setAnswers(Answer.createSingle(answer))
-                .build();
+        return builder(puzzleId, answer).build();
     }
 
     @SuppressWarnings("unchecked")
+    @Nullable
     public <T extends Property> T getPuzzleProperty(Class<T> propertyClass) {
         if (getPuzzleProperties() == null) {
             return null;
@@ -193,31 +220,55 @@ public abstract class Puzzle {
     public abstract String getPuzzleId();
 
     @Nullable
-    @JsonProperty("answers")
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    public abstract List<Answer> getAnswers();
-
-    @Nullable
     @JsonProperty("puzzleProperties")
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    public abstract Map<String, Property> getPuzzleProperties();
+    public abstract ImmutableMap<String, Property> getPuzzleProperties();
+
+    @Nullable
+    @JsonIgnore
+    public String getDisplayName() {
+        DisplayNameProperty displayNameProperty = getPuzzleProperty(DisplayNameProperty.class);
+        if (displayNameProperty == null) {
+            return null;
+        }
+        return displayNameProperty.getDisplayName();
+    }
+
+    @Nullable
+    @JsonIgnore
+    public List<Answer> getAnswers() {
+        AnswersProperty answersProperty = getPuzzleProperty(AnswersProperty.class);
+        if (answersProperty == null) {
+            return null;
+        }
+        return answersProperty.getAnswers();
+    }
 
     // Return a copy of this puzzle with properties that should not be visible to the current
     // solving team removed.
     public Puzzle strip(Visibility visibility) {
-        Puzzle.Builder builder = toBuilder();
-        if (!SecurityUtils.getSubject().isPermitted(new AnswersPermission())) {
-            builder.setAnswers(ImmutableList.copyOf(
-                    Iterables.filter(getAnswers(), a -> visibility.getSolvedAnswers().contains(a.getCanonicalAnswer()))));
-        }
+        ImmutableMap.Builder<String, Property> puzzlePropertiesBuilder = ImmutableMap.builder();
         if (getPuzzleProperties() != null) {
-            builder.setPuzzleProperties(getPuzzleProperties().entrySet().stream()
-                    .filter(entry -> {
-                        Puzzle.Property property = entry.getValue();
-                        return property.getVisibilityRequirement().contains(visibility.getStatus());
-                    })
-                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+            for (Map.Entry<String, Property> entry : getPuzzleProperties().entrySet()) {
+                if (entry.getValue() instanceof AnswersProperty) {
+                    if (SecurityUtils.getSubject().isPermitted(new AnswersPermission())) {
+                        puzzlePropertiesBuilder.put(entry.getKey(), entry.getValue());
+                    } else {
+                        AnswersProperty answersProperty = (AnswersProperty) entry.getValue();
+                        puzzlePropertiesBuilder.put(
+                                entry.getKey(),
+                                AnswersProperty.create(answersProperty.getAnswers().stream()
+                                        .filter(a -> visibility.getSolvedAnswers().contains(a.getCanonicalAnswer()))
+                                        .collect(Collectors.toList()))
+                        );
+                    }
+                } else {
+                    if (entry.getValue().getVisibilityRequirement().contains(visibility.getStatus())) {
+                        puzzlePropertiesBuilder.put(entry.getKey(), entry.getValue());
+                    }
+                }
+            }
         }
-        return builder.build();
+        return toBuilder().setPuzzleProperties(puzzlePropertiesBuilder.build()).build();
     }
 }

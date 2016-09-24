@@ -2,7 +2,6 @@ package edu.mit.puzzle.cube.huntimpl.linearexample;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableTable;
 
@@ -13,6 +12,8 @@ import edu.mit.puzzle.cube.core.events.SubmissionCompleteEvent;
 import edu.mit.puzzle.cube.core.events.VisibilityChangeEvent;
 import edu.mit.puzzle.cube.core.model.Answer;
 import edu.mit.puzzle.cube.core.model.Puzzle;
+import edu.mit.puzzle.cube.core.model.Puzzle.AnswersProperty;
+import edu.mit.puzzle.cube.core.model.Puzzle.DisplayNameProperty;
 import edu.mit.puzzle.cube.core.model.Submission;
 import edu.mit.puzzle.cube.core.model.SubmissionStatus;
 import edu.mit.puzzle.cube.core.model.VisibilityStatusSet;
@@ -36,9 +37,17 @@ public class LinearExampleHuntDefinition extends HuntDefinition {
         for (int i = 1; i <= 7 ; ++i) {
             puzzlesBuilder.add(Puzzle.builder()
                     .setPuzzleId("puzzle" + i)
-                    .setPuzzleProperties(ImmutableMap.of("DisplayNameProperty",
-                            Puzzle.DisplayNameProperty.create("puzzle" + i, ImmutableSet.of("UNLOCKED","SOLVED"))))
-                    .setAnswers(Answer.createSingle("ANSWER" + i))
+                    .addPuzzleProperty(
+                            DisplayNameProperty.class,
+                            DisplayNameProperty.create(
+                                    "puzzle" + i,
+                                    ImmutableSet.of("UNLOCKED","SOLVED")
+                            )
+                    )
+                    .addPuzzleProperty(
+                            AnswersProperty.class,
+                            AnswersProperty.create(Answer.createSingle("ANSWER" + i))
+                    )
                     .build()
             );
         }

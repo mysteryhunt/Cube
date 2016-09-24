@@ -23,6 +23,7 @@ import edu.mit.puzzle.cube.core.model.SubmissionStatus;
 import edu.mit.puzzle.cube.core.model.Team;
 import edu.mit.puzzle.cube.core.model.Visibility;
 import edu.mit.puzzle.cube.core.model.VisibilityStatusSet;
+import edu.mit.puzzle.cube.core.model.Puzzle.AnswersProperty;
 import edu.mit.puzzle.cube.modules.model.StandardVisibilityStatusSet;
 
 import java.time.Duration;
@@ -44,7 +45,10 @@ public class ScoreExampleHuntDefinition extends HuntDefinition {
             puzzleInfoBuilder.put("puzzle" + i, new PuzzleInfo(reward, prereq));
             puzzlesBuilder.add(Puzzle.builder()
                     .setPuzzleId("puzzle" + i)
-                    .setAnswers(Answer.createSingle("ANSWER" + i))
+                    .addPuzzleProperty(
+                            AnswersProperty.class,
+                            AnswersProperty.create(Answer.createSingle("ANSWER" + i))
+                    )
                     .build()
             );
         }
