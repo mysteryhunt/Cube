@@ -17,7 +17,6 @@ import java.io.IOException;
 
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class LinearHuntRunTest extends RestletTest {
@@ -88,12 +87,20 @@ public class LinearHuntRunTest extends RestletTest {
                 json.get("puzzles"), n -> n.get("puzzleId").asText().equals("puzzle1"));
         assertEquals("puzzle1", puzzle1Node.get("puzzleId").asText());
         assertEquals("puzzle1", puzzle1Node.get("puzzleProperties").get("DisplayNameProperty").get("displayName").asText());
-        assertEquals(0, puzzle1Node.get("answers").size());
+        assertEquals(0, puzzle1Node
+                .get("puzzleProperties")
+                .get("AnswersProperty")
+                .get("answers")
+                .size());
         JsonNode puzzle2Node = JsonUtils.getOnlyElementForPredicate(
                 json.get("puzzles"), n -> n.get("puzzleId").asText().equals("puzzle2"));
         assertEquals("puzzle2", puzzle2Node.get("puzzleId").asText());
-        assertEquals(0, puzzle2Node.get("puzzleProperties").size());
-        assertEquals(0, puzzle2Node.get("answers").size());
+        assertEquals(1, puzzle2Node.get("puzzleProperties").size());
+        assertEquals(0, puzzle2Node
+                .get("puzzleProperties")
+                .get("AnswersProperty")
+                .get("answers")
+                .size());
 
         currentUserCredentials = TESTERTEAM_CREDENTIALS;
 
@@ -144,18 +151,34 @@ public class LinearHuntRunTest extends RestletTest {
                 json.get("puzzles"), n -> n.get("puzzleId").asText().equals("puzzle1"));
         assertEquals("puzzle1", puzzle1Node.get("puzzleId").asText());
         assertEquals("puzzle1", puzzle1Node.get("puzzleProperties").get("DisplayNameProperty").get("displayName").asText());
-        assertEquals(1, puzzle1Node.get("answers").size());
-        assertEquals("ANSWER1", puzzle1Node.get("answers").get(0).get("canonicalAnswer").asText());
+        assertEquals(1, puzzle1Node
+                .get("puzzleProperties")
+                .get("AnswersProperty")
+                .get("answers")
+                .size());
+        assertEquals("ANSWER1", puzzle1Node
+                .get("puzzleProperties")
+                .get("AnswersProperty")
+                .get("answers")
+                .get(0).get("canonicalAnswer").asText());
         puzzle2Node = JsonUtils.getOnlyElementForPredicate(
                 json.get("puzzles"), n -> n.get("puzzleId").asText().equals("puzzle2"));
         assertEquals("puzzle2", puzzle2Node.get("puzzleId").asText());
         assertEquals("puzzle2", puzzle2Node.get("puzzleProperties").get("DisplayNameProperty").get("displayName").asText());
-        assertEquals(0, puzzle2Node.get("answers").size());
+        assertEquals(0, puzzle2Node
+                .get("puzzleProperties")
+                .get("AnswersProperty")
+                .get("answers")
+                .size());
         JsonNode puzzle3Node = JsonUtils.getOnlyElementForPredicate(
                 json.get("puzzles"), n -> n.get("puzzleId").asText().equals("puzzle3"));
         assertEquals("puzzle3", puzzle3Node.get("puzzleId").asText());
-        assertEquals(0, puzzle3Node.get("puzzleProperties").size());
-        assertEquals(0, puzzle3Node.get("answers").size());
+        assertEquals(1, puzzle3Node.get("puzzleProperties").size());
+        assertEquals(0, puzzle3Node
+                .get("puzzleProperties")
+                .get("AnswersProperty")
+                .get("answers")
+                .size());
 
         currentUserCredentials = ADMIN_CREDENTIALS;
         post("/puzzles/puzzle2", "{\"puzzleId\": \"puzzle2\", \"puzzleProperties\": {\"DisplayNameProperty\": {\"displayName\": \"Updated puzzle 2\", \"visibilityRequirement\":[\"UNLOCKED\",\"SOLVED\"]}}}");
@@ -167,18 +190,34 @@ public class LinearHuntRunTest extends RestletTest {
                 json.get("puzzles"), n -> n.get("puzzleId").asText().equals("puzzle1"));
         assertEquals("puzzle1", puzzle1Node.get("puzzleId").asText());
         assertEquals("puzzle1", puzzle1Node.get("puzzleProperties").get("DisplayNameProperty").get("displayName").asText());
-        assertEquals(1, puzzle1Node.get("answers").size());
-        assertEquals("ANSWER1", puzzle1Node.get("answers").get(0).get("canonicalAnswer").asText());
+        assertEquals(1, puzzle1Node
+                .get("puzzleProperties")
+                .get("AnswersProperty")
+                .get("answers")
+                .size());
+        assertEquals("ANSWER1", puzzle1Node
+                .get("puzzleProperties")
+                .get("AnswersProperty")
+                .get("answers")
+                .get(0).get("canonicalAnswer").asText());
         puzzle2Node = JsonUtils.getOnlyElementForPredicate(
                 json.get("puzzles"), n -> n.get("puzzleId").asText().equals("puzzle2"));
         assertEquals("puzzle2", puzzle2Node.get("puzzleId").asText());
         assertEquals("Updated puzzle 2", puzzle2Node.get("puzzleProperties").get("DisplayNameProperty").get("displayName").asText());
-        assertEquals(0, puzzle2Node.get("answers").size());
+        assertEquals(0, puzzle2Node
+                .get("puzzleProperties")
+                .get("AnswersProperty")
+                .get("answers")
+                .size());
         puzzle3Node = JsonUtils.getOnlyElementForPredicate(
                 json.get("puzzles"), n -> n.get("puzzleId").asText().equals("puzzle3"));
         assertEquals("puzzle3", puzzle3Node.get("puzzleId").asText());
-        assertEquals(0, puzzle3Node.get("puzzleProperties").size());
-        assertEquals(0, puzzle3Node.get("answers").size());
+        assertEquals(1, puzzle3Node.get("puzzleProperties").size());
+        assertEquals(0, puzzle3Node
+                .get("puzzleProperties")
+                .get("AnswersProperty")
+                .get("answers")
+                .size());
 
         currentUserCredentials = ADMIN_CREDENTIALS;
         postFullRelease("puzzle5");

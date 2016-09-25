@@ -92,10 +92,19 @@ public class HintExampleHuntDefinition extends HuntDefinition {
     @Override
     public List<Puzzle> getPuzzles() {
         return ImmutableList.of(
-                Puzzle.create("puzzle1", "ANSWER1"),
-                Puzzle.create("puzzle2", "ANSWER2"),
-                Puzzle.create("puzzle3", "ANSWER3"),
-                Puzzle.create("meta", "ANSWERMETA")
+                Puzzle.builder("puzzle1", "ANSWER1")
+                        .addPuzzleProperty(HintAllowedProperty.class, HintAllowedProperty.create(true))
+                        .build(),
+                Puzzle.builder("puzzle2", "ANSWER2")
+                        .addPuzzleProperty(HintAllowedProperty.class, HintAllowedProperty.create(true))
+                        .addPuzzleProperty(TokenRewardProperty.class, TokenRewardProperty.create(1))
+                        .build(),
+                Puzzle.builder("puzzle3", "ANSWER3")
+                        .addPuzzleProperty(HintAllowedProperty.class, HintAllowedProperty.create(true))
+                        .build(),
+                Puzzle.builder("meta", "ANSWERMETA")
+                        .addPuzzleProperty(HintAllowedProperty.class, HintAllowedProperty.create(false))
+                        .build()
         );
     }
 
@@ -105,15 +114,6 @@ public class HintExampleHuntDefinition extends HuntDefinition {
             boolean changed = huntStatusStore.recordHuntRunStart();
 
             if (changed) {
-                // Allow hints on all puzzles except for the meta.
-                for (String puzzleId : new String[]{"puzzle1", "puzzle2", "puzzle3"}) {
-                    puzzleStore.setPuzzleProperty(puzzleId, HintAllowedProperty.class, HintAllowedProperty.create(true));
-                }
-                puzzleStore.setPuzzleProperty("meta", HintAllowedProperty.class, HintAllowedProperty.create(false));
-
-                // Only puzzle 2 rewards a hint token.
-                puzzleStore.setPuzzleProperty("puzzle2", TokenRewardProperty.class, TokenRewardProperty.create(1));
-
                 for (String teamId : huntStatusStore.getTeamIds()) {
                     huntStatusStore.setVisibility(teamId, "puzzle1", "UNLOCKED");
                     huntStatusStore.setVisibility(teamId, "puzzle2", "VISIBLE");
