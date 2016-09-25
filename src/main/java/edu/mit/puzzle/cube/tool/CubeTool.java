@@ -12,7 +12,7 @@ import edu.mit.puzzle.cube.core.HuntDefinition;
 import edu.mit.puzzle.cube.core.db.CubeDatabaseSchema;
 import edu.mit.puzzle.cube.core.environments.ProductionEnvironment;
 import edu.mit.puzzle.cube.core.environments.ServiceEnvironment;
-import edu.mit.puzzle.cube.core.model.Puzzle;
+import edu.mit.puzzle.cube.core.model.PuzzleStore;
 import edu.mit.puzzle.cube.core.model.User;
 import edu.mit.puzzle.cube.core.model.UserStore;
 
@@ -62,19 +62,12 @@ public class CubeTool {
                     cubeConfig.getDatabaseConfig().getDriverClassName(),
                     huntDefinition.getVisibilityStatusSet()
             );
+            PuzzleStore puzzleStore = new PuzzleStore(environment.getConnectionFactory(), null);
             try (
                     Connection connection = environment.getConnectionFactory().getConnection()
             ) {
                 cubeDatabaseSchema.execute(connection);
-                try (
-                        PreparedStatement insertPuzzleStatement = connection.prepareStatement(
-                                "INSERT INTO puzzles (puzzleId) VALUES (?)")
-                ) {
-                    for (Puzzle puzzle : huntDefinition.getPuzzles()) {
-                        insertPuzzleStatement.setString(1, puzzle.getPuzzleId());
-                        insertPuzzleStatement.executeUpdate();
-                    }
-                }
+                puzzleStore.initializePuzzles(huntDefinition.getPuzzles());
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
@@ -83,11 +76,15 @@ public class CubeTool {
 
     @Parameters(
             commandNames = {"resethunt"},
-            commandDescription = "Delete all run progress data from the database"
+            commandDescription = "Delete all run progress data from the database and reinit puzzles"
     )
     private class CommandResetHunt implements Command {
         @Override
         public void run() {
+            HuntDefinition huntDefinition = HuntDefinition.forClassName(
+                    cubeConfig.getHuntDefinitionClassName()
+            );
+            PuzzleStore puzzleStore = new PuzzleStore(environment.getConnectionFactory(), null);
             try (
                     Connection connection = environment.getConnectionFactory().getConnection();
                     PreparedStatement updateRun = connection.prepareStatement(
@@ -100,12 +97,19 @@ public class CubeTool {
                             "DELETE FROM visibilities");
                     PreparedStatement deleteVisibilityHistory = connection.prepareStatement(
                             "DELETE FROM visibility_history");
+                    PreparedStatement deletePuzzleProperties = connection.prepareStatement(
+                            "DELETE FROM puzzle_properties");
+                    PreparedStatement deletePuzzles = connection.prepareStatement(
+                            "DELETE FROM puzzles");
             ) {
                 updateRun.executeUpdate();
                 deleteTeamProperties.executeUpdate();
                 deleteSubmissions.executeUpdate();
                 deleteVisibilities.executeUpdate();
                 deleteVisibilityHistory.executeUpdate();
+                deletePuzzleProperties.executeUpdate();
+                deletePuzzles.executeUpdate();
+                puzzleStore.initializePuzzles(huntDefinition.getPuzzles());
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }

@@ -56,14 +56,14 @@ public class PuzzleTest extends RestletTest {
                 return ImmutableList.of(
                         Puzzle.builder()
                         .setPuzzleId(PUZZLE_ONE)
-                        .setAnswers(Answer.createSingle(ANSWER_ONE))
-                        .setPuzzleProperties(ImmutableMap.of(
-                                "AliasesProperty",
+                        .addPuzzleProperty(Puzzle.AnswersProperty.class,
+                                Puzzle.AnswersProperty.create(Answer.createSingle(ANSWER_ONE)))
+                        .addPuzzleProperty(Puzzle.AliasesProperty.class,
                                 Puzzle.AliasesProperty.create(
                                         ImmutableSet.of(ALIAS_ONE),
-                                        getVisibilityStatusSet().getAllowedStatuses()
-                                )
-                        )).build(),
+                                        ImmutableSet.of("UNLOCKED","SOLVED")
+                                ))
+                        .build(),
                         Puzzle.create(PUZZLE_TWO, ANSWER_TWO)
                 );
             }
@@ -90,26 +90,74 @@ public class PuzzleTest extends RestletTest {
 
         JsonNode puzzleJson = get("/puzzles/" + PUZZLE_ONE);
         assertThat(puzzleJson.get("puzzleId").asText()).isEqualTo(PUZZLE_ONE);
-        assertThat(puzzleJson.get("answers").size()).isEqualTo(1);
-        JsonNode answerJson = puzzleJson.get("answers").get(0);
+        assertThat(puzzleJson
+                .get("puzzleProperties")
+                .get("AnswersProperty")
+                .get("answers")
+                .size()
+        ).isEqualTo(1);
+        JsonNode answerJson = puzzleJson
+                .get("puzzleProperties")
+                .get("AnswersProperty")
+                .get("answers")
+                .get(0);
         assertThat(answerJson.get("canonicalAnswer").asText()).isEqualTo(ANSWER_ONE);
         assertThat(answerJson.get("acceptableAnswers").size()).isEqualTo(1);
         assertThat(answerJson.get("acceptableAnswers").get(0).asText()).isEqualTo(ANSWER_ONE);
 
         puzzleJson = get("/puzzles/" + ALIAS_ONE);
         assertThat(puzzleJson.get("puzzleId").asText()).isEqualTo(PUZZLE_ONE);
-        assertThat(puzzleJson.get("answers").size()).isEqualTo(1);
-        answerJson = puzzleJson.get("answers").get(0);
+        assertThat(puzzleJson
+                .get("puzzleProperties")
+                .get("AnswersProperty")
+                .get("answers")
+                .size()
+        ).isEqualTo(1);
+        answerJson = puzzleJson
+                .get("puzzleProperties")
+                .get("AnswersProperty")
+                .get("answers")
+                .get(0);
         assertThat(answerJson.get("canonicalAnswer").asText()).isEqualTo(ANSWER_ONE);
         assertThat(answerJson.get("acceptableAnswers").size()).isEqualTo(1);
         assertThat(answerJson.get("acceptableAnswers").get(0).asText()).isEqualTo(ANSWER_ONE);
 
         puzzleJson = get("/puzzles/" + PUZZLE_TWO);
         assertThat(puzzleJson.get("puzzleId").asText()).isEqualTo(PUZZLE_TWO);
-        assertThat(puzzleJson.get("answers").size()).isEqualTo(1);
-        answerJson = puzzleJson.get("answers").get(0);
+        assertThat(puzzleJson
+                .get("puzzleProperties")
+                .get("AnswersProperty")
+                .get("answers")
+                .size()
+        ).isEqualTo(1);
+        answerJson = puzzleJson
+                .get("puzzleProperties")
+                .get("AnswersProperty")
+                .get("answers")
+                .get(0);
         assertThat(answerJson.get("canonicalAnswer").asText()).isEqualTo(ANSWER_TWO);
         assertThat(answerJson.get("acceptableAnswers").size()).isEqualTo(1);
         assertThat(answerJson.get("acceptableAnswers").get(0).asText()).isEqualTo(ANSWER_TWO);
+    }
+
+    @Test
+    public void testChangePuzzleAnswer() {
+        setCurrentUserCredentials(ADMIN_CREDENTIALS);
+        post("/puzzles/" + PUZZLE_ONE, "{\"puzzleId\": \"puzzle1\", \"puzzleProperties\": {\"AnswersProperty\": {\"answers\": [{\"canonicalAnswer\":\"NEWANSWER\", \"acceptableAnswers\":[\"NEWANSWER\"]}]}}}");
+        JsonNode puzzleJson = get("/puzzles/" + PUZZLE_ONE);
+        assertThat(puzzleJson
+                .get("puzzleProperties")
+                .get("AnswersProperty")
+                .get("answers")
+                .size()
+        ).isEqualTo(1);
+        JsonNode answerJson = puzzleJson
+                .get("puzzleProperties")
+                .get("AnswersProperty")
+                .get("answers")
+                .get(0);
+        assertThat(answerJson.get("canonicalAnswer").asText()).isEqualTo("NEWANSWER");
+        assertThat(answerJson.get("acceptableAnswers").size()).isEqualTo(1);
+        assertThat(answerJson.get("acceptableAnswers").get(0).asText()).isEqualTo("NEWANSWER");
     }
 }

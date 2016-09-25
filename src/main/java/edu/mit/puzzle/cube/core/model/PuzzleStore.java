@@ -6,7 +6,6 @@ import com.fasterxml.jackson.datatype.guava.GuavaModule;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.*;
 
-import edu.mit.puzzle.cube.core.HuntDefinition;
 import edu.mit.puzzle.cube.core.db.ConnectionFactory;
 import edu.mit.puzzle.cube.core.db.DatabaseHelper;
 import edu.mit.puzzle.cube.core.events.Event;
@@ -17,7 +16,11 @@ import org.restlet.data.Status;
 import org.restlet.resource.ResourceException;
 
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.*;
+import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -34,27 +37,45 @@ public class PuzzleStore {
 
     private final ConnectionFactory connectionFactory;
     private final EventProcessor<Event> eventProcessor;
-    private final Map<String, Puzzle> puzzles;
 
     @Inject
     public PuzzleStore(
             ConnectionFactory connectionFactory,
-            EventProcessor<Event> eventProcessor,
-            HuntDefinition huntDefinition
-    ) {
-        this(connectionFactory, eventProcessor, huntDefinition.getPuzzles());
-    }
-
-    public PuzzleStore(
-            ConnectionFactory connectionFactory,
-            EventProcessor<Event> eventProcessor,
-            List<Puzzle> puzzleList
+            EventProcessor<Event> eventProcessor
     ) {
         this.connectionFactory = connectionFactory;
         this.eventProcessor = eventProcessor;
-        puzzles = puzzleList.stream().collect(
-                Collectors.toMap(Puzzle::getPuzzleId, Function.identity())
-        );
+    }
+
+    public void initializePuzzles(List<Puzzle> puzzles) {
+        try (
+                Connection connection = connectionFactory.getConnection();
+                PreparedStatement insertPuzzleStatement = connection.prepareStatement(
+                        "INSERT INTO puzzles (puzzleId) VALUES (?)");
+                PreparedStatement insertPuzzlePropertyStatement = connection.prepareStatement(
+                        "INSERT INTO puzzle_properties (puzzleId, propertyKey, propertyValue) VALUES (?,?,?)")
+        ) {
+            for (Puzzle puzzle : puzzles) {
+                insertPuzzleStatement.setString(1, puzzle.getPuzzleId());
+                insertPuzzleStatement.executeUpdate();
+
+                insertPuzzlePropertyStatement.setString(1, puzzle.getPuzzleId());
+                for (Entry<String, Puzzle.Property> entry : puzzle.getPuzzleProperties().entrySet()) {
+                    insertPuzzlePropertyStatement.setString(2, entry.getKey());
+                    try {
+                        insertPuzzlePropertyStatement.setString(
+                                3,
+                                OBJECT_MAPPER.writeValueAsString(entry.getValue())
+                        );
+                    } catch (JsonProcessingException e) {
+                        throw new RuntimeException(e);
+                    }
+                    insertPuzzlePropertyStatement.executeUpdate();
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private Map<String, Map<String, Puzzle.Property>> deserializePuzzleProperties(
@@ -83,18 +104,26 @@ public class PuzzleStore {
     }
 
     public Puzzle getPuzzle(String puzzleId) {
-        Puzzle puzzle = puzzles.get(puzzleId);
-        if (puzzle == null) {
-            Optional<String> aliasedId = getPuzzleIdForAlias(puzzleId);
-            if (aliasedId.isPresent()) {
-                puzzleId = aliasedId.get();
-                puzzle = puzzles.get(puzzleId);
+        Puzzle puzzle;
+        try {
+            puzzle = Iterables.getOnlyElement(DatabaseHelper.query(
+                    connectionFactory,
+                    "SELECT * FROM puzzles WHERE puzzleId = ?",
+                    Lists.newArrayList(puzzleId),
+                    Puzzle.class
+            ));
+        } catch (NoSuchElementException e) {
+            Optional<String> unaliasedPuzzleId = getPuzzleIdForAlias(puzzleId);
+            if (unaliasedPuzzleId.isPresent()) {
+                return getPuzzle(unaliasedPuzzleId.get());
             }
-            if (puzzle == null) {
-                throw new ResourceException(
-                        Status.CLIENT_ERROR_NOT_FOUND.getCode(),
-                        String.format("Unknown puzzle id %s", puzzleId));
-            }
+            throw new ResourceException(
+                    Status.CLIENT_ERROR_NOT_FOUND.getCode(),
+                    String.format("Failed to access puzzle id %s: %s", puzzleId, e));
+        } catch (Exception e) {
+            throw new ResourceException(
+                    Status.CLIENT_ERROR_NOT_FOUND.getCode(),
+                    String.format("Failed to access puzzle id %s: %s", puzzleId, e));
         }
 
         Table<Integer, String, Object> puzzlePropertiesResults = DatabaseHelper.query(
@@ -115,24 +144,13 @@ public class PuzzleStore {
     }
 
     private Optional<String> getPuzzleIdForAlias(String possiblePuzzleAlias) {
-        //Search in in-memory stored properties
-        Set<String> inMemoryPuzzleIds = puzzles.entrySet().stream()
-                .filter(entry -> entry.getValue().getPuzzleProperty(Puzzle.AliasesProperty.class) != null)
-                .filter(entry -> entry.getValue().getPuzzleProperty(Puzzle.AliasesProperty.class)
-                        .getAliases().contains(possiblePuzzleAlias))
-                .map(Map.Entry::getKey)
-                .collect(Collectors.toSet());
-
-
-        //Search in database-stored properties
-        Set<String> databasePuzzleIds = getAllPuzzleProperties().entrySet().stream()
+        Set<String> puzzleIds = getAllPuzzleProperties().entrySet().stream()
                 .filter(entry -> entry.getValue().containsKey("AliasesProperty"))
                 .filter(entry -> ((Puzzle.AliasesProperty) entry.getValue().get("AliasesProperty"))
                         .getAliases().contains(possiblePuzzleAlias))
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toSet());
 
-        Set<String> puzzleIds = Sets.union(inMemoryPuzzleIds, databasePuzzleIds);
         if (puzzleIds.isEmpty()) {
             return Optional.empty();
         }
@@ -140,18 +158,31 @@ public class PuzzleStore {
     }
 
     public Map<String, Puzzle> getPuzzles() {
-        Map<String, Map<String, Puzzle.Property>> allPuzzleProperties = getAllPuzzleProperties();
-        Map<String, Puzzle> puzzlesCopy = ImmutableMap.copyOf(puzzles);
-        puzzlesCopy = Maps.transformEntries(puzzlesCopy, (puzzleId, puzzle) -> {
-            Map<String, Puzzle.Property> puzzleProperties = allPuzzleProperties.get(puzzleId);
-            if (puzzleProperties != null && !puzzleProperties.isEmpty()) {
-                puzzle = puzzle.toBuilder()
-                        .setPuzzleProperties(puzzleProperties)
-                        .build();
-            }
-            return puzzle;
-        });
-        return puzzlesCopy;
+        List<Puzzle> puzzles = DatabaseHelper.query(
+                connectionFactory,
+                "SELECT * FROM puzzles",
+                Lists.newArrayList(),
+                Puzzle.class
+        );
+        Table<Integer, String, Object> puzzlePropertiesResults = DatabaseHelper.query(
+                connectionFactory,
+                "SELECT puzzleId, propertyKey, propertyValue FROM puzzle_properties",
+                Lists.newArrayList()
+        );
+        Map<String, Map<String, Puzzle.Property>> allPuzzleProperties =
+                deserializePuzzleProperties(puzzlePropertiesResults);
+        return puzzles.stream()
+                .map(puzzle -> {
+                    Map<String, Puzzle.Property> puzzleProperties =
+                            allPuzzleProperties.get(puzzle.getPuzzleId());
+                    if (puzzleProperties != null && !puzzleProperties.isEmpty()) {
+                        return puzzle.toBuilder()
+                                .setPuzzleProperties(puzzleProperties)
+                                .build();
+                    }
+                    return puzzle;
+                })
+                .collect(Collectors.toMap(Puzzle::getPuzzleId, Function.identity()));
     }
 
     private Map<String, Map<String, Puzzle.Property>> getAllPuzzleProperties() {

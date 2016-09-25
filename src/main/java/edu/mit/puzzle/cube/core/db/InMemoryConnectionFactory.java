@@ -3,6 +3,7 @@ package edu.mit.puzzle.cube.core.db;
 import com.google.common.collect.Lists;
 
 import edu.mit.puzzle.cube.core.model.Puzzle;
+import edu.mit.puzzle.cube.core.model.PuzzleStore;
 import edu.mit.puzzle.cube.core.model.User;
 import edu.mit.puzzle.cube.core.model.UserStore;
 import edu.mit.puzzle.cube.core.model.VisibilityStatusSet;
@@ -113,11 +114,8 @@ public class InMemoryConnectionFactory implements ConnectionFactory {
                 .collect(Collectors.toList());
         DatabaseHelper.insertBatch(this, insertTeamSql, parameterLists);
 
-        String insertPuzzleSql = "INSERT INTO puzzles (puzzleId) VALUES (?)";
-        parameterLists = puzzlesList.stream()
-                .map(puzzle -> Lists.<Object>newArrayList(puzzle.getPuzzleId()))
-                .collect(Collectors.toList());
-        DatabaseHelper.insertBatch(this, insertPuzzleSql, parameterLists);
+        PuzzleStore puzzleStore = new PuzzleStore(this, null);
+        puzzleStore.initializePuzzles(puzzlesList);
 
         UserStore userStore = new UserStore(this);
         for (User user : userList) {
