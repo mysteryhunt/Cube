@@ -65,16 +65,16 @@ public class Setec2017HuntDefinition extends HuntDefinition {
         private String singleAnswer;
         private VisibilityConstraint visibleConstraint;
         private VisibilityConstraint unlockedConstraint;
-        private SolveReward solveReward;
+        private SolveRewardProperty solveRewardProperty;
 
-        private static final ImmutableSet<String> DISPLAY_PROPERTY_ACCESS_STATUSES = ImmutableSet.of("VISIBLE","UNLOCKED","SOLVED");
+        private static final ImmutableSet<String> DISPLAY_PROPERTY_ACCESS_STATUSES = ImmutableSet.of("VISIBLE", "UNLOCKED", "SOLVED");
         private static final VisibilityConstraint NO_CONSTRAINT = VisibilityConstraint.builder().build();
-        private static final SolveReward NO_REWARD = SolveReward.builder().build();
+        private static final SolveRewardProperty NO_REWARD = SolveRewardProperty.builder().build();
 
         private Setec2017PuzzleBuilder() {
             this.visibleConstraint = NO_CONSTRAINT;
             this.unlockedConstraint = NO_CONSTRAINT;
-            this.solveReward = NO_REWARD;
+            this.solveRewardProperty = NO_REWARD;
         }
 
         static Setec2017PuzzleBuilder builder() {
@@ -104,8 +104,7 @@ public class Setec2017HuntDefinition extends HuntDefinition {
                         VisibleConstraintProperty.create(visibleConstraint))
                     .addPuzzleProperty(UnlockedConstraintProperty.class,
                         UnlockedConstraintProperty.create(unlockedConstraint))
-                    .addPuzzleProperty(SolveRewardProperty.class,
-                        SolveRewardProperty.create(solveReward))
+                    .addPuzzleProperty(SolveRewardProperty.class, solveRewardProperty)
                     .build();
         }
 
@@ -139,8 +138,8 @@ public class Setec2017HuntDefinition extends HuntDefinition {
             return this;
         }
 
-        Setec2017PuzzleBuilder setSolveReward(SolveReward solveReward) {
-            this.solveReward = solveReward;
+        Setec2017PuzzleBuilder setSolveRewardProperty(SolveRewardProperty solveRewardProperty) {
+            this.solveRewardProperty = solveRewardProperty;
             return this;
         }
 
@@ -347,8 +346,18 @@ public class Setec2017HuntDefinition extends HuntDefinition {
     }
 
     @AutoValue
-    @JsonDeserialize(builder = AutoValue_Setec2017HuntDefinition_SolveReward.Builder.class)
-    protected abstract static class SolveReward {
+    @JsonDeserialize(builder = AutoValue_Setec2017HuntDefinition_SolveRewardProperty.Builder.class)
+    abstract static class SolveRewardProperty extends Puzzle.Property {
+
+        static {
+            registerClass(SolveRewardProperty.class);
+        }
+
+        static Builder builder() {
+            return new AutoValue_Setec2017HuntDefinition_SolveRewardProperty.Builder()
+                    .setGold(0);
+        }
+
         @AutoValue.Builder
         abstract static class Builder {
             @JsonProperty("gold") abstract Builder setGold(int gold);
@@ -361,34 +370,12 @@ public class Setec2017HuntDefinition extends HuntDefinition {
                 return this;
             }
 
-            abstract SolveReward build();
-        }
-
-        static Builder builder() {
-            return new AutoValue_Setec2017HuntDefinition_SolveReward.Builder()
-                    .setGold(0);
+            abstract SolveRewardProperty build();
         }
 
         @JsonProperty("gold") abstract int getGold();
         @JsonProperty("characterLevels") abstract ImmutableMap<Character, Integer> getCharacterLevels();
         // TODO: add inventory items
-    }
-
-    @AutoValue
-    abstract static class SolveRewardProperty extends Puzzle.Property {
-
-        static {
-            registerClass(SolveRewardProperty.class);
-        }
-
-        @JsonCreator
-        public static SolveRewardProperty create(
-                @JsonProperty("solveReward") SolveReward solveReward
-        ) {
-            return new AutoValue_Setec2017HuntDefinition_SolveRewardProperty(solveReward);
-        }
-
-        @JsonProperty("solveReward") public abstract SolveReward getSolveReward();
     }
 
     @Override
@@ -505,7 +492,7 @@ public class Setec2017HuntDefinition extends HuntDefinition {
             Visibility visibility = event.getVisibility();
             if (visibility.getStatus().equals("SOLVED")) {
                 Puzzle puzzle = Setec2017Puzzles.PUZZLES.get(visibility.getPuzzleId());
-                SolveReward solveReward = puzzle.getPuzzleProperty(SolveRewardProperty.class).getSolveReward();
+                SolveRewardProperty solveReward = puzzle.getPuzzleProperty(SolveRewardProperty.class);
                 if (solveReward.getGold() != 0) {
                     huntStatusStore.mutateTeamProperty(
                             visibility.getTeamId(),

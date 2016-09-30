@@ -5,7 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import edu.mit.puzzle.cube.core.model.Puzzle;
 import edu.mit.puzzle.cube.huntimpl.setec2017.Setec2017HuntDefinition.Character;
 import edu.mit.puzzle.cube.huntimpl.setec2017.Setec2017HuntDefinition.Setec2017PuzzleBuilder;
-import edu.mit.puzzle.cube.huntimpl.setec2017.Setec2017HuntDefinition.SolveReward;
+import edu.mit.puzzle.cube.huntimpl.setec2017.Setec2017HuntDefinition.SolveRewardProperty;
 import edu.mit.puzzle.cube.huntimpl.setec2017.Setec2017HuntDefinition.VisibilityConstraint;
 
 import java.util.function.Consumer;
@@ -27,14 +27,14 @@ public class Setec2017Puzzles {
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("f1")
                 .setSingleAnswer("FIGHTER1")
-                .setSolveReward(SolveReward.builder()
+                .setSolveRewardProperty(SolveRewardProperty.builder()
                         .addCharacterLevels(Character.FIGHTER, 1)
                         .setGold(1)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("f2")
                 .setSingleAnswer("FIGHTER2")
-                .setSolveReward(SolveReward.builder()
+                .setSolveRewardProperty(SolveRewardProperty.builder()
                         .addCharacterLevels(Character.FIGHTER, 1)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
@@ -43,7 +43,7 @@ public class Setec2017Puzzles {
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addSumConstraint(1, Character.FIGHTER)
                         .build())
-                .setSolveReward(SolveReward.builder()
+                .setSolveRewardProperty(SolveRewardProperty.builder()
                         .addCharacterLevels(Character.FIGHTER, 1)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
@@ -55,7 +55,7 @@ public class Setec2017Puzzles {
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addSumConstraint(2, Character.FIGHTER)
                         .build())
-                .setSolveReward(SolveReward.builder()
+                .setSolveRewardProperty(SolveRewardProperty.builder()
                         .addCharacterLevels(Character.FIGHTER, 1)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
@@ -67,7 +67,7 @@ public class Setec2017Puzzles {
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addSumConstraint(4, Character.FIGHTER)
                         .build())
-                .setSolveReward(SolveReward.builder()
+                .setSolveRewardProperty(SolveRewardProperty.builder()
                         .addCharacterLevels(Character.FIGHTER, 1)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
@@ -79,7 +79,7 @@ public class Setec2017Puzzles {
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addSumConstraint(6, Character.FIGHTER)
                         .build())
-                .setSolveReward(SolveReward.builder()
+                .setSolveRewardProperty(SolveRewardProperty.builder()
                         .addCharacterLevels(Character.FIGHTER, 1)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
@@ -91,7 +91,7 @@ public class Setec2017Puzzles {
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addSumConstraint(6, Character.FIGHTER)
                         .build())
-                .setSolveReward(SolveReward.builder()
+                .setSolveRewardProperty(SolveRewardProperty.builder()
                         .addCharacterLevels(Character.FIGHTER, 1)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
@@ -103,7 +103,7 @@ public class Setec2017Puzzles {
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addSumConstraint(7, Character.FIGHTER)
                         .build())
-                .setSolveReward(SolveReward.builder()
+                .setSolveRewardProperty(SolveRewardProperty.builder()
                         .addCharacterLevels(Character.FIGHTER, 1)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
@@ -115,7 +115,7 @@ public class Setec2017Puzzles {
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addSumConstraint(9, Character.FIGHTER)
                         .build())
-                .setSolveReward(SolveReward.builder()
+                .setSolveRewardProperty(SolveRewardProperty.builder()
                         .addCharacterLevels(Character.FIGHTER, 1)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
@@ -127,7 +127,7 @@ public class Setec2017Puzzles {
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addSumConstraint(11, Character.FIGHTER)
                         .build())
-                .setSolveReward(SolveReward.builder()
+                .setSolveRewardProperty(SolveRewardProperty.builder()
                         .addCharacterLevels(Character.FIGHTER, 1)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
@@ -139,7 +139,7 @@ public class Setec2017Puzzles {
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addSumConstraint(13, Character.FIGHTER)
                         .build())
-                .setSolveReward(SolveReward.builder()
+                .setSolveRewardProperty(SolveRewardProperty.builder()
                         .addCharacterLevels(Character.FIGHTER, 1)
                         .build()));
 
@@ -149,14 +149,14 @@ public class Setec2017Puzzles {
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("w1")
                 .setSingleAnswer("WIZARD1")
-                .setSolveReward(SolveReward.builder()
+                .setSolveRewardProperty(SolveRewardProperty.builder()
                         .addCharacterLevels(Character.WIZARD, 1)
                         .setGold(1)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("w2")
                 .setSingleAnswer("WIZARD2")
-                .setSolveReward(SolveReward.builder()
+                .setSolveRewardProperty(SolveRewardProperty.builder()
                         .addCharacterLevels(Character.WIZARD, 1)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
@@ -165,7 +165,7 @@ public class Setec2017Puzzles {
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addSumConstraint(1, Character.WIZARD)
                         .build())
-                .setSolveReward(SolveReward.builder()
+                .setSolveRewardProperty(SolveRewardProperty.builder()
                         .addCharacterLevels(Character.WIZARD, 1)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
@@ -177,7 +177,7 @@ public class Setec2017Puzzles {
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addSumConstraint(2, Character.WIZARD)
                         .build())
-                .setSolveReward(SolveReward.builder()
+                .setSolveRewardProperty(SolveRewardProperty.builder()
                         .addCharacterLevels(Character.WIZARD, 1)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
@@ -189,7 +189,7 @@ public class Setec2017Puzzles {
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addSumConstraint(4, Character.WIZARD)
                         .build())
-                .setSolveReward(SolveReward.builder()
+                .setSolveRewardProperty(SolveRewardProperty.builder()
                         .addCharacterLevels(Character.WIZARD, 1)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
@@ -201,7 +201,7 @@ public class Setec2017Puzzles {
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addSumConstraint(6, Character.WIZARD)
                         .build())
-                .setSolveReward(SolveReward.builder()
+                .setSolveRewardProperty(SolveRewardProperty.builder()
                         .addCharacterLevels(Character.WIZARD, 1)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
@@ -213,7 +213,7 @@ public class Setec2017Puzzles {
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addSumConstraint(6, Character.WIZARD)
                         .build())
-                .setSolveReward(SolveReward.builder()
+                .setSolveRewardProperty(SolveRewardProperty.builder()
                         .addCharacterLevels(Character.WIZARD, 1)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
@@ -225,7 +225,7 @@ public class Setec2017Puzzles {
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addSumConstraint(7, Character.WIZARD)
                         .build())
-                .setSolveReward(SolveReward.builder()
+                .setSolveRewardProperty(SolveRewardProperty.builder()
                         .addCharacterLevels(Character.WIZARD, 1)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
@@ -237,7 +237,7 @@ public class Setec2017Puzzles {
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addSumConstraint(9, Character.WIZARD)
                         .build())
-                .setSolveReward(SolveReward.builder()
+                .setSolveRewardProperty(SolveRewardProperty.builder()
                         .addCharacterLevels(Character.WIZARD, 1)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
@@ -249,7 +249,7 @@ public class Setec2017Puzzles {
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addSumConstraint(11, Character.WIZARD)
                         .build())
-                .setSolveReward(SolveReward.builder()
+                .setSolveRewardProperty(SolveRewardProperty.builder()
                         .addCharacterLevels(Character.WIZARD, 1)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
@@ -261,7 +261,7 @@ public class Setec2017Puzzles {
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addSumConstraint(13, Character.WIZARD)
                         .build())
-                .setSolveReward(SolveReward.builder()
+                .setSolveRewardProperty(SolveRewardProperty.builder()
                         .addCharacterLevels(Character.WIZARD, 1)
                         .build()));
 
@@ -271,14 +271,14 @@ public class Setec2017Puzzles {
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("cl1")
                 .setSingleAnswer("CLERIC1")
-                .setSolveReward(SolveReward.builder()
+                .setSolveRewardProperty(SolveRewardProperty.builder()
                         .addCharacterLevels(Character.CLERIC, 1)
                         .setGold(1)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("cl2")
                 .setSingleAnswer("CLERIC2")
-                .setSolveReward(SolveReward.builder()
+                .setSolveRewardProperty(SolveRewardProperty.builder()
                         .addCharacterLevels(Character.CLERIC, 1)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
@@ -287,7 +287,7 @@ public class Setec2017Puzzles {
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addSumConstraint(1, Character.CLERIC)
                         .build())
-                .setSolveReward(SolveReward.builder()
+                .setSolveRewardProperty(SolveRewardProperty.builder()
                         .addCharacterLevels(Character.CLERIC, 1)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
@@ -299,7 +299,7 @@ public class Setec2017Puzzles {
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addSumConstraint(2, Character.CLERIC)
                         .build())
-                .setSolveReward(SolveReward.builder()
+                .setSolveRewardProperty(SolveRewardProperty.builder()
                         .addCharacterLevels(Character.CLERIC, 1)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
@@ -311,7 +311,7 @@ public class Setec2017Puzzles {
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addSumConstraint(4, Character.CLERIC)
                         .build())
-                .setSolveReward(SolveReward.builder()
+                .setSolveRewardProperty(SolveRewardProperty.builder()
                         .addCharacterLevels(Character.CLERIC, 1)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
@@ -323,7 +323,7 @@ public class Setec2017Puzzles {
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addSumConstraint(6, Character.CLERIC)
                         .build())
-                .setSolveReward(SolveReward.builder()
+                .setSolveRewardProperty(SolveRewardProperty.builder()
                         .addCharacterLevels(Character.CLERIC, 1)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
@@ -335,7 +335,7 @@ public class Setec2017Puzzles {
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addSumConstraint(6, Character.CLERIC)
                         .build())
-                .setSolveReward(SolveReward.builder()
+                .setSolveRewardProperty(SolveRewardProperty.builder()
                         .addCharacterLevels(Character.CLERIC, 1)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
@@ -347,7 +347,7 @@ public class Setec2017Puzzles {
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addSumConstraint(7, Character.CLERIC)
                         .build())
-                .setSolveReward(SolveReward.builder()
+                .setSolveRewardProperty(SolveRewardProperty.builder()
                         .addCharacterLevels(Character.CLERIC, 1)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
@@ -359,7 +359,7 @@ public class Setec2017Puzzles {
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addSumConstraint(10, Character.CLERIC)
                         .build())
-                .setSolveReward(SolveReward.builder()
+                .setSolveRewardProperty(SolveRewardProperty.builder()
                         .addCharacterLevels(Character.CLERIC, 1)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
@@ -371,7 +371,7 @@ public class Setec2017Puzzles {
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addSumConstraint(13, Character.CLERIC)
                         .build())
-                .setSolveReward(SolveReward.builder()
+                .setSolveRewardProperty(SolveRewardProperty.builder()
                         .addCharacterLevels(Character.CLERIC, 1)
                         .build()));
 
@@ -402,7 +402,7 @@ public class Setec2017Puzzles {
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("linguist", "UNLOCKED")
                         .build())
-                .setSolveReward(SolveReward.builder()
+                .setSolveRewardProperty(SolveRewardProperty.builder()
                         .addCharacterLevels(Character.LINGUIST, 1)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
@@ -414,7 +414,7 @@ public class Setec2017Puzzles {
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("linguist", "UNLOCKED")
                         .build())
-                .setSolveReward(SolveReward.builder()
+                .setSolveRewardProperty(SolveRewardProperty.builder()
                         .addCharacterLevels(Character.LINGUIST, 1)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
@@ -427,7 +427,7 @@ public class Setec2017Puzzles {
                         .addPuzzleVisibilityStatusConstraint("linguist", "UNLOCKED")
                         .addSumConstraint(1, Character.LINGUIST)
                         .build())
-                .setSolveReward(SolveReward.builder()
+                .setSolveRewardProperty(SolveRewardProperty.builder()
                         .addCharacterLevels(Character.LINGUIST, 1)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
@@ -441,7 +441,7 @@ public class Setec2017Puzzles {
                         .addPuzzleVisibilityStatusConstraint("linguist", "UNLOCKED")
                         .addSumConstraint(3, Character.LINGUIST)
                         .build())
-                .setSolveReward(SolveReward.builder()
+                .setSolveRewardProperty(SolveRewardProperty.builder()
                         .addCharacterLevels(Character.LINGUIST, 1)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
@@ -455,7 +455,7 @@ public class Setec2017Puzzles {
                         .addPuzzleVisibilityStatusConstraint("linguist", "UNLOCKED")
                         .addSumConstraint(4, Character.LINGUIST)
                         .build())
-                .setSolveReward(SolveReward.builder()
+                .setSolveRewardProperty(SolveRewardProperty.builder()
                         .addCharacterLevels(Character.LINGUIST, 1)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
@@ -469,7 +469,7 @@ public class Setec2017Puzzles {
                         .addPuzzleVisibilityStatusConstraint("linguist", "UNLOCKED")
                         .addSumConstraint(7, Character.LINGUIST)
                         .build())
-                .setSolveReward(SolveReward.builder()
+                .setSolveRewardProperty(SolveRewardProperty.builder()
                         .addCharacterLevels(Character.LINGUIST, 1)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
@@ -483,7 +483,7 @@ public class Setec2017Puzzles {
                         .addPuzzleVisibilityStatusConstraint("linguist", "UNLOCKED")
                         .addSumConstraint(7, Character.LINGUIST)
                         .build())
-                .setSolveReward(SolveReward.builder()
+                .setSolveRewardProperty(SolveRewardProperty.builder()
                         .addCharacterLevels(Character.LINGUIST, 1)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
@@ -497,7 +497,7 @@ public class Setec2017Puzzles {
                         .addPuzzleVisibilityStatusConstraint("linguist", "UNLOCKED")
                         .addSumConstraint(8, Character.LINGUIST)
                         .build())
-                .setSolveReward(SolveReward.builder()
+                .setSolveRewardProperty(SolveRewardProperty.builder()
                         .addCharacterLevels(Character.LINGUIST, 1)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
@@ -511,7 +511,7 @@ public class Setec2017Puzzles {
                         .addPuzzleVisibilityStatusConstraint("linguist", "UNLOCKED")
                         .addSumConstraint(10, Character.LINGUIST)
                         .build())
-                .setSolveReward(SolveReward.builder()
+                .setSolveRewardProperty(SolveRewardProperty.builder()
                         .addCharacterLevels(Character.LINGUIST, 1)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
@@ -525,7 +525,7 @@ public class Setec2017Puzzles {
                         .addPuzzleVisibilityStatusConstraint("linguist", "UNLOCKED")
                         .addSumConstraint(12, Character.LINGUIST)
                         .build())
-                .setSolveReward(SolveReward.builder()
+                .setSolveRewardProperty(SolveRewardProperty.builder()
                         .addCharacterLevels(Character.LINGUIST, 1)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
@@ -539,7 +539,7 @@ public class Setec2017Puzzles {
                         .addPuzzleVisibilityStatusConstraint("linguist", "UNLOCKED")
                         .addSumConstraint(14, Character.LINGUIST)
                         .build())
-                .setSolveReward(SolveReward.builder()
+                .setSolveRewardProperty(SolveRewardProperty.builder()
                         .addCharacterLevels(Character.LINGUIST, 1)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
@@ -553,7 +553,7 @@ public class Setec2017Puzzles {
                         .addPuzzleVisibilityStatusConstraint("linguist", "UNLOCKED")
                         .addSumConstraint(15, Character.LINGUIST)
                         .build())
-                .setSolveReward(SolveReward.builder()
+                .setSolveRewardProperty(SolveRewardProperty.builder()
                         .addCharacterLevels(Character.LINGUIST, 1)
                         .build()));
 
@@ -584,7 +584,7 @@ public class Setec2017Puzzles {
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("economist", "UNLOCKED")
                         .build())
-                .setSolveReward(SolveReward.builder()
+                .setSolveRewardProperty(SolveRewardProperty.builder()
                         .addCharacterLevels(Character.ECONOMIST, 1)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
@@ -596,7 +596,7 @@ public class Setec2017Puzzles {
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("economist", "UNLOCKED")
                         .build())
-                .setSolveReward(SolveReward.builder()
+                .setSolveRewardProperty(SolveRewardProperty.builder()
                         .addCharacterLevels(Character.ECONOMIST, 1)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
@@ -609,7 +609,7 @@ public class Setec2017Puzzles {
                         .addPuzzleVisibilityStatusConstraint("economist", "UNLOCKED")
                         .addSumConstraint(2, Character.ECONOMIST)
                         .build())
-                .setSolveReward(SolveReward.builder()
+                .setSolveRewardProperty(SolveRewardProperty.builder()
                         .addCharacterLevels(Character.ECONOMIST, 1)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
@@ -623,7 +623,7 @@ public class Setec2017Puzzles {
                         .addPuzzleVisibilityStatusConstraint("economist", "UNLOCKED")
                         .addSumConstraint(4, Character.ECONOMIST)
                         .build())
-                .setSolveReward(SolveReward.builder()
+                .setSolveRewardProperty(SolveRewardProperty.builder()
                         .addCharacterLevels(Character.ECONOMIST, 1)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
@@ -637,7 +637,7 @@ public class Setec2017Puzzles {
                         .addPuzzleVisibilityStatusConstraint("economist", "UNLOCKED")
                         .addSumConstraint(6, Character.ECONOMIST)
                         .build())
-                .setSolveReward(SolveReward.builder()
+                .setSolveRewardProperty(SolveRewardProperty.builder()
                         .addCharacterLevels(Character.ECONOMIST, 1)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
@@ -651,7 +651,7 @@ public class Setec2017Puzzles {
                         .addPuzzleVisibilityStatusConstraint("economist", "UNLOCKED")
                         .addSumConstraint(6, Character.ECONOMIST)
                         .build())
-                .setSolveReward(SolveReward.builder()
+                .setSolveRewardProperty(SolveRewardProperty.builder()
                         .addCharacterLevels(Character.ECONOMIST, 1)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
@@ -665,7 +665,7 @@ public class Setec2017Puzzles {
                         .addPuzzleVisibilityStatusConstraint("economist", "UNLOCKED")
                         .addSumConstraint(8, Character.ECONOMIST)
                         .build())
-                .setSolveReward(SolveReward.builder()
+                .setSolveRewardProperty(SolveRewardProperty.builder()
                         .addCharacterLevels(Character.ECONOMIST, 1)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
@@ -679,7 +679,7 @@ public class Setec2017Puzzles {
                         .addPuzzleVisibilityStatusConstraint("economist", "UNLOCKED")
                         .addSumConstraint(11, Character.ECONOMIST)
                         .build())
-                .setSolveReward(SolveReward.builder()
+                .setSolveRewardProperty(SolveRewardProperty.builder()
                         .addCharacterLevels(Character.ECONOMIST, 1)
                         .build()));
 
@@ -710,7 +710,7 @@ public class Setec2017Puzzles {
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("chemist", "UNLOCKED")
                         .build())
-                .setSolveReward(SolveReward.builder()
+                .setSolveRewardProperty(SolveRewardProperty.builder()
                         .addCharacterLevels(Character.CHEMIST, 1)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
@@ -722,7 +722,7 @@ public class Setec2017Puzzles {
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("chemist", "UNLOCKED")
                         .build())
-                .setSolveReward(SolveReward.builder()
+                .setSolveRewardProperty(SolveRewardProperty.builder()
                         .addCharacterLevels(Character.CHEMIST, 1)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
@@ -735,7 +735,7 @@ public class Setec2017Puzzles {
                         .addPuzzleVisibilityStatusConstraint("chemist", "UNLOCKED")
                         .addSumConstraint(3, Character.CHEMIST)
                         .build())
-                .setSolveReward(SolveReward.builder()
+                .setSolveRewardProperty(SolveRewardProperty.builder()
                         .addCharacterLevels(Character.CHEMIST, 1)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
@@ -749,7 +749,7 @@ public class Setec2017Puzzles {
                         .addPuzzleVisibilityStatusConstraint("chemist", "UNLOCKED")
                         .addSumConstraint(5, Character.CHEMIST)
                         .build())
-                .setSolveReward(SolveReward.builder()
+                .setSolveRewardProperty(SolveRewardProperty.builder()
                         .addCharacterLevels(Character.CHEMIST, 1)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
@@ -763,7 +763,7 @@ public class Setec2017Puzzles {
                         .addPuzzleVisibilityStatusConstraint("chemist", "UNLOCKED")
                         .addSumConstraint(7, Character.CHEMIST)
                         .build())
-                .setSolveReward(SolveReward.builder()
+                .setSolveRewardProperty(SolveRewardProperty.builder()
                         .addCharacterLevels(Character.CHEMIST, 1)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
@@ -777,7 +777,7 @@ public class Setec2017Puzzles {
                         .addPuzzleVisibilityStatusConstraint("chemist", "UNLOCKED")
                         .addSumConstraint(7, Character.CHEMIST)
                         .build())
-                .setSolveReward(SolveReward.builder()
+                .setSolveRewardProperty(SolveRewardProperty.builder()
                         .addCharacterLevels(Character.CHEMIST, 1)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
@@ -791,7 +791,7 @@ public class Setec2017Puzzles {
                         .addPuzzleVisibilityStatusConstraint("chemist", "UNLOCKED")
                         .addSumConstraint(9, Character.CHEMIST)
                         .build())
-                .setSolveReward(SolveReward.builder()
+                .setSolveRewardProperty(SolveRewardProperty.builder()
                         .addCharacterLevels(Character.CHEMIST, 1)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
@@ -805,7 +805,7 @@ public class Setec2017Puzzles {
                         .addPuzzleVisibilityStatusConstraint("chemist", "UNLOCKED")
                         .addSumConstraint(11, Character.CHEMIST)
                         .build())
-                .setSolveReward(SolveReward.builder()
+                .setSolveRewardProperty(SolveRewardProperty.builder()
                         .addCharacterLevels(Character.CHEMIST, 1)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
@@ -819,7 +819,7 @@ public class Setec2017Puzzles {
                         .addPuzzleVisibilityStatusConstraint("chemist", "UNLOCKED")
                         .addSumConstraint(14, Character.CHEMIST)
                         .build())
-                .setSolveReward(SolveReward.builder()
+                .setSolveRewardProperty(SolveRewardProperty.builder()
                         .addCharacterLevels(Character.CHEMIST, 1)
                         .build()));
 
@@ -832,7 +832,7 @@ public class Setec2017Puzzles {
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addSumConstraint(6, Character.values())
                         .build())
-                .setSolveReward(SolveReward.builder()
+                .setSolveRewardProperty(SolveRewardProperty.builder()
                         .addCharacterLevels(Character.FIGHTER, 1)
                         .addCharacterLevels(Character.WIZARD, 1)
                         .addCharacterLevels(Character.CLERIC, 1)
@@ -957,7 +957,7 @@ public class Setec2017Puzzles {
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addSumConstraint(18, Character.values())
                         .build())
-                .setSolveReward(SolveReward.builder()
+                .setSolveRewardProperty(SolveRewardProperty.builder()
                         .addCharacterLevels(Character.FIGHTER, 1)
                         .addCharacterLevels(Character.WIZARD, 1)
                         .addCharacterLevels(Character.CLERIC, 1)
@@ -1076,11 +1076,11 @@ public class Setec2017Puzzles {
 
         // TODO: add the rest of the rounds
 
-        SolveReward.Builder solveRewardBuilder = SolveReward.builder();
+        SolveRewardProperty.Builder solveRewardBuilder = SolveRewardProperty.builder();
         for (Character character : Character.values()) {
             solveRewardBuilder.addCharacterLevels(character, 1);
         }
-        SolveReward oneLevelForEachCharacter = solveRewardBuilder.build();
+        SolveRewardProperty oneLevelForEachCharacter = solveRewardBuilder.build();
 
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("eventa")
@@ -1091,7 +1091,7 @@ public class Setec2017Puzzles {
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .setRequiresManualAction(true)
                         .build())
-                .setSolveReward(oneLevelForEachCharacter));
+                .setSolveRewardProperty(oneLevelForEachCharacter));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("eventb")
                 .setSingleAnswer("EVENTB")
@@ -1101,13 +1101,13 @@ public class Setec2017Puzzles {
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .setRequiresManualAction(true)
                         .build())
-                .setSolveReward(oneLevelForEachCharacter));
+                .setSolveRewardProperty(oneLevelForEachCharacter));
 
-        solveRewardBuilder = SolveReward.builder();
+        solveRewardBuilder = SolveRewardProperty.builder();
         for (Character character : Character.values()) {
             solveRewardBuilder.addCharacterLevels(character, 2);
         }
-        SolveReward twoLevelsForEachCharacter = solveRewardBuilder.build();
+        SolveRewardProperty twoLevelsForEachCharacter = solveRewardBuilder.build();
 
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("eventc")
@@ -1118,7 +1118,7 @@ public class Setec2017Puzzles {
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .setRequiresManualAction(true)
                         .build())
-                .setSolveReward(twoLevelsForEachCharacter));
+                .setSolveRewardProperty(twoLevelsForEachCharacter));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("eventd")
                 .setSingleAnswer("EVENTD")
@@ -1128,7 +1128,7 @@ public class Setec2017Puzzles {
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .setRequiresManualAction(true)
                         .build())
-                .setSolveReward(twoLevelsForEachCharacter));
+                .setSolveRewardProperty(twoLevelsForEachCharacter));
 
         PUZZLES = puzzlesBuilder.build();
     }
