@@ -430,7 +430,7 @@ public class Setec2017HuntDefinition extends HuntDefinition {
 
         Table<String, String, String> teamPuzzleStatusTable = HashBasedTable.create();
 
-        for (Puzzle puzzle : Setec2017Puzzles.PUZZLES.values()) {
+        for (Puzzle puzzle : puzzleStore.getPuzzles().values()) {
             VisibilityConstraint unlockedConstraint = puzzle.getPuzzleProperty(UnlockedConstraintProperty.class).getUnlockedConstraint();
             VisibilityConstraint visibleConstraint = puzzle.getPuzzleProperty(VisibleConstraintProperty.class).getVisibleConstraint();
 
@@ -491,7 +491,7 @@ public class Setec2017HuntDefinition extends HuntDefinition {
         eventProcessor.addEventProcessor(VisibilityChangeEvent.class, event -> {
             Visibility visibility = event.getVisibility();
             if (visibility.getStatus().equals("SOLVED")) {
-                Puzzle puzzle = Setec2017Puzzles.PUZZLES.get(visibility.getPuzzleId());
+                Puzzle puzzle = puzzleStore.getPuzzle(visibility.getPuzzleId());
                 SolveRewardProperty solveReward = puzzle.getPuzzleProperty(SolveRewardProperty.class);
                 if (solveReward.getGold() != 0) {
                     huntStatusStore.mutateTeamProperty(
