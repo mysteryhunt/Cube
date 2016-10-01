@@ -2,6 +2,7 @@ package edu.mit.puzzle.cube.huntimpl.setec2017;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.auto.value.AutoValue;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ImmutableList;
@@ -18,6 +19,7 @@ import edu.mit.puzzle.cube.core.events.HintCompleteEvent;
 import edu.mit.puzzle.cube.core.events.HuntStartEvent;
 import edu.mit.puzzle.cube.core.events.SubmissionCompleteEvent;
 import edu.mit.puzzle.cube.core.events.VisibilityChangeEvent;
+import edu.mit.puzzle.cube.core.model.Answer;
 import edu.mit.puzzle.cube.core.model.HintRequest;
 import edu.mit.puzzle.cube.core.model.HintRequestStatus;
 import edu.mit.puzzle.cube.core.model.Puzzle;
@@ -36,6 +38,8 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 public class Setec2017HuntDefinition extends HuntDefinition {
     private static final VisibilityStatusSet VISIBILITY_STATUS_SET = new StandardVisibilityStatusSet();
 
@@ -51,6 +55,94 @@ public class Setec2017HuntDefinition extends HuntDefinition {
         LINGUIST,
         ECONOMIST,
         CHEMIST;
+    }
+
+    static class Setec2017PuzzleBuilder {
+
+        private String id;
+        private String displayId;
+        private String displayName;
+        private String singleAnswer;
+        private VisibilityConstraint visibleConstraint;
+        private VisibilityConstraint unlockedConstraint;
+        private SolveRewardProperty solveRewardProperty;
+
+        private static final ImmutableSet<String> DISPLAY_PROPERTY_ACCESS_STATUSES = ImmutableSet.of("VISIBLE", "UNLOCKED", "SOLVED");
+        private static final VisibilityConstraint NO_CONSTRAINT = VisibilityConstraint.builder().build();
+        private static final SolveRewardProperty NO_REWARD = SolveRewardProperty.builder().build();
+
+        private Setec2017PuzzleBuilder() {
+            this.visibleConstraint = NO_CONSTRAINT;
+            this.unlockedConstraint = NO_CONSTRAINT;
+            this.solveRewardProperty = NO_REWARD;
+        }
+
+        static Setec2017PuzzleBuilder builder() {
+            return new Setec2017PuzzleBuilder();
+        }
+
+        Puzzle build() {
+            checkNotNull(id);
+            checkNotNull(singleAnswer);
+            if (displayId == null) {
+                displayId = id;
+            }
+            if (displayName == null) {
+                displayName = id;
+            }
+
+            Puzzle.DisplayNameProperty displayNameProperty = Puzzle.DisplayNameProperty.create(
+                    displayName, DISPLAY_PROPERTY_ACCESS_STATUSES);
+            Puzzle.AnswersProperty answersProperty = Puzzle.AnswersProperty.create(ImmutableList.of(
+                    Answer.create(singleAnswer)));
+
+            return Puzzle.builder()
+                    .setPuzzleId(id)
+                    .addPuzzleProperty(Puzzle.DisplayNameProperty.class, displayNameProperty)
+                    .addPuzzleProperty(Puzzle.AnswersProperty.class, answersProperty)
+                    .addPuzzleProperty(VisibleConstraintProperty.class,
+                        VisibleConstraintProperty.create(visibleConstraint))
+                    .addPuzzleProperty(UnlockedConstraintProperty.class,
+                        UnlockedConstraintProperty.create(unlockedConstraint))
+                    .addPuzzleProperty(SolveRewardProperty.class, solveRewardProperty)
+                    .build();
+        }
+
+        Setec2017PuzzleBuilder setId(String id) {
+            this.id = id;
+            return this;
+        }
+
+        Setec2017PuzzleBuilder setDisplayId(String displayId) {
+            this.displayId = displayId;
+            return this;
+        }
+
+        Setec2017PuzzleBuilder setDisplayName(String displayName) {
+            this.displayName = displayName;
+            return this;
+        }
+
+        Setec2017PuzzleBuilder setSingleAnswer(String answer) {
+            this.singleAnswer = answer;
+            return this;
+        }
+
+        Setec2017PuzzleBuilder setVisibleConstraint(VisibilityConstraint visibilityConstraint) {
+            this.visibleConstraint = visibilityConstraint;
+            return this;
+        }
+
+        Setec2017PuzzleBuilder setUnlockedConstraint(VisibilityConstraint visibilityConstraint) {
+            this.unlockedConstraint = visibilityConstraint;
+            return this;
+        }
+
+        Setec2017PuzzleBuilder setSolveRewardProperty(SolveRewardProperty solveRewardProperty) {
+            this.solveRewardProperty = solveRewardProperty;
+            return this;
+        }
+
     }
 
     @AutoValue
@@ -85,8 +177,10 @@ public class Setec2017HuntDefinition extends HuntDefinition {
 
     // TODO: create a team property for inventory items
 
+
     @AutoValue
-    abstract static class VisibilityConstraint {
+    @JsonDeserialize(builder = AutoValue_Setec2017HuntDefinition_VisibilityConstraint.Builder.class)
+    protected abstract static class VisibilityConstraint {
         private static final ImmutableList<String> VISIBILITY_STATUS_ORDER = ImmutableList.of(
                 "INVISIBLE", "VISIBLE", "UNLOCKED", "SOLVED");
 
@@ -94,17 +188,17 @@ public class Setec2017HuntDefinition extends HuntDefinition {
         abstract static class Builder {
             // If true, then this visibility constraint will never be satisfied. All other
             // constraints in this object will be ignored.
-            abstract Builder setRequiresManualAction(boolean requiresManualAction);
+            @JsonProperty("requiresManualAction") abstract Builder setRequiresManualAction(boolean requiresManualAction);
 
             // A sum constraint is satisfied when the sum of the levels of a set of characters is
             // greater than or equal to a number. All sum constraints must be satisfied for this
             // visibility constraint to be satisfied.
-            abstract ImmutableMap.Builder<ImmutableSet<Character>, Integer> sumConstraintsBuilder();
+            abstract ImmutableList.Builder<CharacterLevelConstraint> sumConstraintsBuilder();
 
             // A max constraint is satisfied when the largest of the levels of a set of characters
             // is greater than or equal to a number. All max constraints must be satisfied for this
             // visibility constraint to be satisfied.
-            abstract ImmutableMap.Builder<ImmutableSet<Character>, Integer> maxConstraintsBuilder();
+            abstract ImmutableList.Builder<CharacterLevelConstraint> maxConstraintsBuilder();
 
             // A puzzle visibility status constraint is satisfied when a puzzle has the given
             // visibility status, or has a visibility status that follows the given visibility
@@ -112,16 +206,19 @@ public class Setec2017HuntDefinition extends HuntDefinition {
             // satisfied for this visibility constraint to be satisfied.
             abstract ImmutableMap.Builder<String, String> puzzleVisibilityStatusConstraintsBuilder();
 
+            @JsonProperty("sumConstraints") abstract Builder setSumConstraints(List<CharacterLevelConstraint> sumConstraints);
             Builder addSumConstraint(int levels, Character... characters) {
-                sumConstraintsBuilder().put(ImmutableSet.copyOf(characters), levels);
+                sumConstraintsBuilder().add(CharacterLevelConstraint.create(levels, characters));
                 return this;
             }
 
+            @JsonProperty("maxConstraints") abstract Builder setMaxConstraints(List<CharacterLevelConstraint> maxConstraints);
             Builder addMaxConstraint(int levels, Character... characters) {
-                maxConstraintsBuilder().put(ImmutableSet.copyOf(characters), levels);
+                maxConstraintsBuilder().add(CharacterLevelConstraint.create(levels, characters));
                 return this;
             }
 
+            @JsonProperty("puzzleVisibilityStatusConstraints") abstract Builder setPuzzleVisibilityStatusConstraints(Map<String,String> puzzleVisibilityStatusConstraints);
             Builder addPuzzleVisibilityStatusConstraint(String puzzleId, String visibility) {
                 puzzleVisibilityStatusConstraintsBuilder().put(puzzleId, visibility);
                 return this;
@@ -135,22 +232,27 @@ public class Setec2017HuntDefinition extends HuntDefinition {
                     .setRequiresManualAction(false);
         }
 
-        abstract boolean getRequiresManualAction();
-        abstract ImmutableMap<ImmutableSet<Character>, Integer> getSumConstraints();
-        abstract ImmutableMap<ImmutableSet<Character>, Integer> getMaxConstraints();
-        abstract ImmutableMap<String, String> getPuzzleVisibilityStatusConstraints();
+        @JsonProperty("requiresManualAction") abstract boolean getRequiresManualAction();
+
+        @JsonProperty("sumConstraints")
+        abstract ImmutableList<CharacterLevelConstraint> getSumConstraints();
+
+        @JsonProperty("maxConstraints")
+        abstract ImmutableList<CharacterLevelConstraint> getMaxConstraints();
+
+        @JsonProperty("puzzleVisibilityStatusConstraints") abstract ImmutableMap<String, String> getPuzzleVisibilityStatusConstraints();
 
         boolean isSatisfied(
-                CharacterLevelsProperty characterLevels,
+                Setec2017HuntDefinition.CharacterLevelsProperty characterLevels,
                 Map<String, String> puzzleIdToVisibilityStatus
         ) {
             if (getRequiresManualAction()) {
                 return false;
             }
 
-            for (Map.Entry<ImmutableSet<Character>, Integer> entry : getSumConstraints().entrySet()) {
-                ImmutableSet<Character> characters = entry.getKey();
-                Integer minimumLevelSum = entry.getValue();
+            for (CharacterLevelConstraint characterLevelConstraint : getSumConstraints()) {
+                ImmutableSet<Character> characters = characterLevelConstraint.getCharacters();
+                Integer minimumLevelSum = characterLevelConstraint.getLevels();
                 int sum = 0;
                 for (Character character : characters) {
                     Integer level = characterLevels.getLevels().get(character);
@@ -163,9 +265,9 @@ public class Setec2017HuntDefinition extends HuntDefinition {
                 }
             }
 
-            for (Map.Entry<ImmutableSet<Character>, Integer> entry : getMaxConstraints().entrySet()) {
-                ImmutableSet<Character> characters = entry.getKey();
-                Integer minimumLevel = entry.getValue();
+            for (CharacterLevelConstraint characterLevelConstraint : getMaxConstraints()) {
+                ImmutableSet<Character> characters = characterLevelConstraint.getCharacters();
+                Integer minimumLevel = characterLevelConstraint.getLevels();
                 int max = 0;
                 for (Character character : characters) {
                     Integer level = characterLevels.getLevels().get(character);
@@ -183,7 +285,7 @@ public class Setec2017HuntDefinition extends HuntDefinition {
                 String constraintStatus = entry.getValue();
                 String status = puzzleIdToVisibilityStatus.get(puzzleId);
                 if (status == null) {
-                    status = VISIBILITY_STATUS_SET.getDefaultVisibilityStatus();
+                    status = Setec2017HuntDefinition.VISIBILITY_STATUS_SET.getDefaultVisibilityStatus();
                 }
                 if (VISIBILITY_STATUS_ORDER.indexOf(status) < VISIBILITY_STATUS_ORDER.indexOf(constraintStatus)) {
                     return false;
@@ -192,13 +294,75 @@ public class Setec2017HuntDefinition extends HuntDefinition {
 
             return true;
         }
+
+        @AutoValue
+        abstract static class CharacterLevelConstraint {
+            @JsonProperty("characters") abstract ImmutableSet<Character> getCharacters();
+            @JsonProperty("levels") abstract int getLevels();
+
+            @JsonCreator
+            static CharacterLevelConstraint create(
+                    @JsonProperty("levels") int levels,
+                    @JsonProperty("characters") Character... characters
+            ) {
+                return new AutoValue_Setec2017HuntDefinition_VisibilityConstraint_CharacterLevelConstraint(
+                        ImmutableSet.copyOf(characters), levels);
+            }
+        }
     }
 
     @AutoValue
-    abstract static class SolveReward {
+    abstract static class VisibleConstraintProperty extends Puzzle.Property {
+
+        static {
+            registerClass(VisibleConstraintProperty.class);
+        }
+
+        @JsonCreator
+        public static VisibleConstraintProperty create(
+                @JsonProperty("visibleConstraint") VisibilityConstraint visibleConstraint
+        ) {
+            return new AutoValue_Setec2017HuntDefinition_VisibleConstraintProperty(visibleConstraint);
+        }
+
+        @JsonProperty("visibleConstraint") public abstract VisibilityConstraint getVisibleConstraint();
+    }
+
+    @AutoValue
+    abstract static class UnlockedConstraintProperty extends Puzzle.Property {
+
+        static {
+            registerClass(UnlockedConstraintProperty.class);
+        }
+
+        @JsonCreator
+        public static UnlockedConstraintProperty create(
+                @JsonProperty("unlockedConstraint") VisibilityConstraint unlockedConstraint
+        ) {
+            return new AutoValue_Setec2017HuntDefinition_UnlockedConstraintProperty(unlockedConstraint);
+        }
+
+        @JsonProperty("unlockedConstraint") public abstract VisibilityConstraint getUnlockedConstraint();
+    }
+
+    @AutoValue
+    @JsonDeserialize(builder = AutoValue_Setec2017HuntDefinition_SolveRewardProperty.Builder.class)
+    abstract static class SolveRewardProperty extends Puzzle.Property {
+
+        static {
+            registerClass(SolveRewardProperty.class);
+        }
+
+        static Builder builder() {
+            return new AutoValue_Setec2017HuntDefinition_SolveRewardProperty.Builder()
+                    .setGold(0);
+        }
+
         @AutoValue.Builder
         abstract static class Builder {
-            abstract Builder setGold(int gold);
+            @JsonProperty("gold") abstract Builder setGold(int gold);
+            @JsonProperty("characterLevels") abstract Builder setCharacterLevels(Map<Character,Integer> characterLevels);
+
             abstract ImmutableMap.Builder<Character, Integer> characterLevelsBuilder();
 
             Builder addCharacterLevels(Character character, int levels) {
@@ -206,48 +370,17 @@ public class Setec2017HuntDefinition extends HuntDefinition {
                 return this;
             }
 
-            abstract SolveReward build();
+            abstract SolveRewardProperty build();
         }
 
-        static Builder builder() {
-            return new AutoValue_Setec2017HuntDefinition_SolveReward.Builder()
-                    .setGold(0);
-        }
-
-        abstract int getGold();
-        abstract ImmutableMap<Character, Integer> getCharacterLevels();
+        @JsonProperty("gold") abstract int getGold();
+        @JsonProperty("characterLevels") abstract ImmutableMap<Character, Integer> getCharacterLevels();
         // TODO: add inventory items
-    }
-
-    @AutoValue
-    abstract static class Setec2017Puzzle {
-        @AutoValue.Builder
-        abstract static class Builder {
-            abstract Builder setPuzzle(Puzzle puzzle);
-            abstract Builder setVisibleConstraint(VisibilityConstraint visibleConstraint);
-            abstract Builder setUnlockedConstraint(VisibilityConstraint unlockedConstraint);
-            abstract Builder setSolveReward(SolveReward solveReward);
-            abstract Setec2017Puzzle build();
-        }
-
-        static Builder builder() {
-            return new AutoValue_Setec2017HuntDefinition_Setec2017Puzzle.Builder()
-                    .setVisibleConstraint(VisibilityConstraint.builder().build())
-                    .setUnlockedConstraint(VisibilityConstraint.builder().build())
-                    .setSolveReward(SolveReward.builder().build());
-        }
-
-        abstract Puzzle getPuzzle();
-        abstract VisibilityConstraint getVisibleConstraint();
-        abstract VisibilityConstraint getUnlockedConstraint();
-        abstract SolveReward getSolveReward();
     }
 
     @Override
     public List<Puzzle> getPuzzles() {
-        return Setec2017Puzzles.PUZZLES.entrySet().stream()
-                .map(entry -> entry.getValue().getPuzzle())
-                .collect(Collectors.toList());
+        return ImmutableList.copyOf(Setec2017Puzzles.PUZZLES.values());
     }
 
     private class Setec2017CompositeEventProcessor extends CompositeEventProcessor {
@@ -297,9 +430,9 @@ public class Setec2017HuntDefinition extends HuntDefinition {
 
         Table<String, String, String> teamPuzzleStatusTable = HashBasedTable.create();
 
-        for (Setec2017Puzzle puzzle : Setec2017Puzzles.PUZZLES.values()) {
-            VisibilityConstraint unlockedConstraint = puzzle.getUnlockedConstraint();
-            VisibilityConstraint visibleConstraint = puzzle.getVisibleConstraint();
+        for (Puzzle puzzle : puzzleStore.getPuzzles().values()) {
+            VisibilityConstraint unlockedConstraint = puzzle.getPuzzleProperty(UnlockedConstraintProperty.class).getUnlockedConstraint();
+            VisibilityConstraint visibleConstraint = puzzle.getPuzzleProperty(VisibleConstraintProperty.class).getVisibleConstraint();
 
             for (String teamId : teamIds) {
                 CharacterLevelsProperty characterLevels = teamToCharacterLevels.get(teamId);
@@ -309,12 +442,12 @@ public class Setec2017HuntDefinition extends HuntDefinition {
                         characterLevels,
                         puzzleIdToVisibilityStatus
                 )) {
-                    teamPuzzleStatusTable.put(teamId, puzzle.getPuzzle().getPuzzleId(), "UNLOCKED");
+                    teamPuzzleStatusTable.put(teamId, puzzle.getPuzzleId(), "UNLOCKED");
                 } else if (visibleConstraint.isSatisfied(
                         characterLevels,
                         puzzleIdToVisibilityStatus
                 )) {
-                    teamPuzzleStatusTable.put(teamId, puzzle.getPuzzle().getPuzzleId(), "VISIBLE");
+                    teamPuzzleStatusTable.put(teamId, puzzle.getPuzzleId(), "VISIBLE");
                 }
             }
         }
@@ -358,8 +491,8 @@ public class Setec2017HuntDefinition extends HuntDefinition {
         eventProcessor.addEventProcessor(VisibilityChangeEvent.class, event -> {
             Visibility visibility = event.getVisibility();
             if (visibility.getStatus().equals("SOLVED")) {
-                Setec2017Puzzle puzzle = Setec2017Puzzles.PUZZLES.get(visibility.getPuzzleId());
-                SolveReward solveReward = puzzle.getSolveReward();
+                Puzzle puzzle = puzzleStore.getPuzzle(visibility.getPuzzleId());
+                SolveRewardProperty solveReward = puzzle.getPuzzleProperty(SolveRewardProperty.class);
                 if (solveReward.getGold() != 0) {
                     huntStatusStore.mutateTeamProperty(
                             visibility.getTeamId(),
