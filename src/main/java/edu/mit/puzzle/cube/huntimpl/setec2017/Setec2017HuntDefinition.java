@@ -67,7 +67,7 @@ public class Setec2017HuntDefinition extends HuntDefinition {
         private VisibilityConstraint unlockedConstraint;
         private SolveRewardProperty solveRewardProperty;
 
-        private static final ImmutableSet<String> DISPLAY_PROPERTY_ACCESS_STATUSES = ImmutableSet.of("VISIBLE", "UNLOCKED", "SOLVED");
+        private static final ImmutableSet<String> DISPLAY_PROPERTY_ACCESS_STATUSES = ImmutableSet.of("UNLOCKED", "SOLVED");
         private static final VisibilityConstraint NO_CONSTRAINT = VisibilityConstraint.builder().build();
         private static final SolveRewardProperty NO_REWARD = SolveRewardProperty.builder().build();
 
@@ -343,6 +343,12 @@ public class Setec2017HuntDefinition extends HuntDefinition {
         }
 
         @JsonProperty("unlockedConstraint") public abstract VisibilityConstraint getUnlockedConstraint();
+
+        private static final ImmutableSet<String> VISIBILITY_REQUIREMENT = ImmutableSet.of("VISIBLE","UNLOCKED","SOLVED");
+        @Override
+        public Set<String> getVisibilityRequirement() {
+            return VISIBILITY_REQUIREMENT;
+        }
     }
 
     @AutoValue
@@ -376,6 +382,12 @@ public class Setec2017HuntDefinition extends HuntDefinition {
         @JsonProperty("gold") abstract int getGold();
         @JsonProperty("characterLevels") abstract ImmutableMap<Character, Integer> getCharacterLevels();
         // TODO: add inventory items
+
+        private static final ImmutableSet<String> VISIBILITY_REQUIREMENT = ImmutableSet.of("UNLOCKED","SOLVED");
+        @Override
+        public Set<String> getVisibilityRequirement() {
+            return VISIBILITY_REQUIREMENT;
+        }
     }
 
     @Override
