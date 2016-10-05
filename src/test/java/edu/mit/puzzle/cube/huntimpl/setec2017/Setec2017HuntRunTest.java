@@ -67,7 +67,7 @@ public class Setec2017HuntRunTest extends RestletTest {
         json = getVisibility("testerteam", "f3");
         assertThat(json.get("status").asText()).isEqualTo("VISIBLE");
         json = getVisibility("testerteam", "f4");
-        assertThat(json.get("status").asText()).isEqualTo("INVISIBLE");
+        assertThat(json.get("status").asText()).isEqualTo("VISIBLE");
         json = getVisibility("testerteam", "dynast");
         assertThat(json.get("status").asText()).isEqualTo("INVISIBLE");
 
@@ -86,7 +86,7 @@ public class Setec2017HuntRunTest extends RestletTest {
         json = getVisibility("testerteam", "f4");
         assertThat(json.get("status").asText()).isEqualTo("VISIBLE");
         json = getVisibility("testerteam", "f5");
-        assertThat(json.get("status").asText()).isEqualTo("INVISIBLE");
+        assertThat(json.get("status").asText()).isEqualTo("VISIBLE");
 
         currentUserCredentials = TESTERTEAM_CREDENTIALS;
         postNewSubmission("testerteam", "f2", "FIGHTER1");
@@ -100,7 +100,7 @@ public class Setec2017HuntRunTest extends RestletTest {
         json = getVisibility("testerteam", "f5");
         assertThat(json.get("status").asText()).isEqualTo("VISIBLE");
         json = getVisibility("testerteam", "f6");
-        assertThat(json.get("status").asText()).isEqualTo("INVISIBLE");
+        assertThat(json.get("status").asText()).isEqualTo("VISIBLE");
 
         json = post(
                 "/hintrequests",
