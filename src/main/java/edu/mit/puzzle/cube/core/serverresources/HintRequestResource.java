@@ -8,6 +8,7 @@ import edu.mit.puzzle.cube.core.permissions.PermissionAction;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.subject.Subject;
 import org.restlet.data.Status;
+import org.restlet.resource.Get;
 import org.restlet.resource.Post;
 import org.restlet.resource.ResourceException;
 
@@ -24,6 +25,23 @@ public class HintRequestResource extends AbstractCubeResource {
             return Integer.parseInt(idString);
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException("id is not valid");
+        }
+    }
+
+    @Get
+    public HintRequest handleGet() {
+        int id = getId();
+        Optional<HintRequest> hintRequest = hintRequestStore.getHintRequest(id);
+
+        if (hintRequest.isPresent()) {
+            SecurityUtils.getSubject().checkPermission(
+                    new HintsPermission(hintRequest.get().getTeamId(), PermissionAction.READ));
+            return hintRequest.get();
+
+        } else {
+            throw new ResourceException(
+                    Status.CLIENT_ERROR_NOT_FOUND,
+                    String.format("Hint request %d does not exist", id));
         }
     }
 
