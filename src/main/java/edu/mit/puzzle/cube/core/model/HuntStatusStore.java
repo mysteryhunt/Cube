@@ -30,6 +30,7 @@ import java.time.Clock;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -272,7 +273,16 @@ public class HuntStatusStore {
                 Lists.newArrayList(teamId),
                 Team.class
         );
-        Team team = Iterables.getOnlyElement(teams);
+
+        Team team;
+        try {
+            team = Iterables.getOnlyElement(teams);
+        } catch (NoSuchElementException e) {
+            throw new ResourceException(
+                    Status.CLIENT_ERROR_NOT_FOUND.getCode(),
+                    e,
+                    "Failed to get team");
+        }
 
         return team.toBuilder()
                 .setTeamProperties(teamProperties)
