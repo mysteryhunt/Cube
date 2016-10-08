@@ -1,12 +1,14 @@
 package edu.mit.puzzle.cube.core.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.datatype.guava.GuavaModule;
+import com.google.auto.value.AutoValue;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Table;
 
 import edu.mit.puzzle.cube.core.db.ConnectionFactory;
 import edu.mit.puzzle.cube.core.db.DatabaseHelper;
@@ -83,24 +85,36 @@ public class PuzzleStore {
         }
     }
 
+    @AutoValue
+    @JsonDeserialize(builder = AutoValue_PuzzleStore_PuzzlePropertiesRow.Builder.class)
+    abstract static class PuzzlePropertiesRow {
+        @AutoValue.Builder
+        abstract static class Builder {
+            @JsonProperty("puzzleId") abstract Builder setPuzzleId(String puzzleId);
+            @JsonProperty("propertyKey") abstract Builder setPropertyKey(String propertyKey);
+            @JsonProperty("propertyValue") abstract Builder setPropertyValue(String propertyValue);
+            abstract PuzzlePropertiesRow build();
+        }
+        @JsonProperty("puzzleId") abstract String getPuzzleId();
+        @JsonProperty("propertyKey") abstract String getPropertyKey();
+        @JsonProperty("propertyValue") abstract String getPropertyValue();
+    }
+
     private Map<String, Map<String, Puzzle.Property>> deserializePuzzleProperties(
-            Table<Integer, String, Object> puzzlePropertiesResults
+            List<PuzzlePropertiesRow> puzzlePropertiesResults
     ) {
         Map<String, Map<String, Puzzle.Property>> allPuzzleProperties = new HashMap<>();
-        for (Map<String, Object> rowMap : puzzlePropertiesResults.rowMap().values()) {
-            String puzzleId = (String) rowMap.get("puzzleId");
-            Map<String, Puzzle.Property> puzzleProperties = allPuzzleProperties.get(puzzleId);
+        for (PuzzlePropertiesRow row : puzzlePropertiesResults) {
+            Map<String, Puzzle.Property> puzzleProperties = allPuzzleProperties.get(row.getPuzzleId());
             if (puzzleProperties == null) {
                 puzzleProperties = new HashMap<>();
-                allPuzzleProperties.put(puzzleId, puzzleProperties);
+                allPuzzleProperties.put(row.getPuzzleId(), puzzleProperties);
             }
 
-            String key = (String) rowMap.get("propertyKey");
-            String value = (String) rowMap.get("propertyValue");
-            Class<? extends Puzzle.Property> propertyClass = Puzzle.Property.getClass(key);
+            Class<? extends Puzzle.Property> propertyClass = Puzzle.Property.getClass(row.getPropertyKey());
             try {
-                Puzzle.Property property = OBJECT_MAPPER.readValue(value, propertyClass);
-                puzzleProperties.put(key, property);
+                Puzzle.Property property = OBJECT_MAPPER.readValue(row.getPropertyValue(), propertyClass);
+                puzzleProperties.put(row.getPropertyKey(), property);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -123,11 +137,12 @@ public class PuzzleStore {
                     String.format("Failed to access puzzle id %s: %s", puzzleId, e));
         }
 
-        Table<Integer, String, Object> puzzlePropertiesResults = DatabaseHelper.query(
+        List<PuzzlePropertiesRow> puzzlePropertiesResults = DatabaseHelper.query(
                 connectionFactory,
                 "SELECT puzzleId, propertyKey, propertyValue FROM puzzle_properties " +
                         "WHERE puzzleId = ?",
-                Lists.newArrayList(puzzleId)
+                Lists.newArrayList(puzzleId),
+                PuzzlePropertiesRow.class
         );
         Map<String, Puzzle.Property> puzzleProperties =
                 deserializePuzzleProperties(puzzlePropertiesResults).get(puzzleId);
@@ -147,10 +162,11 @@ public class PuzzleStore {
                 Lists.newArrayList(),
                 Puzzle.class
         );
-        Table<Integer, String, Object> puzzlePropertiesResults = DatabaseHelper.query(
+        List<PuzzlePropertiesRow> puzzlePropertiesResults = DatabaseHelper.query(
                 connectionFactory,
                 "SELECT puzzleId, propertyKey, propertyValue FROM puzzle_properties",
-                Lists.newArrayList()
+                Lists.newArrayList(),
+                PuzzlePropertiesRow.class
         );
         Map<String, Map<String, Puzzle.Property>> allPuzzleProperties =
                 deserializePuzzleProperties(puzzlePropertiesResults);
