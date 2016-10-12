@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -82,12 +83,15 @@ public class PuzzleStore {
                     } catch (JsonProcessingException e) {
                         throw new RuntimeException(e);
                     }
+                    connection.setAutoCommit(false);
                     insertPuzzlePropertyStatement.executeUpdate();
                     Optional<String> indexableValue = entry.getValue().getIndexableValue();
                     if (indexableValue.isPresent()) {
                         insertPuzzleIndexablePropertyStatement.setString(3, indexableValue.get());
                         insertPuzzleIndexablePropertyStatement.executeUpdate();
                     }
+                    connection.commit();
+                    connection.setAutoCommit(true);
                 }
             }
         } catch (SQLException e) {
@@ -230,36 +234,51 @@ public class PuzzleStore {
         boolean changed = false;
         Optional<String> indexablePropertyValue = property.getIndexableValue();
 
-        Optional<Integer> generatedId = DatabaseHelper.insert(
-                connectionFactory,
-                "INSERT INTO puzzle_properties (puzzleId, propertyKey, propertyValue) SELECT ?, ?, ? " +
-                        "WHERE NOT EXISTS (SELECT 1 FROM puzzle_properties WHERE puzzleId = ? AND propertyKey = ?)",
-                Lists.newArrayList(puzzleId, propertyKey, propertyValue, puzzleId, propertyKey));
-        if (generatedId.isPresent()) {
-            changed = true;
-            if (indexablePropertyValue.isPresent()) {
-                DatabaseHelper.insert(
-                        connectionFactory,
-                        "INSERT INTO puzzle_indexable_properties (puzzleId, propertyKey, propertyValue) SELECT ?, ?, ? " +
-                                "WHERE NOT EXISTS (SELECT 1 FROM puzzle_properties WHERE puzzleId = ? AND propertyKey = ?)",
-                        Lists.newArrayList(puzzleId, propertyKey, indexablePropertyValue.get(), puzzleId, propertyKey));
-            }
-        } else {
-            int updates = DatabaseHelper.update(
-                    connectionFactory,
-                    "UPDATE puzzle_properties SET propertyValue = ? " +
-                            "WHERE puzzleId = ? AND propertyKey = ?",
-                            Lists.newArrayList(propertyValue, puzzleId, propertyKey)
-            );
-            changed = updates > 0;
-            if (changed && indexablePropertyValue.isPresent()) {
-                DatabaseHelper.update(
-                        connectionFactory,
-                        "UPDATE puzzle_indexable_properties SET propertyValue = ? " +
-                                "WHERE puzzleId = ? AND propertyKey = ?",
-                        Lists.newArrayList(indexablePropertyValue.get(), puzzleId, propertyKey)
+        try (Connection connection = connectionFactory.getConnection();
+             PreparedStatement preparedInsert = connection.prepareStatement(
+                     "INSERT INTO puzzle_properties (puzzleId, propertyKey, propertyValue) SELECT ?, ?, ? " +
+                             "WHERE NOT EXISTS (SELECT 1 FROM puzzle_properties WHERE puzzleId = ? AND propertyKey = ?)",
+                     Statement.RETURN_GENERATED_KEYS);
+             PreparedStatement preparedIndexableInsert = connection.prepareStatement(
+                     "INSERT INTO puzzle_indexable_properties (puzzleId, propertyKey, propertyValue) SELECT ?, ?, ? " +
+                             "WHERE NOT EXISTS (SELECT 1 FROM puzzle_properties WHERE puzzleId = ? AND propertyKey = ?)");
+             PreparedStatement preparedUpdate = connection.prepareStatement(
+                     "UPDATE puzzle_properties SET propertyValue = ? " +
+                             "WHERE puzzleId = ? AND propertyKey = ?");
+             PreparedStatement preparedIndexableUpdate = connection.prepareStatement(
+                     "UPDATE puzzle_indexable_properties SET propertyValue = ? " +
+                             "WHERE puzzleId = ? AND propertyKey = ?");
+        ) {
+            connection.setAutoCommit(false);
+
+            Optional<Integer> generatedId = DatabaseHelper.insert(
+                    preparedInsert,
+                    Lists.newArrayList(puzzleId, propertyKey, propertyValue, puzzleId, propertyKey));
+            if (generatedId.isPresent()) {
+                changed = true;
+                if (indexablePropertyValue.isPresent()) {
+                    DatabaseHelper.insert(
+                            preparedIndexableInsert,
+                            Lists.newArrayList(puzzleId, propertyKey, indexablePropertyValue.get(), puzzleId, propertyKey));
+                }
+            } else {
+                int updates = DatabaseHelper.update(
+                        preparedUpdate,
+                        Lists.newArrayList(propertyValue, puzzleId, propertyKey)
                 );
+                changed = updates > 0;
+                if (changed && indexablePropertyValue.isPresent()) {
+                    DatabaseHelper.update(
+                            preparedIndexableUpdate,
+                            Lists.newArrayList(indexablePropertyValue.get(), puzzleId, propertyKey)
+                    );
+                }
             }
+
+            connection.commit();
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
 
         if (changed) {
