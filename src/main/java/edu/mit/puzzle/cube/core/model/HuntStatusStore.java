@@ -1,8 +1,11 @@
 package edu.mit.puzzle.cube.core.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.datatype.guava.GuavaModule;
+import com.google.auto.value.AutoValue;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.*;
@@ -232,24 +235,39 @@ public class HuntStatusStore {
         return teams.stream().map(Team::getTeamId).collect(Collectors.toSet());
     }
 
+    @AutoValue
+    @JsonDeserialize(builder = AutoValue_HuntStatusStore_TeamPropertiesRow.Builder.class)
+    abstract static class TeamPropertiesRow {
+        @AutoValue.Builder
+        abstract static class Builder {
+            @JsonProperty("teamId") abstract Builder setTeamId(String teamId);
+            @JsonProperty("propertyKey") abstract Builder setPropertyKey(String propertyKey);
+            @JsonProperty("propertyValue") abstract Builder setPropertyValue(String propertyValue);
+            abstract TeamPropertiesRow build();
+        }
+        @JsonProperty("teamId") abstract String getTeamId();
+        @JsonProperty("propertyKey") abstract String getPropertyKey();
+        @JsonProperty("propertyValue") abstract String getPropertyValue();
+    }
+
     private Map<String, Map<String, Team.Property>> deserializeTeamProperties(
-            Table<Integer, String, Object> teamPropertiesResults
+            List<TeamPropertiesRow> teamPropertiesResults
     ) {
         Map<String, Map<String, Team.Property>> allTeamProperties = new HashMap<>();
-        for (Map<String, Object> rowMap : teamPropertiesResults.rowMap().values()) {
-            String teamId = (String) rowMap.get("teamId");
-            Map<String, Team.Property> teamProperties = allTeamProperties.get(teamId);
+        for (TeamPropertiesRow row : teamPropertiesResults) {
+            Map<String, Team.Property> teamProperties = allTeamProperties.get(row.getTeamId());
             if (teamProperties == null) {
                 teamProperties = new HashMap<>();
-                allTeamProperties.put(teamId, teamProperties);
+                allTeamProperties.put(row.getTeamId(), teamProperties);
             }
 
-            String key = (String) rowMap.get("propertyKey");
-            String value = (String) rowMap.get("propertyValue");
-            Class<? extends Team.Property> propertyClass = Team.Property.getClass(key);
+            Class<? extends Team.Property> propertyClass = Team.Property.getClass(row.getPropertyKey());
+            if (propertyClass == null) {
+                throw new RuntimeException(String.format("Unknown team property class '%s'", row.getPropertyKey()));
+            }
             try {
-                Team.Property property = OBJECT_MAPPER.readValue(value, propertyClass);
-                teamProperties.put(key, property);
+                Team.Property property = OBJECT_MAPPER.readValue(row.getPropertyValue(), propertyClass);
+                teamProperties.put(row.getPropertyKey(), property);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -258,11 +276,12 @@ public class HuntStatusStore {
     }
 
     public Team getTeam(String teamId) {
-        Table<Integer, String, Object> teamPropertiesResults = DatabaseHelper.query(
+        List<TeamPropertiesRow> teamPropertiesResults = DatabaseHelper.query(
                 connectionFactory,
                 "SELECT teamId, propertyKey, propertyValue FROM team_properties " +
                         "WHERE teamId = ?",
-                Lists.newArrayList(teamId)
+                Lists.newArrayList(teamId),
+                TeamPropertiesRow.class
         );
         Map<String, Team.Property> teamProperties =
                 deserializeTeamProperties(teamPropertiesResults).get(teamId);
@@ -290,10 +309,11 @@ public class HuntStatusStore {
     }
 
     public List<Team> getTeams() {
-        Table<Integer, String, Object> teamPropertiesResults = DatabaseHelper.query(
+        List<TeamPropertiesRow> teamPropertiesResults = DatabaseHelper.query(
                 connectionFactory,
                 "SELECT teamId, propertyKey, propertyValue FROM team_properties",
-                ImmutableList.of()
+                ImmutableList.of(),
+                TeamPropertiesRow.class
         );
         Map<String, Map<String, Team.Property>> allTeamProperties =
                 deserializeTeamProperties(teamPropertiesResults);

@@ -8,6 +8,8 @@ import com.google.common.base.Preconditions;
 
 import org.restlet.data.Status;
 import org.restlet.resource.ResourceException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,6 +20,8 @@ import javax.annotation.Nullable;
 @AutoValue
 @JsonDeserialize(builder = AutoValue_Team.Builder.class)
 public abstract class Team {
+    private static final Logger LOGGER = LoggerFactory.getLogger(Team.class);
+
     private static final Pattern EMAIL_VALIDATOR = Pattern.compile(
             "^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}$", Pattern.CASE_INSENSITIVE);
 
@@ -25,6 +29,7 @@ public abstract class Team {
         private static Map<String, Class<? extends Property>> propertyClasses = new HashMap<>();
 
         protected static void registerClass(Class<? extends Property> propertyClass) {
+            LOGGER.info("Registering team property class {}", propertyClass.getSimpleName());
             propertyClasses.put(propertyClass.getSimpleName(), propertyClass);
         }
 
