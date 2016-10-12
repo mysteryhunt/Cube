@@ -112,6 +112,9 @@ public class PuzzleStore {
             }
 
             Class<? extends Puzzle.Property> propertyClass = Puzzle.Property.getClass(row.getPropertyKey());
+            if (propertyClass == null) {
+                throw new RuntimeException(String.format("Unknown puzzle property class '%s'", row.getPropertyKey()));
+            }
             try {
                 Puzzle.Property property = OBJECT_MAPPER.readValue(row.getPropertyValue(), propertyClass);
                 puzzleProperties.put(row.getPropertyKey(), property);

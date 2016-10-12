@@ -23,6 +23,8 @@ import edu.mit.puzzle.cube.core.permissions.AnswersPermission;
 import org.apache.shiro.SecurityUtils;
 import org.restlet.data.Status;
 import org.restlet.resource.ResourceException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -50,6 +52,8 @@ import javax.annotation.Nullable;
 @AutoValue
 @JsonDeserialize(builder = AutoValue_Puzzle.Builder.class)
 public abstract class Puzzle {
+    private static final Logger LOGGER = LoggerFactory.getLogger(Puzzle.class);
+
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
             .registerModule(new GuavaModule());
 
@@ -57,6 +61,7 @@ public abstract class Puzzle {
         private static Map<String, Class<? extends Property>> propertyClasses = new HashMap<>();
 
         protected static void registerClass(Class<? extends Property> propertyClass) {
+            LOGGER.info("Registering puzzle property class {}", propertyClass.getSimpleName());
             propertyClasses.put(propertyClass.getSimpleName(), propertyClass);
         }
 

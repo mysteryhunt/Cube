@@ -30,6 +30,9 @@ import edu.mit.puzzle.cube.core.model.Visibility;
 import edu.mit.puzzle.cube.core.model.VisibilityStatusSet;
 import edu.mit.puzzle.cube.modules.model.StandardVisibilityStatusSet;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -41,7 +44,27 @@ import java.util.stream.Collectors;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 public class Setec2017HuntDefinition extends HuntDefinition {
+    private static final Logger LOGGER = LoggerFactory.getLogger(Setec2017HuntDefinition.class);
+
     private static final VisibilityStatusSet VISIBILITY_STATUS_SET = new StandardVisibilityStatusSet();
+
+    // We need to force Java to load the puzzle and team property classes, to
+    // ensure that their static initializers actually run and register the
+    // property classes with Puzzle.Property and Team.Property. It would be nice
+    // to come up with a cleaner solution for this, but this works for now.
+    static {
+        try {
+            Class.forName("edu.mit.puzzle.cube.core.model.Puzzle$AnswersProperty");
+            Class.forName("edu.mit.puzzle.cube.core.model.Puzzle$DisplayNameProperty");
+            Class.forName("edu.mit.puzzle.cube.huntimpl.setec2017.Setec2017HuntDefinition$CharacterLevelsProperty");
+            Class.forName("edu.mit.puzzle.cube.huntimpl.setec2017.Setec2017HuntDefinition$GoldProperty");
+            Class.forName("edu.mit.puzzle.cube.huntimpl.setec2017.Setec2017HuntDefinition$SolveRewardProperty");
+            Class.forName("edu.mit.puzzle.cube.huntimpl.setec2017.Setec2017HuntDefinition$VisibleConstraintProperty");
+            Class.forName("edu.mit.puzzle.cube.huntimpl.setec2017.Setec2017HuntDefinition$UnlockedConstraintProperty");
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     @Override
     public VisibilityStatusSet getVisibilityStatusSet() {
@@ -432,6 +455,10 @@ public class Setec2017HuntDefinition extends HuntDefinition {
     }
 
     private void updateVisibility(Set<String> teamIds) {
+        if (teamIds.isEmpty()) {
+            return;
+        }
+
         Map<String,CharacterLevelsProperty> teamToCharacterLevels = Maps.toMap(
                 teamIds,
                 teamId -> huntStatusStore.getTeam(teamId).getTeamProperty(CharacterLevelsProperty.class));
