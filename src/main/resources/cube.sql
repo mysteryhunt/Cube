@@ -65,6 +65,17 @@ CREATE TABLE puzzle_properties (
        FOREIGN KEY(puzzleId) REFERENCES puzzles(puzzleId)
 );
 
+CREATE TABLE puzzle_indexable_properties (
+       puzzleId VARCHAR(64),
+       propertyKey VARCHAR(64),
+       propertyValue VARCHAR(96),
+       PRIMARY KEY(puzzleId, propertyKey),
+       FOREIGN KEY(puzzleId) REFERENCES puzzles(puzzleId)
+);
+
+CREATE INDEX puzzle_indexable_properties_index
+       ON puzzle_indexable_properties (propertyKey, propertyValue);
+
 CREATE TABLE submissions (
        submissionId ${auto_increment_type},
        teamId VARCHAR(64),

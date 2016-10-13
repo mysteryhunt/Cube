@@ -235,6 +235,18 @@ public class DatabaseHelper {
     }
 
 
+    public static Integer update(
+            PreparedStatement statement,
+            List<Object> parameters
+    ) throws SQLException {
+        for (int i = 0; i < parameters.size(); ++i) {
+            statement.setObject(i + 1, parameters.get(i));
+        }
+
+        return statement.executeUpdate();
+    }
+
+
     public static Optional<Integer> insert(
             ConnectionFactory connectionFactory,
             String preparedInsert,
@@ -264,6 +276,29 @@ public class DatabaseHelper {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static Optional<Integer> insert(
+            PreparedStatement statement,
+            List<Object> parameters
+    ) throws SQLException {
+        for (int i = 0; i < parameters.size(); ++i) {
+            statement.setObject(i + 1, parameters.get(i));
+        }
+
+        int updates = statement.executeUpdate();
+        if (updates < 1) {
+            return Optional.empty();
+        }
+
+        ResultSet rs = statement.getGeneratedKeys();
+        Optional<Integer> insertedId = Optional.empty();
+        while (rs.next()) {
+            if (rs.getMetaData().getColumnType(1) == Types.INTEGER) {
+                insertedId = Optional.of(rs.getInt(1));
+            }
+        }
+        return insertedId;
     }
 
     public static void insertBatch(

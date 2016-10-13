@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -75,6 +76,41 @@ public abstract class Puzzle {
         @JsonIgnore
         public Set<String> getVisibilityRequirement() {
             return ImmutableSet.of();
+        }
+
+        // If a property overrides this, string values will be stored in the puzzle_indexable_properties
+        // so that they can be looked up more easily
+        @JsonIgnore
+        public Optional<String> getIndexableValue() {
+            return Optional.empty();
+        }
+    }
+
+    @AutoValue
+    public static abstract class DisplayIdProperty extends Puzzle.Property {
+
+        static {
+            registerClass(DisplayIdProperty.class);
+        }
+
+        @JsonCreator
+        public static DisplayIdProperty create(
+                @JsonProperty("displayId") String displayId,
+                @JsonProperty("visibilityRequirement") Set<String> visibilityRequirement
+        ) {
+            return new AutoValue_Puzzle_DisplayIdProperty(
+                    displayId, ImmutableSet.copyOf(visibilityRequirement));
+        }
+
+        @JsonProperty("displayId") public abstract String getDisplayId();
+
+        @JsonIgnore(false)
+        @JsonProperty("visibilityRequirement")
+        public abstract Set<String> getVisibilityRequirement();
+
+        @Override
+        public Optional<String> getIndexableValue() {
+            return Optional.ofNullable(getDisplayId());
         }
     }
 

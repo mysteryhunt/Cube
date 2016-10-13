@@ -26,6 +26,7 @@ public class Setec2017Puzzles {
                 .setSingleAnswer("FIGHTERMETA"));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("f1")
+                .setDisplayId("super_cool_id")
                 .setSingleAnswer("FIGHTER1")
                 .setVisibleConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("fighter","UNLOCKED").build())
