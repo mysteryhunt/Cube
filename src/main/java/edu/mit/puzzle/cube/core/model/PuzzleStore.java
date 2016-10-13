@@ -10,7 +10,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
-import com.google.common.collect.Table;
 import edu.mit.puzzle.cube.core.db.ConnectionFactory;
 import edu.mit.puzzle.cube.core.db.DatabaseHelper;
 import edu.mit.puzzle.cube.core.events.Event;
@@ -149,15 +148,15 @@ public class PuzzleStore {
                     Puzzle.class
             );
             if (retrievedPuzzles.isEmpty()) {
-                Table<Integer, String, Object> displayIdResult = DatabaseHelper.query(
+                List<PuzzlePropertiesRow> displayIdResult = DatabaseHelper.query(
                         connectionFactory,
                         "SELECT * FROM puzzle_indexable_properties WHERE propertyValue = ? AND propertyKey = 'DisplayIdProperty'",
-                        Lists.newArrayList(puzzleId)
+                        Lists.newArrayList(puzzleId),
+                        PuzzlePropertiesRow.class
                 );
 
                 if (!displayIdResult.isEmpty()) {
-                    String aliasedPuzzleId = (String) Iterables.getOnlyElement(displayIdResult.rowMap().values()).get("puzzleId");
-                    return getPuzzle(aliasedPuzzleId);
+                    return getPuzzle(Iterables.getOnlyElement(displayIdResult).getPuzzleId());
                 }
             }
             //This will throw an exception if retrievedPuzzles is empty and the process got to this point
@@ -241,7 +240,7 @@ public class PuzzleStore {
                      Statement.RETURN_GENERATED_KEYS);
              PreparedStatement preparedIndexableInsert = connection.prepareStatement(
                      "INSERT INTO puzzle_indexable_properties (puzzleId, propertyKey, propertyValue) SELECT ?, ?, ? " +
-                             "WHERE NOT EXISTS (SELECT 1 FROM puzzle_properties WHERE puzzleId = ? AND propertyKey = ?)");
+                             "WHERE NOT EXISTS (SELECT 1 FROM puzzle_indexable_properties WHERE puzzleId = ? AND propertyKey = ?)");
              PreparedStatement preparedUpdate = connection.prepareStatement(
                      "UPDATE puzzle_properties SET propertyValue = ? " +
                              "WHERE puzzleId = ? AND propertyKey = ?");
