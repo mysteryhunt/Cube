@@ -56,6 +56,7 @@ public class Setec2017HuntDefinition extends HuntDefinition {
         try {
             Class.forName("edu.mit.puzzle.cube.core.model.Puzzle$AnswersProperty");
             Class.forName("edu.mit.puzzle.cube.core.model.Puzzle$DisplayNameProperty");
+            Class.forName("edu.mit.puzzle.cube.core.model.Puzzle$DisplayIdProperty");
             Class.forName("edu.mit.puzzle.cube.huntimpl.setec2017.Setec2017HuntDefinition$CharacterLevelsProperty");
             Class.forName("edu.mit.puzzle.cube.huntimpl.setec2017.Setec2017HuntDefinition$GoldProperty");
             Class.forName("edu.mit.puzzle.cube.huntimpl.setec2017.Setec2017HuntDefinition$SolveRewardProperty");
@@ -116,11 +117,14 @@ public class Setec2017HuntDefinition extends HuntDefinition {
 
             Puzzle.DisplayNameProperty displayNameProperty = Puzzle.DisplayNameProperty.create(
                     displayName, DISPLAY_PROPERTY_ACCESS_STATUSES);
+            Puzzle.DisplayIdProperty displayIdProperty = Puzzle.DisplayIdProperty.create(
+                    displayId, DISPLAY_PROPERTY_ACCESS_STATUSES);
             Puzzle.AnswersProperty answersProperty = Puzzle.AnswersProperty.create(ImmutableList.of(
                     Answer.create(singleAnswer)));
 
             return Puzzle.builder()
                     .setPuzzleId(id)
+                    .addPuzzleProperty(Puzzle.DisplayIdProperty.class, displayIdProperty)
                     .addPuzzleProperty(Puzzle.DisplayNameProperty.class, displayNameProperty)
                     .addPuzzleProperty(Puzzle.AnswersProperty.class, answersProperty)
                     .addPuzzleProperty(VisibleConstraintProperty.class,
