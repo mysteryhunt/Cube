@@ -78,7 +78,7 @@ public class Setec2017HuntRunTest extends RestletTest {
 
         assertThat(getCharacterLevel(Character.FIGHTER)).isEqualTo(1);
         assertThat(getCharacterLevel(Character.WIZARD)).isEqualTo(0);
-        assertThat(getGold()).isEqualTo(1);
+        assertThat(getGold()).isEqualTo(0);
         json = getVisibility("testerteam", "f1");
         assertThat(json.get("status").asText()).isEqualTo("SOLVED");
         json = getVisibility("testerteam", "f3");
@@ -110,19 +110,7 @@ public class Setec2017HuntRunTest extends RestletTest {
                         .setRequest("help")
                         .build()
         );
-        assertThat(json.get("created").asBoolean()).isTrue();
+        assertThat(json.get("created").asBoolean()).isFalse();
         assertThat(getGold()).isEqualTo(0);
-
-        // Reject the hint request. One gold should be credited back to the team.
-        currentUserCredentials = ADMIN_CREDENTIALS;
-        post(
-                "/hintrequests/1",
-                HintRequest.builder()
-                        .setHintRequestId(1)
-                        .setCallerUsername("adminuser")
-                        .setStatus(HintRequestStatus.REJECTED)
-                        .build()
-        );
-        assertThat(getGold()).isEqualTo(1);
     }
 }
