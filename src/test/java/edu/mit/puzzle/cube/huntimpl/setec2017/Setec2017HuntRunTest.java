@@ -1,13 +1,14 @@
 package edu.mit.puzzle.cube.huntimpl.setec2017;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.collect.ImmutableSet;
 
 import edu.mit.puzzle.cube.core.HuntDefinition;
 import edu.mit.puzzle.cube.core.RestletTest;
 import edu.mit.puzzle.cube.core.db.CubeJdbcRealm;
 import edu.mit.puzzle.cube.core.model.HintRequest;
-import edu.mit.puzzle.cube.core.model.HintRequestStatus;
 import edu.mit.puzzle.cube.huntimpl.setec2017.Setec2017HuntDefinition.Character;
+import edu.mit.puzzle.cube.huntimpl.setec2017.Setec2017HuntDefinition.InventoryItem;
 
 import org.apache.shiro.realm.Realm;
 import org.junit.Test;
@@ -53,12 +54,26 @@ public class Setec2017HuntRunTest extends RestletTest {
         }
     }
 
+    private ImmutableSet<InventoryItem> getInventoryItems() {
+        JsonNode json = get("/teams/testerteam");
+        JsonNode inventoryItemsNode = json
+                .get("teamProperties")
+                .get("InventoryProperty")
+                .get("inventoryItems");
+        ImmutableSet.Builder<InventoryItem> inventoryItems = ImmutableSet.builder();
+        for (JsonNode inventoryItemNode : inventoryItemsNode) {
+            inventoryItems.add(InventoryItem.valueOf(inventoryItemNode.asText()));
+        }
+        return inventoryItems.build();
+    }
+
     @Test
     public void testRun() throws IOException {
         postHuntStart();
 
         assertThat(getCharacterLevel(Character.FIGHTER)).isEqualTo(0);
         assertThat(getGold()).isEqualTo(0);
+        assertThat(getInventoryItems()).isEqualTo(ImmutableSet.of());
 
         JsonNode json = getVisibility("testerteam", "fighter");
         assertThat(json.get("status").asText()).isEqualTo("UNLOCKED");
@@ -79,6 +94,7 @@ public class Setec2017HuntRunTest extends RestletTest {
         assertThat(getCharacterLevel(Character.FIGHTER)).isEqualTo(1);
         assertThat(getCharacterLevel(Character.WIZARD)).isEqualTo(0);
         assertThat(getGold()).isEqualTo(0);
+        assertThat(getInventoryItems()).isEqualTo(ImmutableSet.of(InventoryItem.ITEM00));
         json = getVisibility("testerteam", "f1");
         assertThat(json.get("status").asText()).isEqualTo("SOLVED");
         json = getVisibility("testerteam", "f3");
@@ -93,6 +109,8 @@ public class Setec2017HuntRunTest extends RestletTest {
         currentUserCredentials = ADMIN_CREDENTIALS;
         postUpdateSubmission(2, "CORRECT");
 
+        assertThat(getInventoryItems()).isEqualTo(
+                ImmutableSet.of(InventoryItem.ITEM00, InventoryItem.ITEM01));
         json = getVisibility("testerteam", "f3");
         assertThat(json.get("status").asText()).isEqualTo("UNLOCKED");
         json = getVisibility("testerteam", "f4");
