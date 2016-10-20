@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 
 import edu.mit.puzzle.cube.core.model.Puzzle;
 import edu.mit.puzzle.cube.huntimpl.setec2017.Setec2017HuntDefinition.Character;
+import edu.mit.puzzle.cube.huntimpl.setec2017.Setec2017HuntDefinition.InventoryItem;
 import edu.mit.puzzle.cube.huntimpl.setec2017.Setec2017HuntDefinition.Setec2017PuzzleBuilder;
 import edu.mit.puzzle.cube.huntimpl.setec2017.Setec2017HuntDefinition.SolveRewardProperty;
 import edu.mit.puzzle.cube.huntimpl.setec2017.Setec2017HuntDefinition.VisibilityConstraint;
@@ -37,6 +38,7 @@ public class Setec2017Puzzles {
                         .addPuzzleVisibilityStatusConstraint("fighter","UNLOCKED").build())
                 .setSolveRewardProperty(SolveRewardProperty.builder()
                         .addCharacterLevels(Character.FIGHTER, 1)
+                        .setInventoryItem(InventoryItem.ITEM00)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("f2")
@@ -49,6 +51,7 @@ public class Setec2017Puzzles {
                         .addPuzzleVisibilityStatusConstraint("fighter","UNLOCKED").build())
                 .setSolveRewardProperty(SolveRewardProperty.builder()
                         .addCharacterLevels(Character.FIGHTER, 1)
+                        .setInventoryItem(InventoryItem.ITEM01)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("f3")

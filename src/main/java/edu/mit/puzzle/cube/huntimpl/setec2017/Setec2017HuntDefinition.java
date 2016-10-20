@@ -41,6 +41,8 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
+import javax.annotation.Nullable;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 
 public class Setec2017HuntDefinition extends HuntDefinition {
@@ -59,6 +61,7 @@ public class Setec2017HuntDefinition extends HuntDefinition {
             Class.forName("edu.mit.puzzle.cube.core.model.Puzzle$DisplayIdProperty");
             Class.forName("edu.mit.puzzle.cube.huntimpl.setec2017.Setec2017HuntDefinition$CharacterLevelsProperty");
             Class.forName("edu.mit.puzzle.cube.huntimpl.setec2017.Setec2017HuntDefinition$GoldProperty");
+            Class.forName("edu.mit.puzzle.cube.huntimpl.setec2017.Setec2017HuntDefinition$InventoryProperty");
             Class.forName("edu.mit.puzzle.cube.huntimpl.setec2017.Setec2017HuntDefinition$SolveRewardProperty");
             Class.forName("edu.mit.puzzle.cube.huntimpl.setec2017.Setec2017HuntDefinition$VisibleConstraintProperty");
             Class.forName("edu.mit.puzzle.cube.huntimpl.setec2017.Setec2017HuntDefinition$UnlockedConstraintProperty");
@@ -79,6 +82,49 @@ public class Setec2017HuntDefinition extends HuntDefinition {
         LINGUIST,
         ECONOMIST,
         CHEMIST;
+    }
+
+    public enum InventoryItem {
+        ITEM00,
+        ITEM01,
+        ITEM02,
+        ITEM03,
+        ITEM04,
+        ITEM05,
+        ITEM06,
+        ITEM07,
+        ITEM08,
+        ITEM09,
+        ITEM10,
+        ITEM11,
+        ITEM12,
+        ITEM13,
+        ITEM14,
+        ITEM15,
+        ITEM16,
+        ITEM17,
+        ITEM18,
+        ITEM19,
+        ITEM20,
+        ITEM21,
+        ITEM22,
+        ITEM23,
+        ITEM24,
+        ITEM25,
+        ITEM26,
+        ITEM27,
+        ITEM28,
+        ITEM29,
+        ITEM30,
+        ITEM31,
+        ITEM32,
+        ITEM33,
+        ITEM34,
+        ITEM35,
+        ITEM36,
+        ITEM37,
+        ITEM38,
+        ITEM39;
     }
 
     static class Setec2017PuzzleBuilder {
@@ -202,7 +248,20 @@ public class Setec2017HuntDefinition extends HuntDefinition {
         @JsonProperty("gold") public abstract int getGold();
     }
 
-    // TODO: create a team property for inventory items
+    @AutoValue
+    public abstract static class InventoryProperty extends Team.Property {
+        static {
+            registerClass(InventoryProperty.class);
+        }
+
+        @JsonCreator
+        public static InventoryProperty create(
+                @JsonProperty("inventoryItems") ImmutableSet<InventoryItem> inventoryItems) {
+            return new AutoValue_Setec2017HuntDefinition_InventoryProperty(inventoryItems);
+        }
+
+        @JsonProperty("inventoryItems") public abstract ImmutableSet<InventoryItem> getInventoryItems();
+    }
 
 
     @AutoValue
@@ -395,6 +454,7 @@ public class Setec2017HuntDefinition extends HuntDefinition {
         abstract static class Builder {
             @JsonProperty("gold") abstract Builder setGold(int gold);
             @JsonProperty("characterLevels") abstract Builder setCharacterLevels(Map<Character,Integer> characterLevels);
+            @JsonProperty("inventoryItem") abstract Builder setInventoryItem(@Nullable InventoryItem inventoryItem);
 
             abstract ImmutableMap.Builder<Character, Integer> characterLevelsBuilder();
 
@@ -408,7 +468,10 @@ public class Setec2017HuntDefinition extends HuntDefinition {
 
         @JsonProperty("gold") abstract int getGold();
         @JsonProperty("characterLevels") abstract ImmutableMap<Character, Integer> getCharacterLevels();
-        // TODO: add inventory items
+
+        @Nullable
+        @JsonProperty("inventoryItem")
+        abstract InventoryItem getInventoryItem();
 
         private static final ImmutableSet<String> VISIBILITY_REQUIREMENT = ImmutableSet.of("UNLOCKED","SOLVED");
         @Override
@@ -516,6 +579,11 @@ public class Setec2017HuntDefinition extends HuntDefinition {
                             CharacterLevelsProperty.class,
                             CharacterLevelsProperty.create(ImmutableMap.of())
                     );
+                    huntStatusStore.setTeamProperty(
+                            teamId,
+                            InventoryProperty.class,
+                            InventoryProperty.create(ImmutableSet.of())
+                    );
                 }
             }
         });
@@ -560,6 +628,18 @@ public class Setec2017HuntDefinition extends HuntDefinition {
                                 }
                                 return CharacterLevelsProperty.create(ImmutableMap.copyOf(newLevels));
                             }
+                    );
+                }
+                if (solveReward.getInventoryItem() != null) {
+                    huntStatusStore.mutateTeamProperty(
+                            visibility.getTeamId(),
+                            InventoryProperty.class,
+                            inventory -> InventoryProperty.create(
+                                    ImmutableSet.<InventoryItem>builder()
+                                            .addAll(inventory.getInventoryItems())
+                                            .add(solveReward.getInventoryItem())
+                                            .build()
+                            )
                     );
                 }
             }
