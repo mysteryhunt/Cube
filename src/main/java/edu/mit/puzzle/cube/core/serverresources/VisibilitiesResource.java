@@ -25,6 +25,7 @@ public class VisibilitiesResource extends AbstractCubeResource {
                     new VisibilitiesPermission("*", PermissionAction.READ));
         }
         Optional<String> puzzleId = Optional.ofNullable(getQueryValue("puzzleId"));
+        puzzleId = puzzleId.map(puzzleStore::getCanonicalPuzzleId);
 
         List<Visibility> visibilities = huntStatusStore.getExplicitVisibilities(teamId, puzzleId);
         return Visibilities.builder()

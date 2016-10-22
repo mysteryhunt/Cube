@@ -32,7 +32,7 @@ public class VisibilityResource extends AbstractCubeResource {
     @Get
     public Visibility handleGet() {
         String teamId = getTeamId();
-        String puzzleId = getPuzzleId();
+        String puzzleId = puzzleStore.getCanonicalPuzzleId(getPuzzleId());
         SecurityUtils.getSubject().checkPermission(
                 new VisibilitiesPermission(teamId, PermissionAction.READ));
         return huntStatusStore.getVisibility(teamId, puzzleId);
@@ -41,7 +41,7 @@ public class VisibilityResource extends AbstractCubeResource {
     @Post
     public PostResult handlePost(Visibility visibility) {
         String teamId = getTeamId();
-        String puzzleId = getPuzzleId();
+        String puzzleId = puzzleStore.getCanonicalPuzzleId(getPuzzleId());
 
         SecurityUtils.getSubject().checkPermission(
                 new VisibilitiesPermission(teamId, PermissionAction.UPDATE));
