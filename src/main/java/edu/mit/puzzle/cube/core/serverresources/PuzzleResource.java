@@ -32,6 +32,7 @@ public class PuzzleResource extends AbstractCubeResource {
         subject.checkPermission(new PuzzlesPermission(PermissionAction.READ));
 
         String puzzleId = getId();
+        puzzleId = puzzleStore.getCanonicalPuzzleId(puzzleId);
         Puzzle puzzle = puzzleStore.getPuzzle(puzzleId);
 
         User user = userStore.getUser((String) subject.getPrincipal());

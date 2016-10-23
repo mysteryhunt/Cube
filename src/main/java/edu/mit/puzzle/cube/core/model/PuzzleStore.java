@@ -138,6 +138,20 @@ public class PuzzleStore {
         return allPuzzleProperties;
     }
 
+    public String getCanonicalPuzzleId(String puzzleDisplayId) {
+        List<PuzzlePropertiesRow> displayIdResult = DatabaseHelper.query(
+                connectionFactory,
+                "SELECT * FROM puzzle_indexable_properties WHERE propertyValue = ? AND propertyKey = 'DisplayIdProperty'",
+                Lists.newArrayList(puzzleDisplayId),
+                PuzzlePropertiesRow.class
+        );
+        if (!displayIdResult.isEmpty()) {
+            return Iterables.getOnlyElement(displayIdResult).getPuzzleId();
+        } else {
+            return puzzleDisplayId;
+        }
+    }
+
     public Puzzle getPuzzle(String puzzleId) {
         Puzzle puzzle;
         try {
@@ -147,19 +161,6 @@ public class PuzzleStore {
                     Lists.newArrayList(puzzleId),
                     Puzzle.class
             );
-            if (retrievedPuzzles.isEmpty()) {
-                List<PuzzlePropertiesRow> displayIdResult = DatabaseHelper.query(
-                        connectionFactory,
-                        "SELECT * FROM puzzle_indexable_properties WHERE propertyValue = ? AND propertyKey = 'DisplayIdProperty'",
-                        Lists.newArrayList(puzzleId),
-                        PuzzlePropertiesRow.class
-                );
-
-                if (!displayIdResult.isEmpty()) {
-                    return getPuzzle(Iterables.getOnlyElement(displayIdResult).getPuzzleId());
-                }
-            }
-            //This will throw an exception if retrievedPuzzles is empty and the process got to this point
             puzzle = Iterables.getOnlyElement(retrievedPuzzles);
         } catch (Exception e) {
             throw new ResourceException(
