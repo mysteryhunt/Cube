@@ -25,6 +25,7 @@ public abstract class CubeRole {
                     new SubmissionsPermission("*", PermissionAction.READ, PermissionAction.UPDATE),
                     new VisibilitiesPermission("*", PermissionAction.READ),
                     new HintsPermission("*", PermissionAction.READ, PermissionAction.UPDATE),
+                    new InteractionsPermission("*", PermissionAction.READ, PermissionAction.UPDATE),
                     new PuzzlesPermission(PermissionAction.READ),
                     new AnswersPermission()
             ));

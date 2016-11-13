@@ -125,3 +125,18 @@ CREATE TABLE hint_requests (
        FOREIGN KEY(puzzleId) REFERENCES puzzles(puzzleId),
        FOREIGN KEY(callerUsername) REFERENCES users(username)
 );
+
+CREATE TABLE interaction_requests (
+       interactionRequestId ${auto_increment_type},
+       teamId VARCHAR(64),
+       puzzleId VARCHAR(64),
+       status VARCHAR(10) DEFAULT 'REQUESTED',
+       timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+       request TEXT,
+       response TEXT,
+       callerUsername VARCHAR(64),
+       PRIMARY KEY(interactionRequestId),
+       FOREIGN KEY(teamId) REFERENCES teams(teamId),
+       FOREIGN KEY(puzzleId) REFERENCES puzzles(puzzleId),
+       FOREIGN KEY(callerUsername) REFERENCES users(username)
+);
