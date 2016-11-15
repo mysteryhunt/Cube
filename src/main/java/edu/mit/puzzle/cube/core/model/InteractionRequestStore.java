@@ -85,7 +85,7 @@ public class InteractionRequestStore {
     public List<InteractionRequest> getNonTerminalInteractionRequests() {
         return DatabaseHelper.query(
                 connectionFactory,
-                "SELECT * FROM interaction_requests WHERE status <> 'ANSWERED' AND status <> 'REJECTED'",
+                "SELECT * FROM interaction_requests WHERE status <> 'COMPLETE'",
                 ImmutableList.of(),
                 InteractionRequest.class
         );

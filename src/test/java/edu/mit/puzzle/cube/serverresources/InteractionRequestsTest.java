@@ -129,7 +129,7 @@ public class InteractionRequestsTest extends RestletTest {
                 InteractionRequest.builder()
                         .setInteractionRequestId(interactionRequest.get("interactionRequestId").asInt())
                         .setResponse("response")
-                        .setStatus(InteractionRequestStatus.ANSWERED)
+                        .setStatus(InteractionRequestStatus.COMPLETE)
                         .build()
         );
 
@@ -146,7 +146,7 @@ public class InteractionRequestsTest extends RestletTest {
         interactionRequest = teamGetResult.get("interactionRequests").get(0);
         assertThat(interactionRequest.get("teamId").asText()).isEqualTo(TEAM.getIdentifier());
         assertThat(interactionRequest.get("puzzleId").asText()).isEqualTo(PUZZLE_ID);
-        assertThat(interactionRequest.get("status").asText()).isEqualTo(InteractionRequestStatus.ANSWERED.name());
+        assertThat(interactionRequest.get("status").asText()).isEqualTo(InteractionRequestStatus.COMPLETE.name());
         assertThat(interactionRequest.get("request").asText()).isEqualTo("help");
         assertThat(interactionRequest.get("response").asText()).isEqualTo("response");
     }

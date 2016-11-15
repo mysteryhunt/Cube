@@ -7,12 +7,12 @@ import java.util.Set;
 public enum InteractionRequestStatus {
     REQUESTED,
     ASSIGNED,
-    ANSWERED,
-    REJECTED;
+    SCHEDULED,
+    COMPLETE;
 
     private static Set<InteractionRequestStatus> ASSIGNED_STATUSES =
-            ImmutableSet.of(ASSIGNED, ANSWERED, REJECTED);
-    private static Set<InteractionRequestStatus> TERMINAL_STATUSES = ImmutableSet.of(ANSWERED, REJECTED);
+            ImmutableSet.of(ASSIGNED, SCHEDULED, COMPLETE);
+    private static Set<InteractionRequestStatus> TERMINAL_STATUSES = ImmutableSet.of(COMPLETE);
 
     public static InteractionRequestStatus getDefault() {
         return REQUESTED;
