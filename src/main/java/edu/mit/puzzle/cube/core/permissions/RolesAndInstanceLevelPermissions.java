@@ -54,7 +54,8 @@ public abstract class RolesAndInstanceLevelPermissions {
                         new TeamsPermission(teamId, PermissionAction.READ),
                         new SubmissionsPermission(teamId, PermissionAction.CREATE, PermissionAction.READ),
                         new VisibilitiesPermission(teamId, PermissionAction.READ),
-                        new HintsPermission(teamId, PermissionAction.CREATE, PermissionAction.READ)
+                        new HintsPermission(teamId, PermissionAction.CREATE, PermissionAction.READ),
+                        new InteractionsPermission(teamId, PermissionAction.CREATE, PermissionAction.READ)
                 ));
     }
 
