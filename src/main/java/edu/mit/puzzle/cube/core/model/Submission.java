@@ -33,6 +33,8 @@ public abstract class Submission {
         return new AutoValue_Submission.Builder();
     }
 
+    public abstract Builder toBuilder();
+
     @Nullable @JsonProperty("submissionId") public abstract Integer getSubmissionId();
     @Nullable @JsonProperty("teamId") public abstract String getTeamId();
     @Nullable @JsonProperty("puzzleId") public abstract String getPuzzleId();

@@ -33,6 +33,8 @@ public abstract class HintRequest {
         return new AutoValue_HintRequest.Builder();
     }
 
+    public abstract Builder toBuilder();
+
     @Nullable @JsonProperty("hintRequestId") public abstract Integer getHintRequestId();
     @Nullable @JsonProperty("teamId") public abstract String getTeamId();
     @Nullable @JsonProperty("puzzleId") public abstract String getPuzzleId();

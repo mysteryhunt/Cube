@@ -33,6 +33,8 @@ public abstract class InteractionRequest {
         return new AutoValue_InteractionRequest.Builder();
     }
 
+    public abstract Builder toBuilder();
+
     @Nullable @JsonProperty("interactionRequestId") public abstract Integer getInteractionRequestId();
     @Nullable @JsonProperty("teamId") public abstract String getTeamId();
     @Nullable @JsonProperty("puzzleId") public abstract String getPuzzleId();

@@ -33,9 +33,11 @@ public class SubmissionsResource extends AbstractCubeResource {
                     .map(statusString -> SubmissionStatus.valueOf(statusString))
                     .collect(Collectors.toList());
         }
+        Optional<String> puzzleId = Optional.ofNullable(getQueryValue("puzzleId"));
+        puzzleId = puzzleId.map(puzzleStore::getCanonicalPuzzleId);
         return FilterOptions.builder()
                 .setTeamId(Optional.ofNullable(getQueryValue("teamId")))
-                .setPuzzleId(Optional.ofNullable(getQueryValue("puzzleId")))
+                .setPuzzleId(puzzleId)
                 .setStatuses(statuses)
                 .setCallerUsername(Optional.ofNullable(getQueryValue("callerUsername")))
                 .build();
@@ -73,6 +75,11 @@ public class SubmissionsResource extends AbstractCubeResource {
     public PostResult handlePost(Submission submission) {
         SecurityUtils.getSubject().checkPermission(
                 new SubmissionsPermission(submission.getTeamId(), PermissionAction.CREATE));
+
+        submission = submission.toBuilder()
+            .setPuzzleId(puzzleStore.getCanonicalPuzzleId(submission.getPuzzleId()))
+            .build();
+
         Visibility visibility = huntStatusStore.getVisibility(
                 submission.getTeamId(),
                 submission.getPuzzleId()
