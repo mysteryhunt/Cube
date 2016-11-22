@@ -646,10 +646,11 @@ public class Setec2017HuntDefinition extends HuntDefinition {
         });
 
         eventProcessor.addEventProcessor(FullReleaseEvent.class, event -> {
+            String puzzleId = puzzleStore.getCanonicalPuzzleId(event.getPuzzleId());
             for (String teamId : huntStatusStore.getTeamIds()) {
                 huntStatusStore.setVisibility(
                         teamId,
-                        event.getPuzzleId(),
+                        puzzleId,
                         "UNLOCKED"
                 );
             }

@@ -28,6 +28,7 @@ public class InteractionRequestsResource extends AbstractCubeResource {
                     puzzleId != null && !puzzleId.isEmpty(),
                     "puzzleId must be specified"
             );
+            puzzleId = puzzleStore.getCanonicalPuzzleId(puzzleId);
 
             SecurityUtils.getSubject().checkPermission(
                     new InteractionsPermission(teamId, PermissionAction.READ)
@@ -46,6 +47,11 @@ public class InteractionRequestsResource extends AbstractCubeResource {
     public PostResult handlePost(InteractionRequest interactionRequest) {
         SecurityUtils.getSubject().checkPermission(
                 new InteractionsPermission(interactionRequest.getTeamId(), PermissionAction.CREATE));
+
+        interactionRequest = interactionRequest.toBuilder()
+            .setPuzzleId(puzzleStore.getCanonicalPuzzleId(interactionRequest.getPuzzleId()))
+            .build();
+
         Visibility visibility = huntStatusStore.getVisibility(
                 interactionRequest.getTeamId(),
                 interactionRequest.getPuzzleId()

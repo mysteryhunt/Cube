@@ -28,6 +28,7 @@ public class HintRequestsResource extends AbstractCubeResource {
                     puzzleId != null && !puzzleId.isEmpty(),
                     "puzzleId must be specified"
             );
+            puzzleId = puzzleStore.getCanonicalPuzzleId(puzzleId);
 
             SecurityUtils.getSubject().checkPermission(
                     new HintsPermission(teamId, PermissionAction.READ)
@@ -46,6 +47,11 @@ public class HintRequestsResource extends AbstractCubeResource {
     public PostResult handlePost(HintRequest hintRequest) {
         SecurityUtils.getSubject().checkPermission(
                 new HintsPermission(hintRequest.getTeamId(), PermissionAction.CREATE));
+
+        hintRequest = hintRequest.toBuilder()
+            .setPuzzleId(puzzleStore.getCanonicalPuzzleId(hintRequest.getPuzzleId()))
+            .build();
+
         Visibility visibility = huntStatusStore.getVisibility(
                 hintRequest.getTeamId(),
                 hintRequest.getPuzzleId()
