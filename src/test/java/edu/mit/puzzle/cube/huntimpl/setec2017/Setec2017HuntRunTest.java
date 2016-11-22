@@ -6,6 +6,8 @@ import com.google.common.collect.ImmutableSet;
 import edu.mit.puzzle.cube.core.HuntDefinition;
 import edu.mit.puzzle.cube.core.RestletTest;
 import edu.mit.puzzle.cube.core.db.CubeJdbcRealm;
+import edu.mit.puzzle.cube.core.events.FullReleaseEvent;
+import edu.mit.puzzle.cube.core.events.FullSolveEvent;
 import edu.mit.puzzle.cube.core.model.HintRequest;
 import edu.mit.puzzle.cube.huntimpl.setec2017.Setec2017HuntDefinition.Character;
 import edu.mit.puzzle.cube.huntimpl.setec2017.Setec2017HuntDefinition.InventoryItem;
@@ -130,5 +132,22 @@ public class Setec2017HuntRunTest extends RestletTest {
         );
         assertThat(json.get("created").asBoolean()).isFalse();
         assertThat(getGold()).isEqualTo(0);
+
+        assertThat(getCharacterLevel(Character.FIGHTER)).isEqualTo(2);
+        assertThat(getCharacterLevel(Character.CLERIC)).isEqualTo(0);
+        post(
+                "/events",
+                FullReleaseEvent.builder()
+                       .setPuzzleId("eventa")
+                       .build()
+        );
+        post(
+                "/events",
+                FullSolveEvent.builder()
+                       .setPuzzleId("eventa")
+                       .build()
+        );
+        assertThat(getCharacterLevel(Character.FIGHTER)).isEqualTo(3);
+        assertThat(getCharacterLevel(Character.CLERIC)).isEqualTo(1);
     }
 }

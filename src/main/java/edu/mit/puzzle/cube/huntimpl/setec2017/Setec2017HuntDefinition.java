@@ -15,6 +15,7 @@ import edu.mit.puzzle.cube.core.HuntDefinition;
 import edu.mit.puzzle.cube.core.events.CompositeEventProcessor;
 import edu.mit.puzzle.cube.core.events.Event;
 import edu.mit.puzzle.cube.core.events.FullReleaseEvent;
+import edu.mit.puzzle.cube.core.events.FullSolveEvent;
 import edu.mit.puzzle.cube.core.events.HintCompleteEvent;
 import edu.mit.puzzle.cube.core.events.HuntStartEvent;
 import edu.mit.puzzle.cube.core.events.SubmissionCompleteEvent;
@@ -647,13 +648,20 @@ public class Setec2017HuntDefinition extends HuntDefinition {
 
         eventProcessor.addEventProcessor(FullReleaseEvent.class, event -> {
             String puzzleId = puzzleStore.getCanonicalPuzzleId(event.getPuzzleId());
+            Table<String,String,String> teamPuzzleStatusTable = HashBasedTable.create();
             for (String teamId : huntStatusStore.getTeamIds()) {
-                huntStatusStore.setVisibility(
-                        teamId,
-                        puzzleId,
-                        "UNLOCKED"
-                );
+                teamPuzzleStatusTable.put(teamId, puzzleId, "UNLOCKED");
             }
+            huntStatusStore.setVisibilityBatch(teamPuzzleStatusTable);
+        });
+
+        eventProcessor.addEventProcessor(FullSolveEvent.class, event -> {
+            String puzzleId = puzzleStore.getCanonicalPuzzleId(event.getPuzzleId());
+            Table<String,String,String> teamPuzzleStatusTable = HashBasedTable.create();
+            for (String teamId : huntStatusStore.getTeamIds()) {
+                teamPuzzleStatusTable.put(teamId, puzzleId, "SOLVED");
+            }
+            huntStatusStore.setVisibilityBatch(teamPuzzleStatusTable);
         });
 
         eventProcessor.addEventProcessor(HintCompleteEvent.class, event -> {
