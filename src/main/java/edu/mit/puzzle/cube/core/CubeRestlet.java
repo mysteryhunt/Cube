@@ -60,7 +60,7 @@ public class CubeRestlet extends Filter {
 
         // Create an authenticator for all routes.
         ChallengeAuthenticator authenticator = new ChallengeAuthenticator(
-                null,
+                context,
                 ChallengeScheme.HTTP_BASIC,
                 "Cube"
         );
