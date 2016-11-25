@@ -17,7 +17,6 @@ import edu.mit.puzzle.cube.core.events.Event;
 import edu.mit.puzzle.cube.core.events.EventProcessor;
 import edu.mit.puzzle.cube.core.events.VisibilityChangeEvent;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.restlet.data.Status;
 import org.restlet.resource.ResourceException;
 import org.slf4j.Logger;
@@ -57,26 +56,36 @@ public class HuntStatusStore {
     private final Clock clock;
     private final VisibilityStatusSet visibilityStatusSet;
     private final EventProcessor<Event> eventProcessor;
+    private final PuzzleStore puzzleStore;
 
     @Inject
     public HuntStatusStore(
         ConnectionFactory connectionFactory,
         HuntDefinition huntDefinition,
-        EventProcessor<Event> eventProcessor
+        EventProcessor<Event> eventProcessor,
+        PuzzleStore puzzleStore
     ) {
-        this(connectionFactory, Clock.systemUTC(), huntDefinition.getVisibilityStatusSet(), eventProcessor);
+        this(
+                connectionFactory,
+                Clock.systemUTC(),
+                huntDefinition.getVisibilityStatusSet(),
+                eventProcessor,
+                puzzleStore
+        );
     }
 
     public HuntStatusStore(
             ConnectionFactory connectionFactory,
             Clock clock,
             VisibilityStatusSet visibilityStatusSet,
-            EventProcessor<Event> eventProcessor
+            EventProcessor<Event> eventProcessor,
+            PuzzleStore puzzleStore
     ) {
         this.connectionFactory = checkNotNull(connectionFactory);
         this.clock = checkNotNull(clock);
         this.visibilityStatusSet = checkNotNull(visibilityStatusSet);
         this.eventProcessor = checkNotNull(eventProcessor);
+        this.puzzleStore = puzzleStore;
     }
 
     public VisibilityStatusSet getVisibilityStatusSet() {
@@ -91,68 +100,6 @@ public class HuntStatusStore {
                         .setStatus(visibilityStatusSet.getDefaultVisibilityStatus())
                         .build()
                 );
-    }
-
-    public List<Visibility> getExplicitVisibilities(
-            Optional<String> teamId,
-            Optional<String> puzzleId
-    ) {
-        String whereClause = "";
-        List<Object> parameters = Lists.newArrayList();
-        if (teamId.isPresent() && puzzleId.isPresent()) {
-            whereClause = " WHERE teamId = ? AND puzzleId = ?";
-            parameters.add(teamId.get());
-            parameters.add(puzzleId.get());
-        } else if (teamId.isPresent()) {
-            whereClause = " WHERE teamId = ?";
-            parameters.add(teamId.get());
-        } else if (puzzleId.isPresent()) {
-            whereClause = " WHERE puzzleId = ?";
-            parameters.add(puzzleId.get());
-        }
-
-        String visibilitiesQuery = "SELECT teamId, puzzleId, status FROM visibilities";
-        visibilitiesQuery += whereClause;
-        List<Visibility> visibilities = DatabaseHelper.query(
-                connectionFactory,
-                visibilitiesQuery,
-                parameters,
-                Visibility.class
-        );
-
-        String submissionsQuery = "SELECT teamId, puzzleId, canonicalAnswer FROM submissions";
-        if (whereClause.isEmpty()) {
-            submissionsQuery += " WHERE ";
-        } else {
-            submissionsQuery += whereClause + " AND ";
-        }
-        submissionsQuery += "canonicalAnswer IS NOT NULL";
-        List<Submission> submissions = DatabaseHelper.query(
-                connectionFactory,
-                submissionsQuery,
-                parameters,
-                Submission.class
-        );
-        ImmutableListMultimap<Object, Submission> submissionIndex = Multimaps.index(
-                submissions,
-                submission -> Pair.of(submission.getTeamId(), submission.getPuzzleId())
-        );
-
-        visibilities = visibilities.stream().map(visibility -> {
-            List<Submission> visibilitySubmissions = submissionIndex.get(
-                    Pair.of(visibility.getTeamId(), visibility.getPuzzleId()));
-            if (!visibilitySubmissions.isEmpty()) {
-                List<String> solvedAnswers = visibilitySubmissions.stream()
-                        .map(Submission::getCanonicalAnswer)
-                        .collect(Collectors.toList());
-                return visibility.toBuilder()
-                        .setSolvedAnswers(solvedAnswers)
-                        .build();
-            }
-            return visibility;
-        }).collect(Collectors.toList());
-
-        return visibilities;
     }
 
     public List<Visibility> getVisibilitiesForTeam(String teamId) {
@@ -184,6 +131,22 @@ public class HuntStatusStore {
                 submissions, Submission::getPuzzleId
         );
 
+        Set<String> solvedPuzzlesMissingAnswers = visibilities.stream()
+                .filter(visibility -> visibility.getStatus().equals("SOLVED"))
+                .map(Visibility::getPuzzleId)
+                .filter(puzzleId -> {
+                    for (Submission submission : submissionIndex.get(puzzleId)) {
+                        if (submission.getCanonicalAnswer() != null && !submission.getCanonicalAnswer().isEmpty()) {
+                            return false;
+                        }
+                    }
+                    return true;
+                })
+                .collect(Collectors.toSet());
+        final Optional<Map<String, Puzzle>> puzzleIndex = solvedPuzzlesMissingAnswers.isEmpty()
+                ? Optional.empty()
+                : Optional.of(puzzleStore.getPuzzles(solvedPuzzlesMissingAnswers));
+
         visibilities = visibilities.stream().map(visibility -> {
             List<Submission> visibilitySubmissions = submissionIndex.get(visibility.getPuzzleId());
             if (!visibilitySubmissions.isEmpty()) {
@@ -193,6 +156,18 @@ public class HuntStatusStore {
                 return visibility.toBuilder()
                         .setSolvedAnswers(solvedAnswers)
                         .build();
+            } else if (puzzleIndex.isPresent()) {
+                Puzzle puzzle = puzzleIndex.get().get(visibility.getPuzzleId());
+                if (puzzle != null) {
+                    List<Answer> answers = puzzle.getAnswers();
+                    if (answers != null) {
+                        return visibility.toBuilder()
+                                .setSolvedAnswers(answers.stream()
+                                        .map(Answer::getCanonicalAnswer)
+                                        .collect(Collectors.toList()))
+                                .build();
+                    }
+                }
             }
             return visibility;
         }).collect(Collectors.toList());
@@ -456,14 +431,46 @@ public class HuntStatusStore {
     }
 
     private Optional<Visibility> getExplicitVisibility(String teamId, String puzzleId) {
-        List<Visibility> visibilities = getExplicitVisibilities(Optional.of(teamId), Optional.of(puzzleId));
-        if (visibilities.size() == 1) {
-            return Optional.of(visibilities.get(0));
-        } else if (visibilities.isEmpty()) {
+        List<Visibility> visibilities = DatabaseHelper.query(
+                connectionFactory,
+                "SELECT teamId, puzzleId, status " +
+                "FROM visibilities " +
+                "WHERE teamId = ? AND puzzleId = ?",
+                Lists.newArrayList(teamId, puzzleId),
+                Visibility.class
+        );
+        if (visibilities.isEmpty()) {
             return Optional.empty();
-        } else {
-            throw new RuntimeException("Primary key violation in application layer");
         }
+        Visibility visibility = Iterables.getOnlyElement(visibilities);
+
+        Set<String> solvedAnswers;
+
+        String submissionsQuery = "SELECT canonicalAnswer FROM submissions " +
+                "WHERE teamId = ? AND puzzleId = ? AND canonicalAnswer IS NOT NULL";
+        List<Submission> submissions = DatabaseHelper.query(
+                connectionFactory,
+                submissionsQuery,
+                ImmutableList.of(teamId, puzzleId),
+                Submission.class
+        );
+        solvedAnswers = submissions.stream()
+                .map(Submission::getCanonicalAnswer)
+                .collect(Collectors.toSet());
+
+        if (visibility.getStatus().equals("SOLVED") && solvedAnswers.isEmpty()) {
+            Puzzle puzzle = puzzleStore.getPuzzle(puzzleId);
+            List<Answer> answers = puzzle.getAnswers();
+            if (answers != null) {
+                solvedAnswers.addAll(answers.stream()
+                        .map(Answer::getCanonicalAnswer)
+                        .collect(Collectors.toSet()));
+            }
+        }
+
+        return Optional.of(visibility.toBuilder()
+                .setSolvedAnswers(ImmutableList.copyOf(solvedAnswers))
+                .build());
     }
 
     private boolean createExplicitDefaultVisibility(String teamId, String puzzleId) {
