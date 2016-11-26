@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 
 import edu.mit.puzzle.cube.core.model.Visibilities;
 import edu.mit.puzzle.cube.core.model.Visibility;
+import edu.mit.puzzle.cube.core.model.VisibilityStatusSet;
 import edu.mit.puzzle.cube.core.permissions.PermissionAction;
 import edu.mit.puzzle.cube.core.permissions.VisibilitiesPermission;
 
@@ -14,6 +15,7 @@ import org.restlet.resource.ResourceException;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class VisibilitiesResource extends AbstractCubeResource {
 
@@ -37,6 +39,11 @@ public class VisibilitiesResource extends AbstractCubeResource {
             visibilities = ImmutableList.of(huntStatusStore.getVisibility(teamId.get(), puzzleId.get()));
         } else {
             visibilities = huntStatusStore.getVisibilitiesForTeam(teamId.get());
+        }
+        if (!SecurityUtils.getSubject().isPermitted(new VisibilitiesPermission("*", PermissionAction.READ))) {
+            visibilities = visibilities.stream()
+                    .filter(v -> !v.getStatus().equalsIgnoreCase("INVISIBLE"))
+                    .collect(Collectors.toList());
         }
 
         return Visibilities.builder()
