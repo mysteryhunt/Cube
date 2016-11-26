@@ -13,6 +13,7 @@ import com.google.common.collect.*;
 import edu.mit.puzzle.cube.core.HuntDefinition;
 import edu.mit.puzzle.cube.core.db.ConnectionFactory;
 import edu.mit.puzzle.cube.core.db.DatabaseHelper;
+import edu.mit.puzzle.cube.core.db.DatabaseHelper.SQLRetryException;
 import edu.mit.puzzle.cube.core.events.Event;
 import edu.mit.puzzle.cube.core.events.EventProcessor;
 import edu.mit.puzzle.cube.core.events.VisibilityChangeEvent;
@@ -345,8 +346,7 @@ public class HuntStatusStore {
             Class<P> propertyClass,
             Function<P, P> mutator) {
         String propertyKey = propertyClass.getSimpleName();
-        int retryCount = 0;
-        while (true) {
+        return DatabaseHelper.retry(() -> {
             try (
                     Connection connection = connectionFactory.getConnection();
                     PreparedStatement getPropertyStatement = connection.prepareStatement(
@@ -375,57 +375,56 @@ public class HuntStatusStore {
                 connection.commit();
 
                 return updated;
-            } catch (SQLException e) {
-                // 40001 is the SQLSTATE error for a serialization failure.
-                if (e.getSQLState().equals("40001")) {
-                    ++retryCount;
-                    if (retryCount > 3) {
-                        throw new RuntimeException(e);
-                    }
-                } else {
-                    throw new RuntimeException(e);
-                }
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-        }
+        });
     }
 
     public void addTeam(Team team) {
-        try (
-                Connection connection = connectionFactory.getConnection();
-                PreparedStatement insertTeamStatement = connection.prepareStatement(
-                        "INSERT INTO teams (teamId, email, primaryPhone, secondaryPhone) VALUES (?,?,?,?)")
-        ) {
-            insertTeamStatement.setString(1, team.getTeamId());
-            insertTeamStatement.setString(2, team.getEmail());
-            insertTeamStatement.setString(3, team.getPrimaryPhone());
-            insertTeamStatement.setString(4, team.getSecondaryPhone());
-            insertTeamStatement.executeUpdate();
-        } catch (SQLException e) {
+        try {
+            DatabaseHelper.retry(() -> {
+                try (
+                        Connection connection = connectionFactory.getConnection();
+                        PreparedStatement insertTeamStatement = connection.prepareStatement(
+                                "INSERT INTO teams (teamId, email, primaryPhone, secondaryPhone) VALUES (?,?,?,?)")
+                ) {
+                    insertTeamStatement.setString(1, team.getTeamId());
+                    insertTeamStatement.setString(2, team.getEmail());
+                    insertTeamStatement.setString(3, team.getPrimaryPhone());
+                    insertTeamStatement.setString(4, team.getSecondaryPhone());
+                    insertTeamStatement.executeUpdate();
+                }
+                return null;
+            });
+        } catch (SQLRetryException e) {
             throw new ResourceException(
                     Status.CLIENT_ERROR_BAD_REQUEST.getCode(),
-                    e,
+                    e.getException(),
                     "Failed to add team to the database");
         }
     }
 
     public boolean updateTeam(Team team) {
-        try (
-                Connection connection = connectionFactory.getConnection();
-                PreparedStatement insertTeamStatement = connection.prepareStatement(
-                        "UPDATE teams SET email = ?, primaryPhone = ?, secondaryPhone = ? " +
-                        "WHERE teamId = ?")
-        ) {
-            insertTeamStatement.setString(1, team.getEmail());
-            insertTeamStatement.setString(2, team.getPrimaryPhone());
-            insertTeamStatement.setString(3, team.getSecondaryPhone());
-            insertTeamStatement.setString(4, team.getTeamId());
-            return insertTeamStatement.executeUpdate() > 0;
-        } catch (SQLException e) {
+        try {
+            return DatabaseHelper.retry(() -> {
+                try (
+                        Connection connection = connectionFactory.getConnection();
+                        PreparedStatement insertTeamStatement = connection.prepareStatement(
+                                "UPDATE teams SET email = ?, primaryPhone = ?, secondaryPhone = ? " +
+                                "WHERE teamId = ?")
+                ) {
+                    insertTeamStatement.setString(1, team.getEmail());
+                    insertTeamStatement.setString(2, team.getPrimaryPhone());
+                    insertTeamStatement.setString(3, team.getSecondaryPhone());
+                    insertTeamStatement.setString(4, team.getTeamId());
+                    return insertTeamStatement.executeUpdate() > 0;
+                }
+            });
+        } catch (SQLRetryException e) {
             throw new ResourceException(
                     Status.CLIENT_ERROR_BAD_REQUEST.getCode(),
-                    e,
+                    e.getException(),
                     "Failed to update team in the database");
         }
     }

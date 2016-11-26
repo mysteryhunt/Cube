@@ -9,6 +9,7 @@ import com.google.common.collect.Table;
 
 import edu.mit.puzzle.cube.core.db.ConnectionFactory;
 import edu.mit.puzzle.cube.core.db.DatabaseHelper;
+import edu.mit.puzzle.cube.core.db.DatabaseHelper.SQLRetryException;
 import edu.mit.puzzle.cube.core.permissions.CubePermission;
 import edu.mit.puzzle.cube.core.permissions.CubeRole;
 import edu.mit.puzzle.cube.core.permissions.RolesAndInstanceLevelPermissions;
@@ -67,45 +68,49 @@ public class UserStore {
         Hash passwordHash = saltAndHashPassword(user.getPassword(), passwordSalt);
         RolesAndInstanceLevelPermissions rolesAndPermissions =
                 RolesAndInstanceLevelPermissions.forUser(user);
+        try {
+            DatabaseHelper.retry(() -> {
+                try (
+                        Connection connection = connectionFactory.getConnection();
+                        PreparedStatement insertUserStatement = connection.prepareStatement(
+                                "INSERT INTO users (username, password, password_salt, teamId) VALUES (?,?,?,?)");
+                        PreparedStatement insertUserRoleStatement = connection.prepareStatement(
+                                "INSERT INTO user_roles (username, role_name) VALUES (?,?)");
+                        PreparedStatement insertPermissionStatement = connection.prepareStatement(
+                                "INSERT INTO users_permissions (username, permission) VALUES (?,?)")
+                ) {
+                    connection.setAutoCommit(false);
 
-        try (
-                Connection connection = connectionFactory.getConnection();
-                PreparedStatement insertUserStatement = connection.prepareStatement(
-                        "INSERT INTO users (username, password, password_salt, teamId) VALUES (?,?,?,?)");
-                PreparedStatement insertUserRoleStatement = connection.prepareStatement(
-                        "INSERT INTO user_roles (username, role_name) VALUES (?,?)");
-                PreparedStatement insertPermissionStatement = connection.prepareStatement(
-                        "INSERT INTO users_permissions (username, permission) VALUES (?,?)")
-        ) {
-            connection.setAutoCommit(false);
+                    insertUserStatement.setString(1, user.getUsername());
+                    insertUserStatement.setString(2, passwordHash.toHex());
+                    insertUserStatement.setString(3, passwordSalt);
+                    if (user.getTeamId() != null) {
+                        insertUserStatement.setString(4, user.getTeamId());
+                    } else {
+                        insertUserStatement.setNull(4, Types.NULL);
+                    }
+                    insertUserStatement.executeUpdate();
 
-            insertUserStatement.setString(1, user.getUsername());
-            insertUserStatement.setString(2, passwordHash.toHex());
-            insertUserStatement.setString(3, passwordSalt);
-            if (user.getTeamId() != null) {
-                insertUserStatement.setString(4, user.getTeamId());
-            } else {
-                insertUserStatement.setNull(4, Types.NULL);
-            }
-            insertUserStatement.executeUpdate();
+                    insertUserRoleStatement.setString(1, user.getUsername());
+                    for (CubeRole role : rolesAndPermissions.getRoles()) {
+                        insertUserRoleStatement.setString(2, role.getName());
+                        insertUserRoleStatement.executeUpdate();
+                    }
 
-            insertUserRoleStatement.setString(1, user.getUsername());
-            for (CubeRole role : rolesAndPermissions.getRoles()) {
-                insertUserRoleStatement.setString(2, role.getName());
-                insertUserRoleStatement.executeUpdate();
-            }
+                    insertPermissionStatement.setString(1, user.getUsername());
+                    for (CubePermission permission : rolesAndPermissions.getInstanceLevelPermissions()) {
+                        insertPermissionStatement.setString(2, permission.getWildcardString());
+                        insertPermissionStatement.executeUpdate();
+                    }
 
-            insertPermissionStatement.setString(1, user.getUsername());
-            for (CubePermission permission : rolesAndPermissions.getInstanceLevelPermissions()) {
-                insertPermissionStatement.setString(2, permission.getWildcardString());
-                insertPermissionStatement.executeUpdate();
-            }
-
-            connection.commit();
-        } catch (SQLException e) {
+                    connection.commit();
+                }
+                return null;
+            });
+        } catch (SQLRetryException e) {
             throw new ResourceException(
                     Status.CLIENT_ERROR_BAD_REQUEST.getCode(),
-                    e,
+                    e.getException(),
                     "Failed to add user to the database");
         }
     }
@@ -181,120 +186,123 @@ public class UserStore {
     }
 
     public boolean updateUser(User user) {
-        try (
-                Connection connection = connectionFactory.getConnection();
-                PreparedStatement selectUserStatement = connection.prepareStatement(
-                        "SELECT * FROM users WHERE username = ?");
-                PreparedStatement selectUserRolesStatement = connection.prepareStatement(
-                        "SELECT role_name FROM user_roles WHERE username = ?");
-                PreparedStatement updatePasswordStatement = connection.prepareStatement(
-                        "UPDATE users SET password = ?, password_salt = ? " +
-                        "WHERE username = ?");
-                PreparedStatement deleteUserRolesStatement = connection.prepareStatement(
-                        "DELETE FROM user_roles WHERE username = ?");
-                PreparedStatement insertUserRoleStatement = connection.prepareStatement(
-                        "INSERT INTO user_roles (username, role_name) VALUES (?,?)");
-                PreparedStatement deleteUserPermissionsStatement = connection.prepareStatement(
-                        "DELETE FROM users_permissions WHERE username = ?");
-                PreparedStatement insertPermissionStatement = connection.prepareStatement(
-                        "INSERT INTO users_permissions (username, permission) VALUES (?,?)")
-        ) {
-            connection.setAutoCommit(false);
+        try {
+            return DatabaseHelper.retry(() -> {
+                try (
+                        Connection connection = connectionFactory.getConnection();
+                        PreparedStatement selectUserStatement = connection.prepareStatement(
+                                "SELECT * FROM users WHERE username = ?");
+                        PreparedStatement selectUserRolesStatement = connection.prepareStatement(
+                                "SELECT role_name FROM user_roles WHERE username = ?");
+                        PreparedStatement updatePasswordStatement = connection.prepareStatement(
+                                "UPDATE users SET password = ?, password_salt = ? " +
+                                "WHERE username = ?");
+                        PreparedStatement deleteUserRolesStatement = connection.prepareStatement(
+                                "DELETE FROM user_roles WHERE username = ?");
+                        PreparedStatement insertUserRoleStatement = connection.prepareStatement(
+                                "INSERT INTO user_roles (username, role_name) VALUES (?,?)");
+                        PreparedStatement deleteUserPermissionsStatement = connection.prepareStatement(
+                                "DELETE FROM users_permissions WHERE username = ?");
+                        PreparedStatement insertPermissionStatement = connection.prepareStatement(
+                                "INSERT INTO users_permissions (username, permission) VALUES (?,?)")
+                ) {
+                    connection.setAutoCommit(false);
 
-            selectUserStatement.setString(1, user.getUsername());
-            ResultSet resultSet = selectUserStatement.executeQuery();
-            int rowCount = 0;
-            String existingPasswordHash = null;
-            String existingPasswordSalt = null;
-            String existingTeamId = null;
-            while (resultSet.next()) {
-                rowCount++;
-                if (rowCount > 1) {
-                    throw new RuntimeException("Primary key violation in application layer");
+                    selectUserStatement.setString(1, user.getUsername());
+                    ResultSet resultSet = selectUserStatement.executeQuery();
+                    int rowCount = 0;
+                    String existingPasswordHash = null;
+                    String existingPasswordSalt = null;
+                    String existingTeamId = null;
+                    while (resultSet.next()) {
+                        rowCount++;
+                        if (rowCount > 1) {
+                            throw new RuntimeException("Primary key violation in application layer");
+                        }
+                        existingPasswordHash = resultSet.getString("password");
+                        existingPasswordSalt = resultSet.getString("password_salt");
+                        existingTeamId = resultSet.getString("teamId");
+                    }
+                    if (rowCount == 0) {
+                        throw new ResourceException(
+                                Status.CLIENT_ERROR_NOT_FOUND,
+                                String.format("The username '%s' does not exist", user.getUsername()));
+                    }
+
+                    if (user.getTeamId() != null && !user.getTeamId().equals(existingTeamId)) {
+                        throw new ResourceException(
+                                Status.CLIENT_ERROR_BAD_REQUEST,
+                                "Changing the team id associated with a user is not currently supported");
+                    }
+
+                    selectUserRolesStatement.setString(1, user.getUsername());
+                    resultSet = selectUserRolesStatement.executeQuery();
+                    Set<String> existingRoles = new HashSet<>();
+                    while (resultSet.next()) {
+                        existingRoles.add(resultSet.getString("role_name"));
+                    }
+
+                    boolean passwordUpdated = false;
+                    if (user.getPassword() != null) {
+                        String passwordHash = saltAndHashPassword(user.getPassword(), existingPasswordSalt).toHex();
+                        if (passwordHash.equals(existingPasswordHash)) {
+                            throw new ResourceException(
+                                    Status.CLIENT_ERROR_BAD_REQUEST,
+                                    "A password change was requested, but the new password was the same as the old one");
+                        }
+
+                        String newPasswordSalt = generatePasswordSalt();
+                        passwordHash = saltAndHashPassword(user.getPassword(), newPasswordSalt).toHex();
+                        updatePasswordStatement.setString(1, passwordHash);
+                        updatePasswordStatement.setString(2, newPasswordSalt);
+                        updatePasswordStatement.setString(3, user.getUsername());
+                        passwordUpdated = updatePasswordStatement.executeUpdate() > 0;
+                    }
+
+                    boolean rolesUpdated = false;
+                    if (user.getRoles() != null
+                            && !ImmutableSet.copyOf(user.getRoles()).equals(existingRoles)) {
+                        rolesUpdated = true;
+
+                        // teamId may not have been specified in the update, make sure we include it when
+                        // computing permissions.
+                        User userForComputingPermissions = user;
+                        if (existingTeamId != null && userForComputingPermissions.getTeamId() == null) {
+                            userForComputingPermissions = userForComputingPermissions.toBuilder()
+                                    .setTeamId(existingTeamId)
+                                    .build();
+                        }
+                        RolesAndInstanceLevelPermissions rolesAndPermissions =
+                                RolesAndInstanceLevelPermissions.forUser(userForComputingPermissions);
+
+                        deleteUserRolesStatement.setString(1, user.getUsername());
+                        deleteUserRolesStatement.executeUpdate();
+                        deleteUserPermissionsStatement.setString(1, user.getUsername());
+                        deleteUserPermissionsStatement.executeUpdate();
+
+                        insertUserRoleStatement.setString(1, user.getUsername());
+                        for (CubeRole role : rolesAndPermissions.getRoles()) {
+                            insertUserRoleStatement.setString(2, role.getName());
+                            insertUserRoleStatement.executeUpdate();
+                        }
+
+                        insertPermissionStatement.setString(1, user.getUsername());
+                        for (CubePermission permission : rolesAndPermissions.getInstanceLevelPermissions()) {
+                            insertPermissionStatement.setString(2, permission.getWildcardString());
+                            insertPermissionStatement.executeUpdate();
+                        }
+                    }
+
+                    connection.commit();
+
+                    return passwordUpdated || rolesUpdated;
                 }
-                existingPasswordHash = resultSet.getString("password");
-                existingPasswordSalt = resultSet.getString("password_salt");
-                existingTeamId = resultSet.getString("teamId");
-            }
-            if (rowCount == 0) {
-                throw new ResourceException(
-                        Status.CLIENT_ERROR_NOT_FOUND,
-                        String.format("The username '%s' does not exist", user.getUsername()));
-            }
-
-            if (user.getTeamId() != null && !user.getTeamId().equals(existingTeamId)) {
-                throw new ResourceException(
-                        Status.CLIENT_ERROR_BAD_REQUEST,
-                        "Changing the team id associated with a user is not currently supported");
-            }
-
-            selectUserRolesStatement.setString(1, user.getUsername());
-            resultSet = selectUserRolesStatement.executeQuery();
-            Set<String> existingRoles = new HashSet<>();
-            while (resultSet.next()) {
-                existingRoles.add(resultSet.getString("role_name"));
-            }
-
-            boolean passwordUpdated = false;
-            if (user.getPassword() != null) {
-                String passwordHash = saltAndHashPassword(user.getPassword(), existingPasswordSalt).toHex();
-                if (passwordHash.equals(existingPasswordHash)) {
-                    throw new ResourceException(
-                            Status.CLIENT_ERROR_BAD_REQUEST,
-                            "A password change was requested, but the new password was the same as the old one");
-                }
-
-                String newPasswordSalt = generatePasswordSalt();
-                passwordHash = saltAndHashPassword(user.getPassword(), newPasswordSalt).toHex();
-                updatePasswordStatement.setString(1, passwordHash);
-                updatePasswordStatement.setString(2, newPasswordSalt);
-                updatePasswordStatement.setString(3, user.getUsername());
-                passwordUpdated = updatePasswordStatement.executeUpdate() > 0;
-            }
-
-            boolean rolesUpdated = false;
-            if (user.getRoles() != null
-                    && !ImmutableSet.copyOf(user.getRoles()).equals(existingRoles)) {
-                rolesUpdated = true;
-
-                // teamId may not have been specified in the update, make sure we include it when
-                // computing permissions.
-                User userForComputingPermissions = user;
-                if (existingTeamId != null && userForComputingPermissions.getTeamId() == null) {
-                    userForComputingPermissions = userForComputingPermissions.toBuilder()
-                            .setTeamId(existingTeamId)
-                            .build();
-                }
-                RolesAndInstanceLevelPermissions rolesAndPermissions =
-                        RolesAndInstanceLevelPermissions.forUser(userForComputingPermissions);
-
-                deleteUserRolesStatement.setString(1, user.getUsername());
-                deleteUserRolesStatement.executeUpdate();
-                deleteUserPermissionsStatement.setString(1, user.getUsername());
-                deleteUserPermissionsStatement.executeUpdate();
-
-                insertUserRoleStatement.setString(1, user.getUsername());
-                for (CubeRole role : rolesAndPermissions.getRoles()) {
-                    insertUserRoleStatement.setString(2, role.getName());
-                    insertUserRoleStatement.executeUpdate();
-                }
-
-                insertPermissionStatement.setString(1, user.getUsername());
-                for (CubePermission permission : rolesAndPermissions.getInstanceLevelPermissions()) {
-                    insertPermissionStatement.setString(2, permission.getWildcardString());
-                    insertPermissionStatement.executeUpdate();
-                }
-            }
-
-            connection.commit();
-
-            return passwordUpdated || rolesUpdated;
-        } catch (SQLException e) {
+            });
+        } catch (SQLRetryException e) {
             throw new ResourceException(
                     Status.CLIENT_ERROR_BAD_REQUEST.getCode(),
-                    e,
+                    e.getException(),
                     "Failed to update user");
         }
-
     }
 }

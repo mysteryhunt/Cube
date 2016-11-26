@@ -19,6 +19,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoField;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -38,6 +39,8 @@ import java.util.stream.IntStream;
 public class DatabaseHelper {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
             .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
+
+    private static final Random RANDOM = new Random();
 
     /**
      * Queries a database (connected to by a Connection from ConnectionFactory) with the given
@@ -194,25 +197,24 @@ public class DatabaseHelper {
             String preparedUpdate,
             List<List<Object>> parameterLists
     ) {
-        try (Connection connection = connectionFactory.getConnection();
-             PreparedStatement statement = connection.prepareStatement(preparedUpdate)) {
+        return retry(() -> {
+            try (Connection connection = connectionFactory.getConnection();
+                 PreparedStatement statement = connection.prepareStatement(preparedUpdate)) {
 
-            for (List<Object> parameters : parameterLists) {
-                for (int i = 0; i < parameters.size(); ++i) {
-                    statement.setObject(i + 1, parameters.get(i));
+                for (List<Object> parameters : parameterLists) {
+                    for (int i = 0; i < parameters.size(); ++i) {
+                        statement.setObject(i + 1, parameters.get(i));
+                    }
+                    statement.addBatch();
                 }
-                statement.addBatch();
+
+                connection.setAutoCommit(false);
+                int[] updatedRowsArray = statement.executeBatch();
+                connection.setAutoCommit(true);
+
+                return IntStream.of(updatedRowsArray).boxed().collect(Collectors.toList());
             }
-
-            connection.setAutoCommit(false);
-            int[] updatedRowsArray = statement.executeBatch();
-            connection.setAutoCommit(true);
-
-            return IntStream.of(updatedRowsArray).boxed().collect(Collectors.toList());
-
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        });
     }
 
     public static Integer update(
@@ -220,41 +222,69 @@ public class DatabaseHelper {
             String preparedUpdate,
             List<Object> parameters
     ) {
-        try (Connection connection = connectionFactory.getConnection();
-             PreparedStatement statement = connection.prepareStatement(preparedUpdate)) {
+        return retry(() -> {
+            try (Connection connection = connectionFactory.getConnection();
+                 PreparedStatement statement = connection.prepareStatement(preparedUpdate)) {
 
-            for (int i = 0; i < parameters.size(); ++i) {
-                statement.setObject(i + 1, parameters.get(i));
+                for (int i = 0; i < parameters.size(); ++i) {
+                    statement.setObject(i + 1, parameters.get(i));
+                }
+
+                return statement.executeUpdate();
             }
-
-            return statement.executeUpdate();
-
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        });
     }
 
 
     public static Integer update(
             PreparedStatement statement,
             List<Object> parameters
-    ) throws SQLException {
-        for (int i = 0; i < parameters.size(); ++i) {
-            statement.setObject(i + 1, parameters.get(i));
-        }
+    ) {
+        return retry(() -> {
+            for (int i = 0; i < parameters.size(); ++i) {
+                statement.setObject(i + 1, parameters.get(i));
+            }
 
-        return statement.executeUpdate();
+            return statement.executeUpdate();
+        });
     }
-
 
     public static Optional<Integer> insert(
             ConnectionFactory connectionFactory,
             String preparedInsert,
             List<Object> parameters
     ) {
-        try (Connection connection = connectionFactory.getConnection();
-             PreparedStatement statement = connection.prepareStatement(preparedInsert, Statement.RETURN_GENERATED_KEYS)) {
+        return retry(() -> {
+            try (Connection connection = connectionFactory.getConnection();
+                 PreparedStatement statement = connection.prepareStatement(
+                         preparedInsert, Statement.RETURN_GENERATED_KEYS)) {
 
+                for (int i = 0; i < parameters.size(); ++i) {
+                    statement.setObject(i + 1, parameters.get(i));
+                }
+
+                int updates = statement.executeUpdate();
+                if (updates < 1) {
+                    return Optional.empty();
+                }
+
+                ResultSet rs = statement.getGeneratedKeys();
+                Optional<Integer> insertedId = Optional.empty();
+                while (rs.next()) {
+                    if (rs.getMetaData().getColumnType(1) == Types.INTEGER) {
+                        insertedId = Optional.of(rs.getInt(1));
+                    }
+                }
+                return insertedId;
+            }
+        });
+    }
+
+    public static Optional<Integer> insert(
+            PreparedStatement statement,
+            List<Object> parameters
+    ) {
+        return retry(() -> {
             for (int i = 0; i < parameters.size(); ++i) {
                 statement.setObject(i + 1, parameters.get(i));
             }
@@ -272,33 +302,7 @@ public class DatabaseHelper {
                 }
             }
             return insertedId;
-
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static Optional<Integer> insert(
-            PreparedStatement statement,
-            List<Object> parameters
-    ) throws SQLException {
-        for (int i = 0; i < parameters.size(); ++i) {
-            statement.setObject(i + 1, parameters.get(i));
-        }
-
-        int updates = statement.executeUpdate();
-        if (updates < 1) {
-            return Optional.empty();
-        }
-
-        ResultSet rs = statement.getGeneratedKeys();
-        Optional<Integer> insertedId = Optional.empty();
-        while (rs.next()) {
-            if (rs.getMetaData().getColumnType(1) == Types.INTEGER) {
-                insertedId = Optional.of(rs.getInt(1));
-            }
-        }
-        return insertedId;
+        });
     }
 
     public static void insertBatch(
@@ -306,22 +310,68 @@ public class DatabaseHelper {
             String preparedInsert,
             List<List<Object>> parameterLists
     ) {
-        try (Connection connection = connectionFactory.getConnection();
-             PreparedStatement statement = connection.prepareStatement(preparedInsert)) {
+        retry(() -> {
+            try (Connection connection = connectionFactory.getConnection();
+                 PreparedStatement statement = connection.prepareStatement(preparedInsert)) {
 
-            for (List<Object> parameters : parameterLists) {
-                for (int i = 0; i < parameters.size(); ++i) {
-                    statement.setObject(i + 1, parameters.get(i));
+                for (List<Object> parameters : parameterLists) {
+                    for (int i = 0; i < parameters.size(); ++i) {
+                        statement.setObject(i + 1, parameters.get(i));
+                    }
+                    statement.addBatch();
                 }
-                statement.addBatch();
+
+                connection.setAutoCommit(false);
+                statement.executeBatch();
+                connection.setAutoCommit(true);
             }
+            return null;
+        });
+    }
 
-            connection.setAutoCommit(false);
-            statement.executeBatch();
-            connection.setAutoCommit(true);
+    public static class SQLRetryException extends RuntimeException {
+        private static final long serialVersionUID = 1L;
+        private final SQLException exception;
 
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+        public SQLRetryException(SQLException exception) {
+            this.exception = exception;
+        }
+
+        public SQLException getException() {
+            return exception;
+        }
+
+        @Override
+        public String toString() {
+            return exception.toString();
+        }
+    }
+
+    public interface SQLExceptionThrowingFunction<T> {
+        public T run() throws SQLException;
+    }
+
+    public static <T> T retry(SQLExceptionThrowingFunction<T> function) {
+        int retryCount = 0;
+        while (true) {
+            try {
+                return function.run();
+            } catch (SQLException e) {
+                // 40001 is the SQLSTATE error for a serialization failure.
+                if (e.getSQLState() != null && e.getSQLState().equals("40001")) {
+                    ++retryCount;
+                    if (retryCount > 5) {
+                        throw new SQLRetryException(e);
+                    }
+                    try {
+                        Thread.sleep((long) (10 * retryCount + RANDOM.nextDouble() * retryCount * 50));
+                    } catch (InterruptedException e1) {
+                        throw new SQLRetryException(e);
+                    }
+                } else {
+                    throw new SQLRetryException(e);
+                }
+            }
         }
     }
 }
