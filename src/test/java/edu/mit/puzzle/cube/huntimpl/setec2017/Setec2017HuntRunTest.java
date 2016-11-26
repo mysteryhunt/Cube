@@ -147,6 +147,9 @@ public class Setec2017HuntRunTest extends RestletTest {
                        .setPuzzleId("eventa")
                        .build()
         );
+        json = getVisibility("testerteam", "eventa");
+        assertThat(json.get("solvedAnswers").size()).isEqualTo(1);
+        assertThat(json.get("solvedAnswers").get(0).asText()).isEqualTo("EVENTA");
         assertThat(getCharacterLevel(Character.FIGHTER)).isEqualTo(3);
         assertThat(getCharacterLevel(Character.CLERIC)).isEqualTo(1);
     }

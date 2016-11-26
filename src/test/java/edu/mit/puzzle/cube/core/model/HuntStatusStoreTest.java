@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 
 import edu.mit.puzzle.cube.core.AdjustableClock;
@@ -21,7 +22,9 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
+import java.util.Collection;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -29,10 +32,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
 
 public class HuntStatusStoreTest {
 
@@ -41,6 +46,7 @@ public class HuntStatusStoreTest {
     private VisibilityStatusSet visibilityStatusSet;
     private HuntStatusStore huntStatusStore;
     private EventProcessor<Event> eventProcessor;
+    private PuzzleStore puzzleStore;
 
     private static String TEST_TEAM_ID = "testerteam";
     private static String TEST_PUZZLE_ID = "a_test_puzzle";
@@ -59,7 +65,25 @@ public class HuntStatusStoreTest {
                 ImmutableList.<User>of());
         clock = new AdjustableClock(Clock.fixed(Instant.now(), ZoneId.of("UTC")));
         eventProcessor = mock(EventProcessor.class);
-        huntStatusStore = new HuntStatusStore(connectionFactory, clock, visibilityStatusSet, eventProcessor);
+
+        puzzleStore = mock(PuzzleStore.class);
+        when(puzzleStore.getPuzzle(any())).thenAnswer(invocation -> {
+           return Puzzle.create(invocation.getArgument(0), "ANSWER");
+        });
+        when(puzzleStore.getPuzzles(any())).thenAnswer(invocation -> {
+           Collection<String> puzzleIds = invocation.getArgument(0);
+           return puzzleIds.stream()
+                   .map(puzzleId -> Puzzle.create(puzzleId, "ANSWER"))
+                   .collect(Collectors.toMap(Puzzle::getPuzzleId, Function.identity()));
+        });
+
+        huntStatusStore = new HuntStatusStore(
+                connectionFactory,
+                clock,
+                visibilityStatusSet,
+                eventProcessor,
+                puzzleStore
+        );
     }
 
     @Test
@@ -184,9 +208,9 @@ public class HuntStatusStoreTest {
         Visibility.Builder visibilityBuilder = Visibility.builder()
                 .setTeamId(TEST_TEAM_ID);
         assertThat(visibilities).containsExactly(
-                visibilityBuilder.setPuzzleId(TEST_PUZZLE_ID).setStatus("SOLVED").build(),
-                visibilityBuilder.setPuzzleId(TEST_PUZZLE_ID_2).setStatus("UNLOCKED").build(),
-                visibilityBuilder.setPuzzleId(TEST_PUZZLE_ID_3).setStatus(visibilityStatusSet.getDefaultVisibilityStatus()).build()
+                visibilityBuilder.setPuzzleId(TEST_PUZZLE_ID).setStatus("SOLVED").setSolvedAnswers(ImmutableList.of("ANSWER")).build(),
+                visibilityBuilder.setPuzzleId(TEST_PUZZLE_ID_2).setStatus("UNLOCKED").setSolvedAnswers(ImmutableList.of()).build(),
+                visibilityBuilder.setPuzzleId(TEST_PUZZLE_ID_3).setStatus(visibilityStatusSet.getDefaultVisibilityStatus()).setSolvedAnswers(ImmutableList.of()).build()
         );
     }
 
@@ -262,5 +286,29 @@ public class HuntStatusStoreTest {
 
         Team readTeam = huntStatusStore.getTeam(TEST_TEAM_ID);
         assertThat(readTeam).isEqualTo(team);
+    }
+
+    @Test
+    public void getVisibilitiesForTeamWithoutSubmissionAnswers() {
+        huntStatusStore.setVisibility(TEST_TEAM_ID, TEST_PUZZLE_ID, "UNLOCKED");
+        Visibility expectedVisibility = Visibility.builder()
+                .setTeamId(TEST_TEAM_ID)
+                .setPuzzleId(TEST_PUZZLE_ID)
+                .setStatus("UNLOCKED")
+                .build();
+        List<Visibility> visibilities = huntStatusStore.getVisibilitiesForTeam(TEST_TEAM_ID);
+        assertThat(visibilities).contains(expectedVisibility);
+        assertThat(huntStatusStore.getVisibility(TEST_TEAM_ID, TEST_PUZZLE_ID)).isEqualTo(expectedVisibility);
+
+        huntStatusStore.setVisibility(TEST_TEAM_ID, TEST_PUZZLE_ID, "SOLVED");
+        expectedVisibility = Visibility.builder()
+                .setTeamId(TEST_TEAM_ID)
+                .setPuzzleId(TEST_PUZZLE_ID)
+                .setStatus("SOLVED")
+                .setSolvedAnswers(ImmutableList.of("ANSWER"))
+                .build();
+        visibilities = huntStatusStore.getVisibilitiesForTeam(TEST_TEAM_ID);
+        assertThat(visibilities).contains(expectedVisibility);
+        assertThat(huntStatusStore.getVisibility(TEST_TEAM_ID, TEST_PUZZLE_ID)).isEqualTo(expectedVisibility);
     }
 }

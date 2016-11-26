@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.datatype.guava.GuavaModule;
 import com.google.auto.value.AutoValue;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
@@ -24,6 +25,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -186,8 +188,31 @@ public class PuzzleStore {
         return puzzle;
     }
 
+    public Map<String, Puzzle> getPuzzles(Collection<String> puzzleIds) {
+        String puzzleIdSqlList = String.join(
+                ",",
+                puzzleIds.stream()
+                        .map(puzzleId -> String.format("'%s'", puzzleId))
+                        .collect(Collectors.toList())
+        );
+        List<Puzzle> puzzleResults = DatabaseHelper.query(
+                connectionFactory,
+                "SELECT * FROM puzzles WHERE puzzleId IN (?)",
+                ImmutableList.of(puzzleIdSqlList),
+                Puzzle.class
+        );
+        List<PuzzlePropertiesRow> puzzlePropertiesResults = DatabaseHelper.query(
+                connectionFactory,
+                "SELECT puzzleId, propertyKey, propertyValue FROM puzzle_properties " +
+                        "WHERE puzzleId IN (?)",
+                ImmutableList.of(puzzleIdSqlList),
+                PuzzlePropertiesRow.class
+        );
+        return joinPuzzlesAndProperties(puzzleResults, puzzlePropertiesResults);
+    }
+
     public Map<String, Puzzle> getPuzzles() {
-        List<Puzzle> puzzles = DatabaseHelper.query(
+        List<Puzzle> puzzleResults = DatabaseHelper.query(
                 connectionFactory,
                 "SELECT * FROM puzzles",
                 Lists.newArrayList(),
@@ -199,9 +224,16 @@ public class PuzzleStore {
                 Lists.newArrayList(),
                 PuzzlePropertiesRow.class
         );
+        return joinPuzzlesAndProperties(puzzleResults, puzzlePropertiesResults);
+    }
+
+    private Map<String, Puzzle> joinPuzzlesAndProperties(
+            List<Puzzle> puzzleResults,
+            List<PuzzlePropertiesRow> puzzlePropertiesResults
+    ) {
         Map<String, Map<String, Puzzle.Property>> allPuzzleProperties =
                 deserializePuzzleProperties(puzzlePropertiesResults);
-        return puzzles.stream()
+        return puzzleResults.stream()
                 .map(puzzle -> {
                     Map<String, Puzzle.Property> puzzleProperties =
                             allPuzzleProperties.get(puzzle.getPuzzleId());
