@@ -360,11 +360,11 @@ public class DatabaseHelper {
                 // 40001 is the SQLSTATE error for a serialization failure.
                 if (e.getSQLState() != null && e.getSQLState().equals("40001")) {
                     ++retryCount;
-                    if (retryCount > 3) {
+                    if (retryCount > 5) {
                         throw new SQLRetryException(e);
                     }
                     try {
-                        Thread.sleep((long) (RANDOM.nextDouble() * retryCount * 50));
+                        Thread.sleep((long) (10 * retryCount + RANDOM.nextDouble() * retryCount * 50));
                     } catch (InterruptedException e1) {
                         throw new SQLRetryException(e);
                     }
