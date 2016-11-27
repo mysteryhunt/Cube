@@ -13,8 +13,10 @@ import edu.mit.puzzle.cube.core.model.SubmissionStore;
 import edu.mit.puzzle.cube.core.model.UserStore;
 
 import org.restlet.representation.Representation;
-import org.restlet.representation.Variant;
 import org.restlet.resource.ServerResource;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.inject.Inject;
 
@@ -29,13 +31,14 @@ public abstract class AbstractCubeResource extends ServerResource {
 
     @Inject MetricRegistry metricRegistry;
 
-    private static Timer latencyTimer;
+    private static Map<Class<? extends AbstractCubeResource>, Timer> latencyTimers = new ConcurrentHashMap<>();
 
     private Timer getLatencyTimer() {
-        if (latencyTimer == null) {
-            latencyTimer = metricRegistry.timer(MetricRegistry.name(this.getClass(), "latency"));
+        Class<? extends AbstractCubeResource> klass = this.getClass();
+        if (latencyTimers.get(klass) == null) {
+            latencyTimers.put(klass, metricRegistry.timer(MetricRegistry.name(this.getClass(), "latency")));
         }
-        return latencyTimer;
+        return latencyTimers.get(klass);
     }
 
     @Override
