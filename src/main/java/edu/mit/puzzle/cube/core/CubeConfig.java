@@ -52,6 +52,8 @@ public abstract class CubeConfig {
         @JsonProperty("corsAllowedOrigins") public abstract Builder setCorsAllowedOrigins(Set<String> corsAllowedOrigins);
         @JsonProperty("huntDefinitionClassName") public abstract Builder setHuntDefinitionClassName(String huntDefinitionClassName);
         @JsonProperty("serviceEnvironment") public abstract Builder setServiceEnvironment(ServiceEnvironment serviceEnvironment);
+        @Nullable @JsonProperty("graphiteHost") public abstract Builder setGraphiteHost(String graphiteHost);
+        @Nullable @JsonProperty("graphitePrefix") public abstract Builder setGraphitePrefix(String graphitePrefix);
         @Nullable @JsonProperty("databaseConfig") public abstract Builder setDatabaseConfig(DatabaseConfig databaseConfig);
 
         public abstract CubeConfig build();
@@ -83,5 +85,7 @@ public abstract class CubeConfig {
     @JsonProperty("corsAllowedOrigins") public abstract Set<String> getCorsAllowedOrigins();
     @JsonProperty("huntDefinitionClassName") public abstract String getHuntDefinitionClassName();
     @JsonProperty("serviceEnvironment") public abstract ServiceEnvironment getServiceEnvironment();
+    @Nullable @JsonProperty("graphiteHost") public abstract String getGraphiteHost();
+    @Nullable @JsonProperty("graphitePrefix") public abstract String getGraphitePrefix();
     @Nullable @JsonProperty("databaseConfig") public abstract DatabaseConfig getDatabaseConfig();
 }

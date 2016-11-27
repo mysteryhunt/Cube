@@ -1,5 +1,7 @@
 package edu.mit.puzzle.cube.core;
 
+import com.codahale.metrics.MetricRegistry;
+
 import edu.mit.puzzle.cube.core.db.ConnectionFactory;
 import edu.mit.puzzle.cube.core.environments.ServiceEnvironment;
 import edu.mit.puzzle.cube.core.events.CompositeEventProcessor;
@@ -15,6 +17,7 @@ public interface CubeComponent {
     ServiceEnvironment getServiceEnvironment();
     ConnectionFactory getConnectionFactory();
     CompositeEventProcessor getCompositeEventProcessor();
+    MetricRegistry getMetricRegistry();
 
     void injectHuntDefinition(HuntDefinition huntDefinition);
 

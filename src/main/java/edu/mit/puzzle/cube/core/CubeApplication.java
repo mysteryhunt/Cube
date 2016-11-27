@@ -83,7 +83,11 @@ public class CubeApplication extends Application {
 
     @Override
     public synchronized Restlet createInboundRoot() {
-        return new CubeRestlet(getContext(), dagger.getCubeResourceComponentBuilder().build());
+        return new CubeRestlet(
+                getContext(),
+                dagger.getCubeResourceComponentBuilder().build(),
+                dagger.getMetricRegistry()
+        );
     }
 
     public static void main (String[] args) throws Exception {

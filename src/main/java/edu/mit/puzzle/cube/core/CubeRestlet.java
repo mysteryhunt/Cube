@@ -1,5 +1,8 @@
 package edu.mit.puzzle.cube.core;
 
+import com.codahale.metrics.MetricRegistry;
+import com.codahale.metrics.Timer;
+
 import edu.mit.puzzle.cube.core.serverresources.*;
 
 import org.apache.shiro.SecurityUtils;
@@ -20,7 +23,11 @@ import org.restlet.security.ChallengeAuthenticator;
 import org.restlet.security.Verifier;
 
 public class CubeRestlet extends Filter {
-    public CubeRestlet(Context context, CubeResourceComponent dagger) {
+    public CubeRestlet(
+            Context context,
+            CubeResourceComponent dagger,
+            MetricRegistry metricRegistry
+    ) {
         super(context);
 
         Router router = new Router(context) {
@@ -92,6 +99,24 @@ public class CubeRestlet extends Filter {
         });
         authenticator.setNext(router);
 
-        setNext(authenticator);
+        final String cubeLatencyTimerKey = MetricRegistry.name(this.getClass(), "latency");
+        final Timer latencyTimer = metricRegistry.timer(cubeLatencyTimerKey);
+        Filter timingMetricFilter = new Filter(context) {
+            @Override
+            protected int beforeHandle(Request request, Response response) {
+                Timer.Context timerContext = latencyTimer.time();
+                request.getAttributes().put(cubeLatencyTimerKey, timerContext);
+                return CONTINUE;
+            }
+
+            @Override
+            protected void afterHandle(Request request, Response response) {
+                Timer.Context timerContext = (Timer.Context) request.getAttributes().get(cubeLatencyTimerKey);
+                timerContext.stop();
+            }
+        };
+        timingMetricFilter.setNext(authenticator);
+
+        setNext(timingMetricFilter);
     }
 }
