@@ -31,14 +31,14 @@ public abstract class AbstractCubeResource extends ServerResource {
 
     @Inject MetricRegistry metricRegistry;
 
-    private static Map<Class<? extends AbstractCubeResource>, Timer> latencyTimers = new ConcurrentHashMap<>();
+    private static Map<Class<? extends AbstractCubeResource>, Timer> requestsTimers = new ConcurrentHashMap<>();
 
     private Timer getLatencyTimer() {
         Class<? extends AbstractCubeResource> klass = this.getClass();
-        if (latencyTimers.get(klass) == null) {
-            latencyTimers.put(klass, metricRegistry.timer(MetricRegistry.name(this.getClass(), "latency")));
+        if (requestsTimers.get(klass) == null) {
+            requestsTimers.put(klass, metricRegistry.timer(MetricRegistry.name(this.getClass(), "requests")));
         }
-        return latencyTimers.get(klass);
+        return requestsTimers.get(klass);
     }
 
     @Override

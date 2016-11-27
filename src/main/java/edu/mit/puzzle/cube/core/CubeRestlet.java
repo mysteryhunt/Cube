@@ -99,19 +99,19 @@ public class CubeRestlet extends Filter {
         });
         authenticator.setNext(router);
 
-        final String cubeLatencyTimerKey = MetricRegistry.name(this.getClass(), "latency");
-        final Timer latencyTimer = metricRegistry.timer(cubeLatencyTimerKey);
+        final String cubeRequestsTimerKey = MetricRegistry.name(this.getClass(), "requests");
+        final Timer requestsTimer = metricRegistry.timer(cubeRequestsTimerKey);
         Filter timingMetricFilter = new Filter(context) {
             @Override
             protected int beforeHandle(Request request, Response response) {
-                Timer.Context timerContext = latencyTimer.time();
-                request.getAttributes().put(cubeLatencyTimerKey, timerContext);
+                Timer.Context timerContext = requestsTimer.time();
+                request.getAttributes().put(cubeRequestsTimerKey, timerContext);
                 return CONTINUE;
             }
 
             @Override
             protected void afterHandle(Request request, Response response) {
-                Timer.Context timerContext = (Timer.Context) request.getAttributes().get(cubeLatencyTimerKey);
+                Timer.Context timerContext = (Timer.Context) request.getAttributes().get(cubeRequestsTimerKey);
                 timerContext.stop();
             }
         };
