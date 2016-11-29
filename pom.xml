@@ -19,6 +19,7 @@
 
     <properties>
         <restlet-version>2.3.7</restlet-version>
+        <metrics-version>3.1.0</metrics-version>
     </properties>
 
     <build>
@@ -208,6 +209,17 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>3.4</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>io.dropwizard.metrics</groupId>
+            <artifactId>metrics-core</artifactId>
+            <version>${metrics-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.dropwizard.metrics</groupId>
+            <artifactId>metrics-graphite</artifactId>
+            <version>${metrics-version}</version>
         </dependency>
     </dependencies>
 

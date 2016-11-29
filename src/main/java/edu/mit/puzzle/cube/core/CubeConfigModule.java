@@ -1,5 +1,8 @@
 package edu.mit.puzzle.cube.core;
 
+import com.codahale.metrics.graphite.Graphite;
+import com.google.common.base.Optional;
+
 import edu.mit.puzzle.cube.core.environments.DevelopmentEnvironment;
 import edu.mit.puzzle.cube.core.environments.ProductionEnvironment;
 import edu.mit.puzzle.cube.core.environments.ServiceEnvironment;
@@ -7,6 +10,7 @@ import edu.mit.puzzle.cube.core.environments.ServiceEnvironment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Named;
 import javax.inject.Singleton;
 
 import dagger.Module;
@@ -41,5 +45,19 @@ public class CubeConfigModule {
             System.exit(1);
             return null;
         }
+    }
+
+    @Provides
+    Optional<Graphite> provideGraphite() {
+        if (config.getGraphiteHost() != null) {
+            return Optional.of(new Graphite(config.getGraphiteHost(), 2003));
+        }
+        return Optional.absent();
+    }
+
+    @Provides
+    @Named("graphitePrefix")
+    Optional<String> provideGraphitePrefix() {
+        return Optional.fromNullable(config.getGraphitePrefix());
     }
 }
