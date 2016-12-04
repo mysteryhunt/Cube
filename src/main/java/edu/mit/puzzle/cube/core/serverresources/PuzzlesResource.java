@@ -1,7 +1,5 @@
 package edu.mit.puzzle.cube.core.serverresources;
 
-import com.codahale.metrics.MetricRegistry;
-import com.codahale.metrics.Timer;
 import com.google.common.collect.ImmutableList;
 
 import edu.mit.puzzle.cube.core.model.Puzzle;
