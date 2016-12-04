@@ -10,6 +10,7 @@ public class StandardVisibilityStatusSet implements VisibilityStatusSet {
 
     private static final Set<String> ALL_STATUSES = ImmutableSet.of(
             "INVISIBLE", "VISIBLE", "UNLOCKED", "SOLVED");
+    private static final Set<String> INVISIBLE_STATUSES = ImmutableSet.of("INVISIBLE");
     private static final Set<String> SUBMISSION_STATUSES = ImmutableSet.of("UNLOCKED");
 
     @Override
@@ -45,6 +46,6 @@ public class StandardVisibilityStatusSet implements VisibilityStatusSet {
 
     @Override
     public Set<String> getInvisibleStatuses() {
-        return ImmutableSet.of("INVISIBLE");
+        return INVISIBLE_STATUSES;
     }
 }
