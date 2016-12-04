@@ -22,30 +22,6 @@ import java.util.stream.Collectors;
 
 public class PuzzlesResource extends AbstractCubeResource {
 
-    private static Timer getPuzzlesTimer;
-    private Timer getPuzzlesTimer() {
-        if (getPuzzlesTimer == null) {
-            getPuzzlesTimer = metricRegistry.timer(MetricRegistry.name(this.getClass(), "getPuzzles"));
-        }
-        return getPuzzlesTimer;
-    }
-
-    private static Timer getVisibilitiesTimer;
-    private Timer getVisibilitiesTimer() {
-        if (getVisibilitiesTimer == null) {
-            getVisibilitiesTimer = metricRegistry.timer(MetricRegistry.name(this.getClass(), "getVisibilities"));
-        }
-        return getVisibilitiesTimer;
-    }
-
-    private static Timer postProcessingTimer;
-    private Timer postProcessingTimer() {
-        if (postProcessingTimer == null) {
-            postProcessingTimer = metricRegistry.timer(MetricRegistry.name(this.getClass(), "postProcessing"));
-        }
-        return postProcessingTimer;
-    }
-
     @Get
     public Puzzles handleGet() {
         Optional<String> teamId = Optional.ofNullable(getQueryValue("teamId"));
@@ -53,19 +29,14 @@ public class PuzzlesResource extends AbstractCubeResource {
             SecurityUtils.getSubject().checkPermission(
                     new TeamsPermission(teamId.get(), PermissionAction.READ));
 
-            Timer.Context timerContext = getPuzzlesTimer().time();
             Map<String, Puzzle> unfilteredPuzzles = puzzleStore.getPuzzles();
-            timerContext.stop();
 
-            timerContext = getVisibilitiesTimer().time();
             Map<String, Visibility> retrievedVisibilities = huntStatusStore.getVisibilitiesForTeam(teamId.get()).stream()
                     .collect(Collectors.toMap(
                             Visibility::getPuzzleId,
                             Function.identity()
                     ));
-            timerContext.stop();
 
-            timerContext = postProcessingTimer().time();
             final Set<String> invisibleStatuses = huntStatusStore.getVisibilityStatusSet().getInvisibleStatuses();
             List<Puzzle> puzzles = unfilteredPuzzles.entrySet().stream()
                     .filter(entry -> {
@@ -77,7 +48,6 @@ public class PuzzlesResource extends AbstractCubeResource {
                     })
                     .map(entry -> entry.getValue().strip(retrievedVisibilities.get(entry.getKey())))
                     .collect(Collectors.toList());
-            timerContext.stop();
             return Puzzles.builder()
                     .setPuzzles(puzzles)
                     .build();
