@@ -332,7 +332,6 @@ public class Setec2017Puzzles {
                         .addPuzzleVisibilityStatusConstraint("cleric","UNLOCKED").build())
                 .setSolveRewardProperty(SolveRewardProperty.builder()
                         .addCharacterLevels(Character.CLERIC, 1)
-                        .setGold(1)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("cl-r1")
@@ -658,10 +657,10 @@ public class Setec2017Puzzles {
                 .setDisplayName("Rescue the Economist")
                 .setSingleAnswer("DUMMYECONOMISTANSWER")
                 .setVisibleConstraint(VisibilityConstraint.builder()
-                        .addSumConstraint(40, Character.values())
+                        .addSumConstraint(24, Character.values())
                         .build())
                 .setUnlockedConstraint(VisibilityConstraint.builder()
-                        .addSumConstraint(40, Character.values())
+                        .addSumConstraint(24, Character.values())
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("economist")
@@ -799,10 +798,10 @@ public class Setec2017Puzzles {
                 .setDisplayName("Rescue the Chemist")
                 .setSingleAnswer("DUMMYCHEMISTANSWER")
                 .setVisibleConstraint(VisibilityConstraint.builder()
-                        .addSumConstraint(24, Character.values())
+                        .addSumConstraint(40, Character.values())
                         .build())
                 .setUnlockedConstraint(VisibilityConstraint.builder()
-                        .addSumConstraint(24, Character.values())
+                        .addSumConstraint(40, Character.values())
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("chemist")
@@ -1130,7 +1129,7 @@ public class Setec2017Puzzles {
                         .build())
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("dungeon", "UNLOCKED")
-                        .addSumConstraint(3, Character.WIZARD)
+                        .addSumConstraint(5, Character.FIGHTER)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("dungeon2")
@@ -1142,7 +1141,7 @@ public class Setec2017Puzzles {
                         .build())
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("dungeon", "UNLOCKED")
-                        .addSumConstraint(3, Character.FIGHTER)
+                        .addSumConstraint(5, Character.WIZARD)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("dungeon3")
@@ -1154,7 +1153,7 @@ public class Setec2017Puzzles {
                         .build())
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("dungeon", "UNLOCKED")
-                        .addSumConstraint(3, Character.CLERIC)
+                        .addSumConstraint(5, Character.CLERIC)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("dungeon4")
@@ -1166,7 +1165,7 @@ public class Setec2017Puzzles {
                         .build())
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("dungeon", "UNLOCKED")
-                        .addSumConstraint(4, Character.WIZARD)
+                        .addSumConstraint(4, Character.LINGUIST)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("dungeon5")
@@ -1178,7 +1177,7 @@ public class Setec2017Puzzles {
                         .build())
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("dungeon", "UNLOCKED")
-                        .addSumConstraint(2, Character.LINGUIST)
+                        .addSumConstraint(6, Character.FIGHTER)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("dungeon6")
@@ -1190,7 +1189,7 @@ public class Setec2017Puzzles {
                         .build())
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("dungeon", "UNLOCKED")
-                        .addSumConstraint(4, Character.FIGHTER)
+                        .addSumConstraint(6, Character.WIZARD)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("dungeon7")
@@ -1202,7 +1201,7 @@ public class Setec2017Puzzles {
                         .build())
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("dungeon", "UNLOCKED")
-                        .addSumConstraint(4, Character.CLERIC)
+                        .addSumConstraint(6, Character.CLERIC)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("dungeon8")
@@ -1214,7 +1213,7 @@ public class Setec2017Puzzles {
                         .build())
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("dungeon", "UNLOCKED")
-                        .addSumConstraint(3, Character.LINGUIST)
+                        .addSumConstraint(5, Character.LINGUIST)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("dungeon9")
@@ -1226,7 +1225,7 @@ public class Setec2017Puzzles {
                         .build())
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("dungeon", "UNLOCKED")
-                        .addSumConstraint(5, Character.CLERIC)
+                        .addSumConstraint(7, Character.FIGHTER)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("dungeon10")
@@ -1238,7 +1237,7 @@ public class Setec2017Puzzles {
                         .build())
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("dungeon", "UNLOCKED")
-                        .addSumConstraint(5, Character.FIGHTER)
+                        .addSumConstraint(7, Character.WIZARD)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("dungeon11")
@@ -1250,7 +1249,7 @@ public class Setec2017Puzzles {
                         .build())
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("dungeon", "UNLOCKED")
-                        .addSumConstraint(4, Character.LINGUIST)
+                        .addSumConstraint(7, Character.CLERIC)
                         .build()));
 
         add.accept(Setec2017PuzzleBuilder.builder()
@@ -1282,7 +1281,7 @@ public class Setec2017Puzzles {
                         .build())
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("thespians", "UNLOCKED")
-                        .addSumConstraint(5, Character.CLERIC)
+                        .addSumConstraint(8, Character.FIGHTER)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("thespians-l2")
@@ -1294,7 +1293,7 @@ public class Setec2017Puzzles {
                         .build())
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("thespians", "UNLOCKED")
-                        .addSumConstraint(4, Character.FIGHTER)
+                        .addSumConstraint(8, Character.WIZARD)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("thespians-l3")
@@ -1306,7 +1305,7 @@ public class Setec2017Puzzles {
                         .build())
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("thespians", "UNLOCKED")
-                        .addSumConstraint(3, Character.ECONOMIST)
+                        .addSumConstraint(8, Character.CLERIC)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("thespians-l4")
@@ -1318,7 +1317,7 @@ public class Setec2017Puzzles {
                         .build())
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("thespians", "UNLOCKED")
-                        .addSumConstraint(5, Character.WIZARD)
+                        .addSumConstraint(7, Character.LINGUIST)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("thespians-l5")
@@ -1330,7 +1329,7 @@ public class Setec2017Puzzles {
                         .build())
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("thespians", "UNLOCKED")
-                        .addSumConstraint(4, Character.LINGUIST)
+                        .addSumConstraint(5, Character.ECONOMIST)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("thespians-r1")
@@ -1342,7 +1341,7 @@ public class Setec2017Puzzles {
                         .build())
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("thespians", "UNLOCKED")
-                        .addSumConstraint(4, Character.WIZARD)
+                        .addSumConstraint(9, Character.FIGHTER)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("thespians-r2")
@@ -1354,7 +1353,7 @@ public class Setec2017Puzzles {
                         .build())
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("thespians", "UNLOCKED")
-                        .addSumConstraint(4, Character.CLERIC)
+                        .addSumConstraint(9, Character.WIZARD)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("thespians-r3")
@@ -1366,7 +1365,7 @@ public class Setec2017Puzzles {
                         .build())
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("thespians", "UNLOCKED")
-                        .addSumConstraint(3, Character.LINGUIST)
+                        .addSumConstraint(9, Character.CLERIC)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("thespians-r4")
@@ -1378,7 +1377,7 @@ public class Setec2017Puzzles {
                         .build())
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("thespians", "UNLOCKED")
-                        .addSumConstraint(2, Character.ECONOMIST)
+                        .addSumConstraint(8, Character.LINGUIST)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("thespians-r5")
@@ -1390,7 +1389,7 @@ public class Setec2017Puzzles {
                         .build())
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("thespians", "UNLOCKED")
-                        .addSumConstraint(5, Character.FIGHTER)
+                        .addSumConstraint(6, Character.ECONOMIST)
                         .build()));
 
 
@@ -1423,7 +1422,7 @@ public class Setec2017Puzzles {
                         .build())
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("bridge", "UNLOCKED")
-                        .addSumConstraint(5, Character.WIZARD)
+                        .addSumConstraint(10, Character.FIGHTER)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("bridge2")
@@ -1435,7 +1434,7 @@ public class Setec2017Puzzles {
                         .build())
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("bridge", "UNLOCKED")
-                        .addSumConstraint(5, Character.FIGHTER)
+                        .addSumConstraint(10, Character.WIZARD)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("bridge3")
@@ -1447,7 +1446,7 @@ public class Setec2017Puzzles {
                         .build())
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("bridge", "UNLOCKED")
-                        .addSumConstraint(5, Character.CLERIC)
+                        .addSumConstraint(10, Character.CLERIC)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("bridge4")
@@ -1459,7 +1458,7 @@ public class Setec2017Puzzles {
                         .build())
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("bridge", "UNLOCKED")
-                        .addSumConstraint(4, Character.LINGUIST)
+                        .addSumConstraint(8, Character.LINGUIST)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("bridge5")
@@ -1471,7 +1470,7 @@ public class Setec2017Puzzles {
                         .build())
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("bridge", "UNLOCKED")
-                        .addSumConstraint(3, Character.ECONOMIST)
+                        .addSumConstraint(6, Character.ECONOMIST)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("bridge6")
@@ -1483,7 +1482,7 @@ public class Setec2017Puzzles {
                         .build())
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("bridge", "UNLOCKED")
-                        .addSumConstraint(7, Character.CLERIC)
+                        .addSumConstraint(5, Character.CHEMIST)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("bridge7")
@@ -1495,7 +1494,7 @@ public class Setec2017Puzzles {
                         .build())
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("bridge", "UNLOCKED")
-                        .addSumConstraint(7, Character.WIZARD)
+                        .addSumConstraint(11, Character.FIGHTER)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("bridge8")
@@ -1507,7 +1506,7 @@ public class Setec2017Puzzles {
                         .build())
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("bridge", "UNLOCKED")
-                        .addSumConstraint(2, Character.CHEMIST)
+                        .addSumConstraint(11, Character.WIZARD)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("bridge9")
@@ -1519,7 +1518,7 @@ public class Setec2017Puzzles {
                         .build())
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("bridge", "UNLOCKED")
-                        .addSumConstraint(6, Character.WIZARD)
+                        .addSumConstraint(11, Character.CLERIC)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("bridge10")
@@ -1531,7 +1530,7 @@ public class Setec2017Puzzles {
                         .build())
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("bridge", "UNLOCKED")
-                        .addSumConstraint(6, Character.LINGUIST)
+                        .addSumConstraint(9, Character.LINGUIST)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("bridge11")
@@ -1543,7 +1542,7 @@ public class Setec2017Puzzles {
                         .build())
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("bridge", "UNLOCKED")
-                        .addSumConstraint(7, Character.FIGHTER)
+                        .addSumConstraint(7, Character.ECONOMIST)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("bridge12")
@@ -1555,7 +1554,7 @@ public class Setec2017Puzzles {
                         .build())
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("bridge", "UNLOCKED")
-                        .addSumConstraint(6, Character.FIGHTER)
+                        .addSumConstraint(6, Character.CHEMIST)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("bridge13")
@@ -1567,7 +1566,7 @@ public class Setec2017Puzzles {
                         .build())
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("bridge", "UNLOCKED")
-                        .addSumConstraint(6, Character.CLERIC)
+                        .addSumConstraint(12, Character.FIGHTER)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("bridge14")
@@ -1579,7 +1578,7 @@ public class Setec2017Puzzles {
                         .build())
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("bridge", "UNLOCKED")
-                        .addSumConstraint(5, Character.LINGUIST)
+                        .addSumConstraint(12, Character.WIZARD)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("bridge15")
@@ -1591,7 +1590,7 @@ public class Setec2017Puzzles {
                         .build())
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("bridge", "UNLOCKED")
-                        .addSumConstraint(4, Character.ECONOMIST)
+                        .addSumConstraint(12, Character.CHEMIST)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("bridge16")
@@ -1603,7 +1602,7 @@ public class Setec2017Puzzles {
                         .build())
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("bridge", "UNLOCKED")
-                        .addSumConstraint(3, Character.CHEMIST)
+                        .addSumConstraint(10, Character.LINGUIST)
                         .build()));
 
         add.accept(Setec2017PuzzleBuilder.builder()
@@ -1635,7 +1634,7 @@ public class Setec2017Puzzles {
                         .build())
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("criminal", "UNLOCKED")
-                        .addSumConstraint(6, Character.WIZARD)
+                        .addSumConstraint(9, Character.LINGUIST)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("criminal2")
@@ -1647,7 +1646,7 @@ public class Setec2017Puzzles {
                         .build())
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("criminal", "UNLOCKED")
-                        .addSumConstraint(6, Character.FIGHTER)
+                        .addSumConstraint(10, Character.LINGUIST)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("criminal3")
@@ -1659,7 +1658,7 @@ public class Setec2017Puzzles {
                         .build())
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("criminal", "UNLOCKED")
-                        .addSumConstraint(6, Character.CLERIC)
+                        .addSumConstraint(7, Character.ECONOMIST)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("criminal4")
@@ -1671,7 +1670,7 @@ public class Setec2017Puzzles {
                         .build())
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("criminal", "UNLOCKED")
-                        .addSumConstraint(5, Character.LINGUIST)
+                        .addSumConstraint(5, Character.CHEMIST)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("criminal5")
@@ -1683,7 +1682,7 @@ public class Setec2017Puzzles {
                         .build())
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("criminal", "UNLOCKED")
-                        .addSumConstraint(4, Character.ECONOMIST)
+                        .addSumConstraint(12, Character.FIGHTER)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("criminal6")
@@ -1695,7 +1694,7 @@ public class Setec2017Puzzles {
                         .build())
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("criminal", "UNLOCKED")
-                        .addSumConstraint(6, Character.LINGUIST)
+                        .addSumConstraint(12, Character.WIZARD)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("criminal7")
@@ -1707,7 +1706,7 @@ public class Setec2017Puzzles {
                         .build())
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("criminal", "UNLOCKED")
-                        .addSumConstraint(7, Character.CLERIC)
+                        .addSumConstraint(12, Character.CLERIC)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("criminal8")
@@ -1719,7 +1718,7 @@ public class Setec2017Puzzles {
                         .build())
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("criminal", "UNLOCKED")
-                        .addSumConstraint(3, Character.CHEMIST)
+                        .addSumConstraint(11, Character.LINGUIST)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("criminal9")
@@ -1731,7 +1730,7 @@ public class Setec2017Puzzles {
                         .build())
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("criminal", "UNLOCKED")
-                        .addSumConstraint(7, Character.FIGHTER)
+                        .addSumConstraint(8, Character.ECONOMIST)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("criminal10")
@@ -1743,7 +1742,7 @@ public class Setec2017Puzzles {
                         .build())
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("criminal", "UNLOCKED")
-                        .addSumConstraint(7, Character.WIZARD)
+                        .addSumConstraint(6, Character.CHEMIST)
                         .build()));
 
         add.accept(Setec2017PuzzleBuilder.builder()
@@ -1775,7 +1774,7 @@ public class Setec2017Puzzles {
                         .build())
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("minstrels", "UNLOCKED")
-                        .addSumConstraint(7, Character.WIZARD)
+                        .addSumConstraint(8, Character.CHEMIST)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("minstrels2")
@@ -1787,7 +1786,7 @@ public class Setec2017Puzzles {
                         .build())
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("minstrels", "UNLOCKED")
-                        .addSumConstraint(7, Character.FIGHTER)
+                        .addSumConstraint(13, Character.FIGHTER)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("minstrels3")
@@ -1799,7 +1798,7 @@ public class Setec2017Puzzles {
                         .build())
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("minstrels", "UNLOCKED")
-                        .addSumConstraint(7, Character.CLERIC)
+                        .addSumConstraint(13, Character.WIZARD)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("minstrels4")
@@ -1811,7 +1810,7 @@ public class Setec2017Puzzles {
                         .build())
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("minstrels", "UNLOCKED")
-                        .addSumConstraint(8, Character.WIZARD)
+                        .addSumConstraint(13, Character.CLERIC)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("minstrels5")
@@ -1823,7 +1822,7 @@ public class Setec2017Puzzles {
                         .build())
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("minstrels", "UNLOCKED")
-                        .addSumConstraint(6, Character.LINGUIST)
+                        .addSumConstraint(12, Character.LINGUIST)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("minstrels6")
@@ -1835,7 +1834,7 @@ public class Setec2017Puzzles {
                         .build())
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("minstrels", "UNLOCKED")
-                        .addSumConstraint(5, Character.ECONOMIST)
+                        .addSumConstraint(9, Character.ECONOMIST)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("minstrels7")
@@ -1847,7 +1846,7 @@ public class Setec2017Puzzles {
                         .build())
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("minstrels", "UNLOCKED")
-                        .addSumConstraint(4, Character.CHEMIST)
+                        .addSumConstraint(8, Character.CHEMIST)
                         .build()));
 
         add.accept(Setec2017PuzzleBuilder.builder()
@@ -1879,7 +1878,7 @@ public class Setec2017Puzzles {
                         .build())
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("cube", "UNLOCKED")
-                        .addSumConstraint(7, Character.LINGUIST)
+                        .addSumConstraint(13, Character.LINGUIST)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("cube2")
@@ -1891,7 +1890,7 @@ public class Setec2017Puzzles {
                         .build())
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("cube", "UNLOCKED")
-                        .addSumConstraint(8, Character.WIZARD)
+                        .addSumConstraint(12, Character.ECONOMIST)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("cube3")
@@ -1903,7 +1902,7 @@ public class Setec2017Puzzles {
                         .build())
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("cube", "UNLOCKED")
-                        .addSumConstraint(9, Character.WIZARD)
+                        .addSumConstraint(14, Character.FIGHTER)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("cube4")
@@ -1915,7 +1914,7 @@ public class Setec2017Puzzles {
                         .build())
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("cube", "UNLOCKED")
-                        .addSumConstraint(8, Character.FIGHTER)
+                        .addSumConstraint(14, Character.WIZARD)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("cube5")
@@ -1927,7 +1926,7 @@ public class Setec2017Puzzles {
                         .build())
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("cube", "UNLOCKED")
-                        .addSumConstraint(8, Character.CLERIC)
+                        .addSumConstraint(14, Character.CLERIC)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("cube6")
@@ -1939,7 +1938,7 @@ public class Setec2017Puzzles {
                         .build())
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("cube", "UNLOCKED")
-                        .addSumConstraint(5, Character.CHEMIST)
+                        .addSumConstraint(14, Character.LINGUIST)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("cube7")
@@ -1951,7 +1950,7 @@ public class Setec2017Puzzles {
                         .build())
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("cube", "UNLOCKED")
-                        .addSumConstraint(9, Character.FIGHTER)
+                        .addSumConstraint(13, Character.ECONOMIST)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("cube8")
@@ -1963,7 +1962,7 @@ public class Setec2017Puzzles {
                         .build())
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("cube", "UNLOCKED")
-                        .addSumConstraint(6, Character.ECONOMIST)
+                        .addSumConstraint(10, Character.CHEMIST)
                         .build()));
 
 
@@ -1997,7 +1996,7 @@ public class Setec2017Puzzles {
                         .build())
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("warlord", "UNLOCKED")
-                        .addSumConstraint(9, Character.WIZARD)
+                        .addSumConstraint(14, Character.LINGUIST)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("warlord-nc")
@@ -2009,7 +2008,7 @@ public class Setec2017Puzzles {
                         .build())
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("warlord", "UNLOCKED")
-                        .addSumConstraint(9, Character.FIGHTER)
+                        .addSumConstraint(14, Character.ECONOMIST)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("warlord-ne")
@@ -2021,7 +2020,7 @@ public class Setec2017Puzzles {
                         .build())
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("warlord", "UNLOCKED")
-                        .addSumConstraint(9, Character.CLERIC)
+                        .addSumConstraint(14, Character.CHEMIST)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("warlord-cw")
@@ -2033,7 +2032,7 @@ public class Setec2017Puzzles {
                         .build())
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("warlord", "UNLOCKED")
-                        .addSumConstraint(8, Character.LINGUIST)
+                        .addSumConstraint(15, Character.FIGHTER)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("warlord-cc")
@@ -2045,7 +2044,7 @@ public class Setec2017Puzzles {
                         .build())
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("warlord", "UNLOCKED")
-                        .addSumConstraint(7, Character.ECONOMIST)
+                        .addSumConstraint(15, Character.WIZARD)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("warlord-ce")
@@ -2057,7 +2056,7 @@ public class Setec2017Puzzles {
                         .build())
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("warlord", "UNLOCKED")
-                        .addSumConstraint(6, Character.CHEMIST)
+                        .addSumConstraint(15, Character.CLERIC)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("warlord-sw")
@@ -2069,7 +2068,7 @@ public class Setec2017Puzzles {
                         .build())
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("warlord", "UNLOCKED")
-                        .addSumConstraint(10, Character.WIZARD)
+                        .addSumConstraint(15, Character.LINGUIST)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("warlord-sc")
@@ -2081,7 +2080,7 @@ public class Setec2017Puzzles {
                         .build())
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("warlord", "UNLOCKED")
-                        .addSumConstraint(10, Character.FIGHTER)
+                        .addSumConstraint(15, Character.ECONOMIST)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("warlord-se")
@@ -2093,7 +2092,7 @@ public class Setec2017Puzzles {
                         .build())
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("warlord", "UNLOCKED")
-                        .addSumConstraint(10, Character.CLERIC)
+                        .addSumConstraint(15, Character.CHEMIST)
                         .build()));
 
         add.accept(Setec2017PuzzleBuilder.builder()
@@ -2137,22 +2136,10 @@ public class Setec2017Puzzles {
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("eventa")
                 .setSingleAnswer("EVENTA")
-                .setVisibleConstraint(VisibilityConstraint.builder()
-                        .setRequiresManualAction(true)
-                        .build())
-                .setUnlockedConstraint(VisibilityConstraint.builder()
-                        .setRequiresManualAction(true)
-                        .build())
                 .setSolveRewardProperty(oneLevelForEachCharacter));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("eventb")
                 .setSingleAnswer("EVENTB")
-                .setVisibleConstraint(VisibilityConstraint.builder()
-                        .setRequiresManualAction(true)
-                        .build())
-                .setUnlockedConstraint(VisibilityConstraint.builder()
-                        .setRequiresManualAction(true)
-                        .build())
                 .setSolveRewardProperty(oneLevelForEachCharacter));
 
         solveRewardBuilder = SolveRewardProperty.builder();
@@ -2164,22 +2151,10 @@ public class Setec2017Puzzles {
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("eventc")
                 .setSingleAnswer("EVENTC")
-                .setVisibleConstraint(VisibilityConstraint.builder()
-                        .setRequiresManualAction(true)
-                        .build())
-                .setUnlockedConstraint(VisibilityConstraint.builder()
-                        .setRequiresManualAction(true)
-                        .build())
                 .setSolveRewardProperty(twoLevelsForEachCharacter));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("eventd")
                 .setSingleAnswer("EVENTD")
-                .setVisibleConstraint(VisibilityConstraint.builder()
-                        .setRequiresManualAction(true)
-                        .build())
-                .setUnlockedConstraint(VisibilityConstraint.builder()
-                        .setRequiresManualAction(true)
-                        .build())
                 .setSolveRewardProperty(twoLevelsForEachCharacter));
 
         PUZZLES = puzzlesBuilder.build();
