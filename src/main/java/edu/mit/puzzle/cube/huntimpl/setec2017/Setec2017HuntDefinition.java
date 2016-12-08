@@ -27,6 +27,7 @@ import edu.mit.puzzle.cube.core.model.Puzzle;
 import edu.mit.puzzle.cube.core.model.Submission;
 import edu.mit.puzzle.cube.core.model.SubmissionStatus;
 import edu.mit.puzzle.cube.core.model.Team;
+import edu.mit.puzzle.cube.core.model.Visibilities;
 import edu.mit.puzzle.cube.core.model.Visibility;
 import edu.mit.puzzle.cube.core.model.VisibilityStatusSet;
 import edu.mit.puzzle.cube.modules.model.StandardVisibilityStatusSet;
@@ -343,7 +344,9 @@ public class Setec2017HuntDefinition extends HuntDefinition {
                 int sum = 0;
                 for (Character character : characters) {
                     Integer level = characterLevels.getLevels().get(character);
-                    if (level != null) {
+                    String visibilityString = puzzleIdToVisibilityStatus.getOrDefault(
+                            character.toString().toLowerCase(), "INVISIBLE");
+                    if (level != null && (visibilityString.equalsIgnoreCase("UNLOCKED") || visibilityString.equalsIgnoreCase("SOLVED"))) {
                         sum += level;
                     }
                 }
