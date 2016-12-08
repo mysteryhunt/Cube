@@ -1,5 +1,6 @@
 package edu.mit.puzzle.cube.core;
 
+import com.codahale.metrics.MetricRegistry;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -73,7 +74,11 @@ public abstract class RestletTest {
                 .build();
         serviceEnvironment = dagger.getServiceEnvironment();
 
-        restlet = new CubeRestlet(context, dagger.getCubeResourceComponentBuilder().build());
+        restlet = new CubeRestlet(
+                context,
+                dagger.getCubeResourceComponentBuilder().build(),
+                new MetricRegistry()
+        );
 
         dagger.injectHuntDefinition(huntDefinition);
         huntDefinition.addToEventProcessor();

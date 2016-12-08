@@ -1,5 +1,8 @@
 package edu.mit.puzzle.cube.core;
 
+import com.codahale.metrics.jvm.GarbageCollectorMetricSet;
+import com.codahale.metrics.jvm.MemoryUsageGaugeSet;
+import com.codahale.metrics.jvm.ThreadStatesGaugeSet;
 import com.google.common.util.concurrent.AbstractScheduledService;
 import com.google.common.util.concurrent.Service;
 
@@ -63,6 +66,10 @@ public class CubeApplication extends Application {
             }
         };
         timingEventService.startAsync();
+
+        dagger.getMetricRegistry().registerAll(new GarbageCollectorMetricSet());
+        dagger.getMetricRegistry().registerAll(new MemoryUsageGaugeSet());
+        dagger.getMetricRegistry().registerAll(new ThreadStatesGaugeSet());
     }
 
     private void setupAuthentication(ConnectionFactory connectionFactory) {
@@ -83,7 +90,11 @@ public class CubeApplication extends Application {
 
     @Override
     public synchronized Restlet createInboundRoot() {
-        return new CubeRestlet(getContext(), dagger.getCubeResourceComponentBuilder().build());
+        return new CubeRestlet(
+                getContext(),
+                dagger.getCubeResourceComponentBuilder().build(),
+                dagger.getMetricRegistry()
+        );
     }
 
     public static void main (String[] args) throws Exception {
