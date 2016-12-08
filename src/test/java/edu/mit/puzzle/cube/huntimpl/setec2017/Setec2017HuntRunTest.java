@@ -96,7 +96,7 @@ public class Setec2017HuntRunTest extends RestletTest {
         assertThat(getCharacterLevel(Character.FIGHTER)).isEqualTo(1);
         assertThat(getCharacterLevel(Character.WIZARD)).isEqualTo(0);
         assertThat(getGold()).isEqualTo(0);
-        assertThat(getInventoryItems()).isEqualTo(ImmutableSet.of(InventoryItem.ITEM00));
+        assertThat(getInventoryItems()).isEmpty();
         json = getVisibility("testerteam", "f1");
         assertThat(json.get("status").asText()).isEqualTo("SOLVED");
         json = getVisibility("testerteam", "f3");
@@ -111,8 +111,7 @@ public class Setec2017HuntRunTest extends RestletTest {
         currentUserCredentials = ADMIN_CREDENTIALS;
         postUpdateSubmission(2, "CORRECT");
 
-        assertThat(getInventoryItems()).isEqualTo(
-                ImmutableSet.of(InventoryItem.ITEM00, InventoryItem.ITEM01));
+        assertThat(getInventoryItems()).isEmpty();
         json = getVisibility("testerteam", "f3");
         assertThat(json.get("status").asText()).isEqualTo("UNLOCKED");
         json = getVisibility("testerteam", "f4");
