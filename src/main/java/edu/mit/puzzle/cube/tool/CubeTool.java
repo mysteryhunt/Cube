@@ -191,6 +191,13 @@ public class CubeTool {
 
         @Override
         public void run() {
+            try {
+                Class.forName("edu.mit.puzzle.cube.core.model.Puzzle$DisplayNameProperty");
+                Class.forName("edu.mit.puzzle.cube.core.model.Puzzle$DisplayIdProperty");
+            } catch (ClassNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+
             PuzzleStore puzzleStore = new PuzzleStore(
                     environment.getConnectionFactory(),
                     new CompositeEventProcessor()
