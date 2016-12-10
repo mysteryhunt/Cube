@@ -192,6 +192,7 @@ public class CubeTool {
         @Override
         public void run() {
             try {
+                Class.forName("edu.mit.puzzle.cube.core.model.Puzzle$AnswersProperty");
                 Class.forName("edu.mit.puzzle.cube.core.model.Puzzle$DisplayNameProperty");
                 Class.forName("edu.mit.puzzle.cube.core.model.Puzzle$DisplayIdProperty");
             } catch (ClassNotFoundException e) {
