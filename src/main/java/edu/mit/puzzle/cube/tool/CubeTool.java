@@ -191,13 +191,10 @@ public class CubeTool {
 
         @Override
         public void run() {
-            try {
-                Class.forName("edu.mit.puzzle.cube.core.model.Puzzle$AnswersProperty");
-                Class.forName("edu.mit.puzzle.cube.core.model.Puzzle$DisplayNameProperty");
-                Class.forName("edu.mit.puzzle.cube.core.model.Puzzle$DisplayIdProperty");
-            } catch (ClassNotFoundException e) {
-                throw new RuntimeException(e);
-            }
+            // Load HuntDefinition to force all puzzle property classes to be loaded.
+            HuntDefinition.forClassName(
+                    cubeConfig.getHuntDefinitionClassName()
+            );
 
             PuzzleStore puzzleStore = new PuzzleStore(
                     environment.getConnectionFactory(),
