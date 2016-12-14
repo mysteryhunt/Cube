@@ -6,12 +6,15 @@ import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import com.beust.jcommander.Parameters;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 
 import edu.mit.puzzle.cube.core.CubeConfig;
 import edu.mit.puzzle.cube.core.HuntDefinition;
 import edu.mit.puzzle.cube.core.db.CubeDatabaseSchema;
 import edu.mit.puzzle.cube.core.environments.ProductionEnvironment;
 import edu.mit.puzzle.cube.core.environments.ServiceEnvironment;
+import edu.mit.puzzle.cube.core.events.CompositeEventProcessor;
+import edu.mit.puzzle.cube.core.model.Puzzle;
 import edu.mit.puzzle.cube.core.model.PuzzleStore;
 import edu.mit.puzzle.cube.core.model.User;
 import edu.mit.puzzle.cube.core.model.UserStore;
@@ -155,11 +158,75 @@ public class CubeTool {
         }
     }
 
+    @Parameters(
+            commandNames = {"updatepuzzle"},
+            commandDescription = "Update the display ID and display name for a puzzle"
+    )
+    private class CommandUpdatePuzzle implements Command {
+        private final ImmutableSet<String> DISPLAY_PROPERTY_ACCESS_STATUSES = ImmutableSet.of("UNLOCKED", "SOLVED");
+
+        @Parameter(
+                names = {"--puzzleId"},
+                description = "The canonical ID of the puzzle to update",
+                required = true,
+                validateWith = NonEmptyStringValidator.class
+        )
+        String puzzleId;
+
+        @Parameter(
+                names = {"--displayId"},
+                description = "The new display ID for the puzzle",
+                required = true,
+                validateWith = NonEmptyStringValidator.class
+        )
+        String displayId;
+
+        @Parameter(
+                names = {"--displayName"},
+                description = "The new display name for the puzzle",
+                required = true,
+                validateWith = NonEmptyStringValidator.class
+        )
+        String displayName;
+
+        @Override
+        public void run() {
+            // Load HuntDefinition to force all puzzle property classes to be loaded.
+            HuntDefinition.forClassName(
+                    cubeConfig.getHuntDefinitionClassName()
+            );
+
+            PuzzleStore puzzleStore = new PuzzleStore(
+                    environment.getConnectionFactory(),
+                    new CompositeEventProcessor()
+            );
+
+            boolean changed = puzzleStore.setPuzzleProperty(
+                    puzzleId,
+                    Puzzle.DisplayIdProperty.class,
+                    Puzzle.DisplayIdProperty.create(displayId, DISPLAY_PROPERTY_ACCESS_STATUSES)
+            );
+            if (!changed) {
+                throw new RuntimeException("Failed to update display ID property for puzzle " + puzzleId);
+            }
+
+            changed = puzzleStore.setPuzzleProperty(
+                    puzzleId,
+                    Puzzle.DisplayNameProperty.class,
+                    Puzzle.DisplayNameProperty.create(displayName, DISPLAY_PROPERTY_ACCESS_STATUSES)
+            );
+            if (!changed) {
+                throw new RuntimeException("Failed to update display name property for puzzle " + puzzleId);
+            }
+        }
+    }
+
     private void run(String[] args) {
         Map<String, Command> commands = ImmutableMap.of(
                 "initdb", new CommandInitDb(),
                 "resethunt", new CommandResetHunt(),
-                "adduser", new CommandAddUser()
+                "adduser", new CommandAddUser(),
+                "updatepuzzle", new CommandUpdatePuzzle()
         );
         for (Command command : commands.values()) {
             jCommander.addCommand(command);
