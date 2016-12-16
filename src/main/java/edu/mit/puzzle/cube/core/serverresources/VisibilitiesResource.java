@@ -1,7 +1,10 @@
 package edu.mit.puzzle.cube.core.serverresources;
 
+import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
 import edu.mit.puzzle.cube.core.model.Visibilities;
 import edu.mit.puzzle.cube.core.model.Visibility;
 import edu.mit.puzzle.cube.core.model.VisibilityStatusSet;
@@ -15,6 +18,7 @@ import org.restlet.resource.ResourceException;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class VisibilitiesResource extends AbstractCubeResource {
@@ -30,16 +34,17 @@ public class VisibilitiesResource extends AbstractCubeResource {
                     Status.CLIENT_ERROR_BAD_REQUEST,
                     "A team id must be specified");
         }
-        Optional<String> puzzleId = Optional.ofNullable(getQueryValue("puzzleId"));
-        puzzleId = puzzleId.map(puzzleStore::getCanonicalPuzzleId);
-
+        Optional<String> puzzleIdQueryValue = Optional.ofNullable(getQueryValue("puzzleId"));
         List<Visibility> visibilities;
-
-        if (puzzleId.isPresent()) {
-            visibilities = ImmutableList.of(huntStatusStore.getVisibility(teamId.get(), puzzleId.get()));
-        } else {
+        if (!puzzleIdQueryValue.isPresent()) {
             visibilities = huntStatusStore.getVisibilitiesForTeam(teamId.get());
+        } else {
+            visibilities = Splitter.on(",").splitToList(puzzleIdQueryValue.get()).stream()
+                    .map(puzzleStore::getCanonicalPuzzleId)
+                    .map(pid -> huntStatusStore.getVisibility(teamId.get(), pid))
+                    .collect(Collectors.toList());
         }
+
         if (!SecurityUtils.getSubject().isPermitted(new VisibilitiesPermission("*", PermissionAction.READ))) {
             visibilities = visibilities.stream()
                     .filter(v -> !v.getStatus().equalsIgnoreCase("INVISIBLE"))
