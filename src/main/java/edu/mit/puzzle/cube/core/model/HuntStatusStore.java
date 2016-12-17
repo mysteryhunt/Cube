@@ -103,6 +103,56 @@ public class HuntStatusStore {
                 );
     }
 
+    public List<Visibility> getVisibilitiesForTeam(String teamId, List<String> puzzleIds) {
+        List<Object> puzzleIdParameters = ImmutableList.copyOf(puzzleIds);
+        String puzzleIdParameterPlaceholders = String.join(
+                ",",
+                Stream.generate(() -> "?").limit(puzzleIds.size()).collect(Collectors.toList()));
+
+        String visibilitiesQuery = String.format(
+                "SELECT " +
+                "  ? AS teamId, " +
+                "  puzzles.puzzleId AS puzzleId, " +
+                "  CASE WHEN visibilities.status IS NOT NULL " +
+                "    THEN visibilities.status " +
+                "    ELSE ? " +
+                "  END AS status " +
+                "FROM puzzles " +
+                "LEFT JOIN visibilities ON " +
+                "  puzzles.puzzleId = visibilities.puzzleId AND visibilities.teamId = ? " +
+                "WHERE puzzles.puzzleId in (%s)",
+                puzzleIdParameterPlaceholders);
+        List<Object> visibilitiesQueryParameters = ImmutableList.builder()
+                .add(teamId)
+                .add(visibilityStatusSet.getDefaultVisibilityStatus())
+                .add(teamId)
+                .addAll(puzzleIdParameters)
+                .build();
+        List<Visibility> visibilities = DatabaseHelper.query(
+                connectionFactory,
+                visibilitiesQuery,
+                visibilitiesQueryParameters,
+                Visibility.class
+        );
+
+        String submissionsQuery = String.format(
+                "SELECT puzzleId, canonicalAnswer FROM submissions " +
+                "WHERE teamId = ? AND canonicalAnswer IS NOT NULL AND puzzleId in (%s)",
+                puzzleIdParameterPlaceholders);
+        List<Object> submissionsQueryParameters = ImmutableList.builder()
+                .add(teamId)
+                .addAll(puzzleIdParameters)
+                .build();
+        List<Submission> submissions = DatabaseHelper.query(
+                connectionFactory,
+                submissionsQuery,
+                submissionsQueryParameters,
+                Submission.class
+        );
+
+        return fillInVisibilityAnswers(visibilities, submissions);
+    }
+
     public List<Visibility> getVisibilitiesForTeam(String teamId) {
         List<Visibility> visibilities = DatabaseHelper.query(
                 connectionFactory,
@@ -128,6 +178,14 @@ public class HuntStatusStore {
                 ImmutableList.of(teamId),
                 Submission.class
         );
+
+        return fillInVisibilityAnswers(visibilities, submissions);
+    }
+
+    private List<Visibility> fillInVisibilityAnswers(
+            List<Visibility> visibilities,
+            List<Submission> submissions
+    ) {
         ImmutableListMultimap<String, Submission> submissionIndex = Multimaps.index(
                 submissions, Submission::getPuzzleId
         );

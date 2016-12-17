@@ -39,10 +39,9 @@ public class VisibilitiesResource extends AbstractCubeResource {
         if (!puzzleIdQueryValue.isPresent()) {
             visibilities = huntStatusStore.getVisibilitiesForTeam(teamId.get());
         } else {
-            visibilities = Splitter.on(",").splitToList(puzzleIdQueryValue.get()).stream()
-                    .map(puzzleStore::getCanonicalPuzzleId)
-                    .map(pid -> huntStatusStore.getVisibility(teamId.get(), pid))
-                    .collect(Collectors.toList());
+            List<String> puzzleIds = Splitter.on(",").splitToList(puzzleIdQueryValue.get());
+            puzzleIds = puzzleStore.getCanonicalPuzzleIds(puzzleIds);
+            visibilities = huntStatusStore.getVisibilitiesForTeam(teamId.get(), puzzleIds);
         }
 
         if (!SecurityUtils.getSubject().isPermitted(new VisibilitiesPermission("*", PermissionAction.READ))) {
