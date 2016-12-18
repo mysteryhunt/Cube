@@ -10,6 +10,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 import edu.mit.puzzle.cube.core.db.ConnectionFactory;
 import edu.mit.puzzle.cube.core.db.DatabaseHelper;
@@ -33,6 +34,7 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -154,6 +156,39 @@ public class PuzzleStore {
         }
     }
 
+    public List<String> getCanonicalPuzzleIds(List<String> puzzleDisplayIds) {
+        List<Object> parameters = ImmutableList.copyOf(puzzleDisplayIds);
+        String parameterPlaceholders = String.join(
+                ",",
+                Stream.generate(() -> "?").limit(puzzleDisplayIds.size()).collect(Collectors.toList()));
+
+        String query = String.format(
+                "SELECT * FROM puzzle_indexable_properties " +
+                "WHERE propertyValue in (%s) AND propertyKey = 'DisplayIdProperty'",
+                parameterPlaceholders);
+
+        List<PuzzlePropertiesRow> displayIdResult = DatabaseHelper.query(
+                connectionFactory,
+                query,
+                parameters,
+                PuzzlePropertiesRow.class
+        );
+
+        Map<String, PuzzlePropertiesRow> displayIdToPuzzleProperties = Maps.uniqueIndex(
+                displayIdResult,
+                PuzzlePropertiesRow::getPropertyValue);
+
+        return puzzleDisplayIds.stream()
+                .map(puzzleDisplayId -> {
+                    PuzzlePropertiesRow puzzleProperties = displayIdToPuzzleProperties.get(puzzleDisplayId);
+                    if (puzzleProperties != null) {
+                        return puzzleProperties.getPuzzleId();
+                    }
+                    return puzzleDisplayId;
+                })
+                .collect(Collectors.toList());
+    }
+
     public Puzzle getPuzzle(String puzzleId) {
         Puzzle puzzle;
         try {
@@ -189,23 +224,22 @@ public class PuzzleStore {
     }
 
     public Map<String, Puzzle> getPuzzles(Collection<String> puzzleIds) {
-        String puzzleIdSqlList = String.join(
+        List<Object> parameters = ImmutableList.copyOf(puzzleIds);
+        String parameterPlaceholders = String.join(
                 ",",
-                puzzleIds.stream()
-                        .map(puzzleId -> String.format("'%s'", puzzleId))
-                        .collect(Collectors.toList())
-        );
+                Stream.generate(() -> "?").limit(puzzleIds.size()).collect(Collectors.toList()));
         List<Puzzle> puzzleResults = DatabaseHelper.query(
                 connectionFactory,
-                "SELECT * FROM puzzles WHERE puzzleId IN (?)",
-                ImmutableList.of(puzzleIdSqlList),
+                String.format("SELECT * FROM puzzles WHERE puzzleId IN (%s)", parameterPlaceholders),
+                parameters,
                 Puzzle.class
         );
         List<PuzzlePropertiesRow> puzzlePropertiesResults = DatabaseHelper.query(
                 connectionFactory,
-                "SELECT puzzleId, propertyKey, propertyValue FROM puzzle_properties " +
-                        "WHERE puzzleId IN (?)",
-                ImmutableList.of(puzzleIdSqlList),
+                String.format("SELECT puzzleId, propertyKey, propertyValue FROM puzzle_properties " +
+                        "WHERE puzzleId IN (%s)",
+                        parameterPlaceholders),
+                parameters,
                 PuzzlePropertiesRow.class
         );
         return joinPuzzlesAndProperties(puzzleResults, puzzlePropertiesResults);

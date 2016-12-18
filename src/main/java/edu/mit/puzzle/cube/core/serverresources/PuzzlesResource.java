@@ -2,8 +2,8 @@ package edu.mit.puzzle.cube.core.serverresources;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
-
 import com.google.common.collect.Maps;
+
 import edu.mit.puzzle.cube.core.model.Puzzle;
 import edu.mit.puzzle.cube.core.model.Puzzles;
 import edu.mit.puzzle.cube.core.model.Visibility;
@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class PuzzlesResource extends AbstractCubeResource {
@@ -30,48 +29,38 @@ public class PuzzlesResource extends AbstractCubeResource {
             SecurityUtils.getSubject().checkPermission(
                     new TeamsPermission(teamId.get(), PermissionAction.READ));
 
+            Map<String, Puzzle> unfilteredPuzzles;
+            Map<String, Visibility> retrievedVisibilities;
             if (!puzzleId.isPresent()) {
-                Map<String, Puzzle> unfilteredPuzzles = puzzleStore.getPuzzles();
-
-                Map<String, Visibility> retrievedVisibilities = huntStatusStore.getVisibilitiesForTeam(teamId.get()).stream()
-                        .collect(Collectors.toMap(
-                                Visibility::getPuzzleId,
-                                Function.identity()
-                        ));
-
-                final Set<String> invisibleStatuses = huntStatusStore.getVisibilityStatusSet().getInvisibleStatuses();
-                List<Puzzle> puzzles = unfilteredPuzzles.entrySet().stream()
-                        .filter(entry -> {
-                            Visibility visibility = retrievedVisibilities.get(entry.getKey());
-                            if (visibility == null) {
-                                return false;
-                            }
-                            return !invisibleStatuses.contains(visibility.getStatus());
-                        })
-                        .map(entry -> entry.getValue().strip(retrievedVisibilities.get(entry.getKey())))
-                        .collect(Collectors.toList());
-                return Puzzles.builder()
-                        .setPuzzles(puzzles)
-                        .build();
+                unfilteredPuzzles = puzzleStore.getPuzzles();
+                retrievedVisibilities = Maps.uniqueIndex(
+                        huntStatusStore.getVisibilitiesForTeam(teamId.get()),
+                        Visibility::getPuzzleId
+                );
             } else {
                 List<String> puzzleIds = Splitter.on(",").splitToList(puzzleId.get());
-                Map<String, Puzzle> unfilteredPuzzles = Maps.toMap(puzzleIds, puzzleStore::getPuzzle);
-                Map<String, Visibility> retrievedVisibilities = Maps.toMap(puzzleIds, pid -> huntStatusStore.getVisibility(teamId.get(), pid));
-                final Set<String> invisibleStatuses = huntStatusStore.getVisibilityStatusSet().getInvisibleStatuses();
-                List<Puzzle> puzzles = unfilteredPuzzles.entrySet().stream()
-                        .filter(entry -> {
-                            Visibility visibility = retrievedVisibilities.get(entry.getKey());
-                            if (visibility == null) {
-                                return false;
-                            }
-                            return !invisibleStatuses.contains(visibility.getStatus());
-                        })
-                        .map(entry -> entry.getValue().strip(retrievedVisibilities.get(entry.getKey())))
-                        .collect(Collectors.toList());
-                return Puzzles.builder()
-                        .setPuzzles(puzzles)
-                        .build();
+                puzzleIds = puzzleStore.getCanonicalPuzzleIds(puzzleIds);
+                unfilteredPuzzles = puzzleStore.getPuzzles(puzzleIds);
+                retrievedVisibilities = Maps.uniqueIndex(
+                        huntStatusStore.getVisibilitiesForTeam(teamId.get(), puzzleIds),
+                        Visibility::getPuzzleId
+                );
             }
+
+            final Set<String> invisibleStatuses = huntStatusStore.getVisibilityStatusSet().getInvisibleStatuses();
+            List<Puzzle> puzzles = unfilteredPuzzles.entrySet().stream()
+                    .filter(entry -> {
+                        Visibility visibility = retrievedVisibilities.get(entry.getKey());
+                        if (visibility == null) {
+                            return false;
+                        }
+                        return !invisibleStatuses.contains(visibility.getStatus());
+                    })
+                    .map(entry -> entry.getValue().strip(retrievedVisibilities.get(entry.getKey())))
+                    .collect(Collectors.toList());
+            return Puzzles.builder()
+                    .setPuzzles(puzzles)
+                    .build();
         } else {
             SecurityUtils.getSubject().checkPermission(
                     new TeamsPermission("*", PermissionAction.READ));
