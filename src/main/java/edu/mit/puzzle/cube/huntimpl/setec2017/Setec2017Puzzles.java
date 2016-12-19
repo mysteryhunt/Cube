@@ -2105,14 +2105,6 @@ public class Setec2017Puzzles {
                         .build())
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addSumConstraint(92, Character.values())
-                        .build())
-                .setSolveRewardProperty(SolveRewardProperty.builder()
-                        .addCharacterLevels(Character.FIGHTER, 1)
-                        .addCharacterLevels(Character.WIZARD, 1)
-                        .addCharacterLevels(Character.CLERIC, 1)
-                        .addCharacterLevels(Character.LINGUIST, 1)
-                        .addCharacterLevels(Character.ECONOMIST, 1)
-                        .addCharacterLevels(Character.CHEMIST, 1)
                         .build()));
 
         add.accept(Setec2017PuzzleBuilder.builder()
