@@ -265,8 +265,8 @@ public class Setec2017Puzzles {
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("w8")
-                .setDisplayId("mola")
-                .setDisplayName("MoLA")
+                .setDisplayId("masters_pieces")
+                .setDisplayName("Masters' Pieces")
                 .setSingleAnswer("ILLUMINATE")
                 .setVisibleConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("wizard","UNLOCKED").build())
@@ -816,8 +816,8 @@ public class Setec2017Puzzles {
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("ch1")
-                .setDisplayId("bring_us_a_volcano")
-                .setDisplayName("Bring Us a Volcano")
+                .setDisplayId("you_blew_it")
+                .setDisplayName("You Blew It!")
                 .setSingleAnswer("CROC")
                 .setVisibleConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("chemist", "UNLOCKED")
@@ -1638,8 +1638,8 @@ public class Setec2017Puzzles {
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("criminal2")
-                .setDisplayId("blankety_blank")
-                .setDisplayName("Blankety-Blank")
+                .setDisplayId("fill_in_the")
+                .setDisplayName("Fill in the _____")
                 .setSingleAnswer("KHAGAN BEK")
                 .setVisibleConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("criminal", "UNLOCKED")
@@ -1662,6 +1662,18 @@ public class Setec2017Puzzles {
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("criminal4")
+                .setDisplayId("house_arrest")
+                .setDisplayName("House Arrest")
+                .setSingleAnswer("PAVING TILE")
+                .setVisibleConstraint(VisibilityConstraint.builder()
+                        .addPuzzleVisibilityStatusConstraint("criminal", "UNLOCKED")
+                        .build())
+                .setUnlockedConstraint(VisibilityConstraint.builder()
+                        .addPuzzleVisibilityStatusConstraint("criminal", "UNLOCKED")
+                        .addSumConstraint(6, Character.CHEMIST)
+                        .build()));
+        add.accept(Setec2017PuzzleBuilder.builder()
+                .setId("criminal5")
                 .setDisplayId("location_location_location")
                 .setDisplayName("location.location.location")
                 .setSingleAnswer("ANGKOR WAT")
@@ -1673,7 +1685,7 @@ public class Setec2017Puzzles {
                         .addSumConstraint(7, Character.ECONOMIST)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
-                .setId("criminal5")
+                .setId("criminal6")
                 .setDisplayId("mentally_stimulating_diversion")
                 .setDisplayName("Mentally Stimulating Diversion")
                 .setSingleAnswer("MORGAN HILL")
@@ -1685,7 +1697,7 @@ public class Setec2017Puzzles {
                         .addSumConstraint(5, Character.CHEMIST)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
-                .setId("criminal6")
+                .setId("criminal7")
                 .setDisplayId("mr_y_hunt")
                 .setDisplayName("Mr. Y Hunt")
                 .setSingleAnswer("LEAVES BE")
@@ -1697,7 +1709,7 @@ public class Setec2017Puzzles {
                         .addSumConstraint(12, Character.FIGHTER)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
-                .setId("criminal7")
+                .setId("criminal8")
                 .setDisplayId("oh_you")
                 .setDisplayName("Oh, You!")
                 .setSingleAnswer("PACKED ICE")
@@ -1709,7 +1721,7 @@ public class Setec2017Puzzles {
                         .addSumConstraint(12, Character.WIZARD)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
-                .setId("criminal8")
+                .setId("criminal9")
                 .setDisplayId("special_ops")
                 .setDisplayName("Special OPS")
                 .setSingleAnswer("TAMPER WITH")
@@ -1721,7 +1733,7 @@ public class Setec2017Puzzles {
                         .addSumConstraint(12, Character.CLERIC)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
-                .setId("criminal9")
+                .setId("criminal10")
                 .setDisplayId("trips")
                 .setDisplayName("Trips")
                 .setSingleAnswer("PIGEON LAKE")
@@ -1731,18 +1743,6 @@ public class Setec2017Puzzles {
                 .setUnlockedConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("criminal", "UNLOCKED")
                         .addSumConstraint(11, Character.LINGUIST)
-                        .build()));
-        add.accept(Setec2017PuzzleBuilder.builder()
-                .setId("criminal10")
-                .setDisplayId("where_do_you_live")
-                .setDisplayName("Where Do You Live?")
-                .setSingleAnswer("PAVING TILE")
-                .setVisibleConstraint(VisibilityConstraint.builder()
-                        .addPuzzleVisibilityStatusConstraint("criminal", "UNLOCKED")
-                        .build())
-                .setUnlockedConstraint(VisibilityConstraint.builder()
-                        .addPuzzleVisibilityStatusConstraint("criminal", "UNLOCKED")
-                        .addSumConstraint(6, Character.CHEMIST)
                         .build()));
 
         add.accept(Setec2017PuzzleBuilder.builder()
@@ -1882,8 +1882,8 @@ public class Setec2017Puzzles {
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("cube2")
-                .setDisplayId("horse_sense")
-                .setDisplayName("Horse Sense")
+                .setDisplayId("horse_code")
+                .setDisplayName("Horse Code")
                 .setSingleAnswer("DECOYS")
                 .setVisibleConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("cube", "UNLOCKED")
@@ -2048,8 +2048,8 @@ public class Setec2017Puzzles {
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("warlord-ce")
-                .setDisplayId("beheadments")
-                .setDisplayName("Beheadments")
+                .setDisplayId("hopping_lock")
+                .setDisplayName("Hopping Lock")
                 .setSingleAnswer("EVIL")
                 .setVisibleConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("warlord", "UNLOCKED")
