@@ -4,7 +4,6 @@ import edu.mit.puzzle.cube.core.model.VisibilityChanges;
 import edu.mit.puzzle.cube.core.permissions.PermissionAction;
 import edu.mit.puzzle.cube.core.permissions.VisibilitiesPermission;
 
-import org.apache.shiro.SecurityUtils;
 import org.restlet.resource.Get;
 
 public class VisibilityChangesResource extends AbstractCubeResource {
@@ -13,7 +12,7 @@ public class VisibilityChangesResource extends AbstractCubeResource {
     // visibility changes may not scale.
     @Get
     public VisibilityChanges handleGet() {
-        SecurityUtils.getSubject().checkPermission(
+        getSubject().checkPermission(
                 new VisibilitiesPermission("*", PermissionAction.READ));
         return VisibilityChanges.builder()
                 .setVisibilityChanges(huntStatusStore.getVisibilityChanges())

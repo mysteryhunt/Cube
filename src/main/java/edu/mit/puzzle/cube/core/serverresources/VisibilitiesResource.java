@@ -1,24 +1,18 @@
 package edu.mit.puzzle.cube.core.serverresources;
 
 import com.google.common.base.Splitter;
-import com.google.common.collect.ImmutableList;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
 import edu.mit.puzzle.cube.core.model.Visibilities;
 import edu.mit.puzzle.cube.core.model.Visibility;
-import edu.mit.puzzle.cube.core.model.VisibilityStatusSet;
 import edu.mit.puzzle.cube.core.permissions.PermissionAction;
 import edu.mit.puzzle.cube.core.permissions.VisibilitiesPermission;
 
-import org.apache.shiro.SecurityUtils;
 import org.restlet.data.Status;
 import org.restlet.resource.Get;
 import org.restlet.resource.ResourceException;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public class VisibilitiesResource extends AbstractCubeResource {
@@ -27,7 +21,7 @@ public class VisibilitiesResource extends AbstractCubeResource {
     public Visibilities handleGet() {
         Optional<String> teamId = Optional.ofNullable(getQueryValue("teamId"));
         if (teamId.isPresent()) {
-            SecurityUtils.getSubject().checkPermission(
+            getSubject().checkPermission(
                     new VisibilitiesPermission(teamId.get(), PermissionAction.READ));
         } else {
             throw new ResourceException(
@@ -44,7 +38,7 @@ public class VisibilitiesResource extends AbstractCubeResource {
             visibilities = huntStatusStore.getVisibilitiesForTeam(teamId.get(), puzzleIds);
         }
 
-        if (!SecurityUtils.getSubject().isPermitted(new VisibilitiesPermission("*", PermissionAction.READ))) {
+        if (!getSubject().isPermitted(new VisibilitiesPermission("*", PermissionAction.READ))) {
             visibilities = visibilities.stream()
                     .filter(v -> !v.getStatus().equalsIgnoreCase("INVISIBLE"))
                     .collect(Collectors.toList());

@@ -9,7 +9,6 @@ import edu.mit.puzzle.cube.core.model.Visibility;
 import edu.mit.puzzle.cube.core.permissions.InteractionsPermission;
 import edu.mit.puzzle.cube.core.permissions.PermissionAction;
 
-import org.apache.shiro.SecurityUtils;
 import org.restlet.data.Status;
 import org.restlet.resource.Get;
 import org.restlet.resource.Post;
@@ -30,12 +29,12 @@ public class InteractionRequestsResource extends AbstractCubeResource {
             );
             puzzleId = puzzleStore.getCanonicalPuzzleId(puzzleId);
 
-            SecurityUtils.getSubject().checkPermission(
+            getSubject().checkPermission(
                     new InteractionsPermission(teamId, PermissionAction.READ)
             );
             interactionRequests = interactionRequestStore.getInteractionRequestsForTeamAndPuzzle(teamId, puzzleId);
         } else {
-            SecurityUtils.getSubject().checkPermission(
+            getSubject().checkPermission(
                     new InteractionsPermission("*", PermissionAction.READ)
             );
             interactionRequests = interactionRequestStore.getNonTerminalInteractionRequests();
@@ -45,7 +44,7 @@ public class InteractionRequestsResource extends AbstractCubeResource {
 
     @Post
     public PostResult handlePost(InteractionRequest interactionRequest) {
-        SecurityUtils.getSubject().checkPermission(
+        getSubject().checkPermission(
                 new InteractionsPermission(interactionRequest.getTeamId(), PermissionAction.CREATE));
 
         interactionRequest = interactionRequest.toBuilder()

@@ -7,7 +7,6 @@ import edu.mit.puzzle.cube.core.model.SubmissionStatus;
 import edu.mit.puzzle.cube.core.permissions.PermissionAction;
 import edu.mit.puzzle.cube.core.permissions.SubmissionsPermission;
 
-import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.subject.Subject;
 import org.restlet.data.Status;
 import org.restlet.resource.Get;
@@ -36,7 +35,7 @@ public class SubmissionResource extends AbstractCubeResource {
         Optional<Submission> submission = submissionStore.getSubmission(id);
 
         if (submission.isPresent()) {
-            SecurityUtils.getSubject().checkPermission(
+            getSubject().checkPermission(
                     new SubmissionsPermission(submission.get().getTeamId(), PermissionAction.READ));
             return submission.get();
         } else {
@@ -62,7 +61,7 @@ public class SubmissionResource extends AbstractCubeResource {
                     String.format("Submission %d does not exist", id));
         }
 
-        Subject subject = SecurityUtils.getSubject();
+        Subject subject = getSubject();
         subject.checkPermission(
                 new SubmissionsPermission(existingSubmission.get().getTeamId(), PermissionAction.UPDATE));
 

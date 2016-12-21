@@ -5,7 +5,6 @@ import edu.mit.puzzle.cube.core.model.PostResult;
 import edu.mit.puzzle.cube.core.permissions.HintsPermission;
 import edu.mit.puzzle.cube.core.permissions.PermissionAction;
 
-import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.subject.Subject;
 import org.restlet.data.Status;
 import org.restlet.resource.Get;
@@ -34,7 +33,7 @@ public class HintRequestResource extends AbstractCubeResource {
         Optional<HintRequest> hintRequest = hintRequestStore.getHintRequest(id);
 
         if (hintRequest.isPresent()) {
-            SecurityUtils.getSubject().checkPermission(
+            getSubject().checkPermission(
                     new HintsPermission(hintRequest.get().getTeamId(), PermissionAction.READ));
             return hintRequest.get();
 
@@ -61,7 +60,7 @@ public class HintRequestResource extends AbstractCubeResource {
                     String.format("Hint request %d does not exist", id));
         }
 
-        Subject subject = SecurityUtils.getSubject();
+        Subject subject = getSubject();
         subject.checkPermission(
                 new HintsPermission(existingHintRequest.get().getTeamId(), PermissionAction.UPDATE));
 
