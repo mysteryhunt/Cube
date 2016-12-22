@@ -7,7 +7,6 @@ import edu.mit.puzzle.cube.core.model.Visibility;
 import edu.mit.puzzle.cube.core.permissions.PermissionAction;
 import edu.mit.puzzle.cube.core.permissions.PuzzlesPermission;
 
-import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.subject.Subject;
 import org.restlet.data.Status;
 import org.restlet.resource.Get;
@@ -28,7 +27,7 @@ public class PuzzleResource extends AbstractCubeResource {
 
     @Get
     public Puzzle handleGet() {
-        Subject subject = SecurityUtils.getSubject();
+        Subject subject = getSubject();
         subject.checkPermission(new PuzzlesPermission(PermissionAction.READ));
 
         String puzzleId = getId();
@@ -46,7 +45,7 @@ public class PuzzleResource extends AbstractCubeResource {
                         String.format("The puzzle id '%s' does not exist", puzzleId));
             }
 
-            puzzle = puzzle.strip(visibility);
+            puzzle = puzzle.strip(subject, visibility);
         }
 
         return puzzle;
@@ -54,7 +53,7 @@ public class PuzzleResource extends AbstractCubeResource {
 
     @Post
     public PostResult handlePost(Puzzle puzzle) {
-        SecurityUtils.getSubject().checkPermission(new PuzzlesPermission(PermissionAction.UPDATE));
+        getSubject().checkPermission(new PuzzlesPermission(PermissionAction.UPDATE));
         String puzzleId = getId();
         boolean updated = false;
         for (Map.Entry<String, Puzzle.Property> entry : puzzle.getPuzzleProperties().entrySet()) {

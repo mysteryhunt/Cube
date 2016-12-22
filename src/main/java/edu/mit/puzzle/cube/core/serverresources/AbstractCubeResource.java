@@ -11,7 +11,9 @@ import edu.mit.puzzle.cube.core.model.InteractionRequestStore;
 import edu.mit.puzzle.cube.core.model.PuzzleStore;
 import edu.mit.puzzle.cube.core.model.SubmissionStore;
 import edu.mit.puzzle.cube.core.model.UserStore;
+import edu.mit.puzzle.cube.core.permissions.SubjectUtils;
 
+import org.apache.shiro.subject.Subject;
 import org.restlet.representation.Representation;
 import org.restlet.resource.ServerResource;
 
@@ -49,5 +51,9 @@ public abstract class AbstractCubeResource extends ServerResource {
         } finally {
             timerContext.stop();
         }
+    }
+
+    protected Subject getSubject() {
+        return SubjectUtils.getSubject(getRequest());
     }
 }

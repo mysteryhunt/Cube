@@ -5,7 +5,6 @@ import edu.mit.puzzle.cube.core.model.Visibility;
 import edu.mit.puzzle.cube.core.permissions.PermissionAction;
 import edu.mit.puzzle.cube.core.permissions.VisibilitiesPermission;
 
-import org.apache.shiro.SecurityUtils;
 import org.restlet.data.Status;
 import org.restlet.resource.Get;
 import org.restlet.resource.Post;
@@ -33,7 +32,7 @@ public class VisibilityResource extends AbstractCubeResource {
     public Visibility handleGet() {
         String teamId = getTeamId();
         String puzzleId = puzzleStore.getCanonicalPuzzleId(getPuzzleId());
-        SecurityUtils.getSubject().checkPermission(
+        getSubject().checkPermission(
                 new VisibilitiesPermission(teamId, PermissionAction.READ));
         return huntStatusStore.getVisibility(teamId, puzzleId);
     }
@@ -43,7 +42,7 @@ public class VisibilityResource extends AbstractCubeResource {
         String teamId = getTeamId();
         String puzzleId = puzzleStore.getCanonicalPuzzleId(getPuzzleId());
 
-        SecurityUtils.getSubject().checkPermission(
+        getSubject().checkPermission(
                 new VisibilitiesPermission(teamId, PermissionAction.UPDATE));
 
         if (visibility.getStatus() == null

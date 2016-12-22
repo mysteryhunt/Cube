@@ -9,7 +9,6 @@ import edu.mit.puzzle.cube.core.model.User;
 import edu.mit.puzzle.cube.core.permissions.PermissionAction;
 import edu.mit.puzzle.cube.core.permissions.TeamsPermission;
 
-import org.apache.shiro.SecurityUtils;
 import org.restlet.resource.Get;
 import org.restlet.resource.Post;
 
@@ -17,7 +16,7 @@ public class TeamsResource extends AbstractCubeResource {
 
     @Get
     public Teams handleGet() {
-        SecurityUtils.getSubject().checkPermission(
+        getSubject().checkPermission(
                 new TeamsPermission("*", PermissionAction.READ));
         return Teams.builder()
                 .setTeams(huntStatusStore.getTeams())
@@ -26,7 +25,7 @@ public class TeamsResource extends AbstractCubeResource {
 
     @Post
     public PostResult handlePost(Team team) {
-        SecurityUtils.getSubject().checkPermission(
+        getSubject().checkPermission(
                 new TeamsPermission(team.getTeamId(), PermissionAction.CREATE));
         Preconditions.checkArgument(
                 !team.getTeamId().isEmpty(),

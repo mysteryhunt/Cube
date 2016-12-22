@@ -5,7 +5,6 @@ import edu.mit.puzzle.cube.core.model.PostResult;
 import edu.mit.puzzle.cube.core.permissions.InteractionsPermission;
 import edu.mit.puzzle.cube.core.permissions.PermissionAction;
 
-import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.subject.Subject;
 import org.restlet.data.Status;
 import org.restlet.resource.Get;
@@ -34,7 +33,7 @@ public class InteractionRequestResource extends AbstractCubeResource {
         Optional<InteractionRequest> interactionRequest = interactionRequestStore.getInteractionRequest(id);
 
         if (interactionRequest.isPresent()) {
-            SecurityUtils.getSubject().checkPermission(
+            getSubject().checkPermission(
                     new InteractionsPermission(interactionRequest.get().getTeamId(), PermissionAction.READ));
             return interactionRequest.get();
         } else {
@@ -60,7 +59,7 @@ public class InteractionRequestResource extends AbstractCubeResource {
                     String.format("Interaction request %d does not exist", id));
         }
 
-        Subject subject = SecurityUtils.getSubject();
+        Subject subject = getSubject();
         subject.checkPermission(
                 new InteractionsPermission(existingInteractionRequest.get().getTeamId(), PermissionAction.UPDATE));
 

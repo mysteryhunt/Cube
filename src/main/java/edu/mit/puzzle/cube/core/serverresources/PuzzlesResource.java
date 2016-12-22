@@ -10,7 +10,7 @@ import edu.mit.puzzle.cube.core.model.Visibility;
 import edu.mit.puzzle.cube.core.permissions.PermissionAction;
 import edu.mit.puzzle.cube.core.permissions.TeamsPermission;
 
-import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.subject.Subject;
 import org.restlet.resource.Get;
 
 import java.util.List;
@@ -23,10 +23,11 @@ public class PuzzlesResource extends AbstractCubeResource {
 
     @Get
     public Puzzles handleGet() {
+        Subject subject = getSubject();
         Optional<String> teamId = Optional.ofNullable(getQueryValue("teamId"));
         Optional<String> puzzleId = Optional.ofNullable(getQueryValue("puzzleId"));
         if (teamId.isPresent()) {
-            SecurityUtils.getSubject().checkPermission(
+            subject.checkPermission(
                     new TeamsPermission(teamId.get(), PermissionAction.READ));
 
             Map<String, Puzzle> unfilteredPuzzles;
@@ -56,13 +57,13 @@ public class PuzzlesResource extends AbstractCubeResource {
                         }
                         return !invisibleStatuses.contains(visibility.getStatus());
                     })
-                    .map(entry -> entry.getValue().strip(retrievedVisibilities.get(entry.getKey())))
+                    .map(entry -> entry.getValue().strip(subject, retrievedVisibilities.get(entry.getKey())))
                     .collect(Collectors.toList());
             return Puzzles.builder()
                     .setPuzzles(puzzles)
                     .build();
         } else {
-            SecurityUtils.getSubject().checkPermission(
+            subject.checkPermission(
                     new TeamsPermission("*", PermissionAction.READ));
 
             Map<String, Puzzle> unfilteredPuzzles = puzzleStore.getPuzzles();
