@@ -7,7 +7,6 @@ import edu.mit.puzzle.cube.core.model.Team;
 import edu.mit.puzzle.cube.core.permissions.PermissionAction;
 import edu.mit.puzzle.cube.core.permissions.TeamsPermission;
 
-import org.apache.shiro.SecurityUtils;
 import org.restlet.resource.Get;
 import org.restlet.resource.Post;
 
@@ -24,7 +23,7 @@ public class TeamResource extends AbstractCubeResource {
     @Get
     public Team handleGet() {
         String id = getId();
-        SecurityUtils.getSubject().checkPermission(
+        getSubject().checkPermission(
                 new TeamsPermission(id, PermissionAction.READ));
         return huntStatusStore.getTeam(id);
     }
@@ -32,7 +31,7 @@ public class TeamResource extends AbstractCubeResource {
     @Post
     public PostResult handlePost(Team team) {
         String teamId = getId();
-        SecurityUtils.getSubject().checkPermission(
+        getSubject().checkPermission(
                 new TeamsPermission(teamId, PermissionAction.UPDATE));
         Preconditions.checkArgument(
                 team.getTeamId().equals(teamId),

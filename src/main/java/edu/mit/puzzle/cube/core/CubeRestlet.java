@@ -3,12 +3,11 @@ package edu.mit.puzzle.cube.core;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.Timer;
 
+import edu.mit.puzzle.cube.core.permissions.SubjectUtils;
 import edu.mit.puzzle.cube.core.serverresources.*;
 
-import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.UsernamePasswordToken;
-import org.apache.shiro.subject.Subject;
 import org.restlet.Context;
 import org.restlet.Request;
 import org.restlet.Response;
@@ -76,13 +75,6 @@ public class CubeRestlet extends Filter {
                 return Verifier.RESULT_VALID;
             }
 
-            Subject subject = SecurityUtils.getSubject();
-
-            // We don't want any sessionization for our stateless RESTful API.
-            if (subject.isAuthenticated() && subject.getSession(false) != null) {
-                subject.logout();
-            }
-
             ChallengeResponse challengeResponse = request.getChallengeResponse();
             if (challengeResponse == null) {
                 throw new AuthenticationException(
@@ -93,7 +85,7 @@ public class CubeRestlet extends Filter {
                     challengeResponse.getIdentifier(),
                     challengeResponse.getSecret()
             );
-            subject.login(token);
+            SubjectUtils.setSubject(request, token);
 
             return Verifier.RESULT_VALID;
         });

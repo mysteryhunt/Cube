@@ -20,7 +20,7 @@ import com.google.common.collect.ImmutableSet;
 
 import edu.mit.puzzle.cube.core.permissions.AnswersPermission;
 
-import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.subject.Subject;
 import org.restlet.data.Status;
 import org.restlet.resource.ResourceException;
 import org.slf4j.Logger;
@@ -287,12 +287,12 @@ public abstract class Puzzle {
 
     // Return a copy of this puzzle with properties that should not be visible to the current
     // solving team removed.
-    public Puzzle strip(Visibility visibility) {
+    public Puzzle strip(Subject subject, Visibility visibility) {
         ImmutableMap.Builder<String, Property> puzzlePropertiesBuilder = ImmutableMap.builder();
         if (getPuzzleProperties() != null) {
             for (Map.Entry<String, Property> entry : getPuzzleProperties().entrySet()) {
                 if (entry.getValue() instanceof AnswersProperty) {
-                    if (SecurityUtils.getSubject().isPermitted(new AnswersPermission())) {
+                    if (subject.isPermitted(new AnswersPermission())) {
                         puzzlePropertiesBuilder.put(entry.getKey(), entry.getValue());
                     } else {
                         AnswersProperty answersProperty = (AnswersProperty) entry.getValue();

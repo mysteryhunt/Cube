@@ -8,7 +8,6 @@ import edu.mit.puzzle.cube.core.permissions.PermissionAction;
 import edu.mit.puzzle.cube.core.permissions.UserRolesPermission;
 import edu.mit.puzzle.cube.core.permissions.UsersPermission;
 
-import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.subject.Subject;
 import org.restlet.resource.Get;
 import org.restlet.resource.Post;
@@ -27,7 +26,7 @@ public class UserResource extends AbstractCubeResource {
     public User handleGet() {
         String id = getId();
 
-        Subject subject = SecurityUtils.getSubject();
+        Subject subject = getSubject();
         subject.checkPermission(new UsersPermission(id, PermissionAction.READ));
 
         User user = userStore.getUser(id);
@@ -45,7 +44,7 @@ public class UserResource extends AbstractCubeResource {
     public PostResult handlePost(User user) {
         String id = getId();
 
-        Subject subject = SecurityUtils.getSubject();
+        Subject subject = getSubject();
         subject.checkPermission(new UsersPermission(id, PermissionAction.UPDATE));
         if (user.getRoles() != null) {
             subject.checkPermission(new UserRolesPermission(id, PermissionAction.UPDATE));

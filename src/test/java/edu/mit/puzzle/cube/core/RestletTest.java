@@ -56,8 +56,6 @@ public abstract class RestletTest {
     protected static final ChallengeResponse ADMIN_CREDENTIALS =
             new ChallengeResponse(ChallengeScheme.HTTP_BASIC, "adminuser", "adminpassword");
 
-    private static ThreadState subjectThreadState;
-
     protected Context context;
     protected Restlet restlet;
     protected ServiceEnvironment serviceEnvironment;
@@ -87,18 +85,11 @@ public abstract class RestletTest {
         SecurityManager securityManager = new DefaultSecurityManager(realm);
         SecurityUtils.setSecurityManager(securityManager);
 
-        subjectThreadState = new SubjectThreadState(SecurityUtils.getSubject());
-        subjectThreadState.bind();
-
         currentUserCredentials = ADMIN_CREDENTIALS;
     }
 
     @After
     public void tearDown() {
-        if (subjectThreadState != null) {
-            subjectThreadState.clear();
-            subjectThreadState = null;
-        }
         try {
             SecurityManager securityManager = SecurityUtils.getSecurityManager();
             LifecycleUtils.destroy(securityManager);

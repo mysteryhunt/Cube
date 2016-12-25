@@ -3,7 +3,6 @@ package edu.mit.puzzle.cube.core.serverresources;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.auto.value.AutoValue;
 
-import org.apache.shiro.SecurityUtils;
 import org.restlet.data.Status;
 import org.restlet.resource.Get;
 import org.restlet.resource.ResourceException;
@@ -26,6 +25,6 @@ public class AuthorizedResource extends AbstractCubeResource {
                     Status.CLIENT_ERROR_BAD_REQUEST,
                     "A request to /authorized must specify a permission to check");
         }
-        return Authorized.create(SecurityUtils.getSubject().isPermitted(permission));
+        return Authorized.create(getSubject().isPermitted(permission));
     }
 }

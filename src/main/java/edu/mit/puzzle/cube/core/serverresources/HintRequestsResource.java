@@ -9,7 +9,6 @@ import edu.mit.puzzle.cube.core.model.Visibility;
 import edu.mit.puzzle.cube.core.permissions.HintsPermission;
 import edu.mit.puzzle.cube.core.permissions.PermissionAction;
 
-import org.apache.shiro.SecurityUtils;
 import org.restlet.data.Status;
 import org.restlet.resource.Get;
 import org.restlet.resource.Post;
@@ -30,12 +29,12 @@ public class HintRequestsResource extends AbstractCubeResource {
             );
             puzzleId = puzzleStore.getCanonicalPuzzleId(puzzleId);
 
-            SecurityUtils.getSubject().checkPermission(
+            getSubject().checkPermission(
                     new HintsPermission(teamId, PermissionAction.READ)
             );
             hintRequests = hintRequestStore.getHintRequestsForTeamAndPuzzle(teamId, puzzleId);
         } else {
-            SecurityUtils.getSubject().checkPermission(
+            getSubject().checkPermission(
                     new HintsPermission("*", PermissionAction.READ)
             );
             hintRequests = hintRequestStore.getNonTerminalHintRequests();
@@ -45,7 +44,7 @@ public class HintRequestsResource extends AbstractCubeResource {
 
     @Post
     public PostResult handlePost(HintRequest hintRequest) {
-        SecurityUtils.getSubject().checkPermission(
+        getSubject().checkPermission(
                 new HintsPermission(hintRequest.getTeamId(), PermissionAction.CREATE));
 
         hintRequest = hintRequest.toBuilder()
