@@ -278,8 +278,8 @@ public class Setec2017Puzzles {
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("w9")
-                .setDisplayId("penny_for_your_thoughts")
-                .setDisplayName("Penny for Your Thoughts")
+                .setDisplayId("a_penny_for_your_thoughts")
+                .setDisplayName("A Penny for Your Thoughts")
                 .setSingleAnswer("CONFLAGRATE")
                 .setVisibleConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("wizard","UNLOCKED").build())
