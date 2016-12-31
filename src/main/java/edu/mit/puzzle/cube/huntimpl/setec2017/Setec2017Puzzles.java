@@ -1770,8 +1770,8 @@ public class Setec2017Puzzles {
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("criminal1")
-                .setDisplayId("790_06_crossword_puzzles_and_other_games")
-                .setDisplayName("790.06 Crossword Puzzles and Other Games")
+                .setDisplayId("790_06_crossword_puzzles_and_other_word_games")
+                .setDisplayName("790.06 Crossword Puzzles and Other Word Games")
                 .setSingleAnswer("RAPIER WIT")
                 .setVisibleConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("criminal", "UNLOCKED")
