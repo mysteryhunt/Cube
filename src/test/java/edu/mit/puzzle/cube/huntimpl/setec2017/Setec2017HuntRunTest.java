@@ -79,17 +79,17 @@ public class Setec2017HuntRunTest extends RestletTest {
 
         JsonNode json = getVisibility("testerteam", "fighter");
         assertThat(json.get("status").asText()).isEqualTo("UNLOCKED");
-        json = getVisibility("testerteam", "f1");
+        json = getVisibility("testerteam", "f5");
         assertThat(json.get("status").asText()).isEqualTo("UNLOCKED");
-        json = getVisibility("testerteam", "f3");
-        assertThat(json.get("status").asText()).isEqualTo("VISIBLE");
         json = getVisibility("testerteam", "f4");
+        assertThat(json.get("status").asText()).isEqualTo("VISIBLE");
+        json = getVisibility("testerteam", "f8");
         assertThat(json.get("status").asText()).isEqualTo("VISIBLE");
         json = getVisibility("testerteam", "dynast");
         assertThat(json.get("status").asText()).isEqualTo("INVISIBLE");
 
         currentUserCredentials = TESTERTEAM_CREDENTIALS;
-        postNewSubmission("testerteam", "f1", "FIGHTER1");
+        postNewSubmission("testerteam", "f5", "FIGHTER1");
         currentUserCredentials = ADMIN_CREDENTIALS;
         postUpdateSubmission(1, "CORRECT");
 
@@ -97,26 +97,24 @@ public class Setec2017HuntRunTest extends RestletTest {
         assertThat(getCharacterLevel(Character.WIZARD)).isEqualTo(0);
         assertThat(getGold()).isEqualTo(0);
         assertThat(getInventoryItems()).isEmpty();
-        json = getVisibility("testerteam", "f1");
+        json = getVisibility("testerteam", "f5");
         assertThat(json.get("status").asText()).isEqualTo("SOLVED");
         json = getVisibility("testerteam", "f3");
         assertThat(json.get("status").asText()).isEqualTo("UNLOCKED");
         json = getVisibility("testerteam", "f4");
         assertThat(json.get("status").asText()).isEqualTo("VISIBLE");
-        json = getVisibility("testerteam", "f5");
+        json = getVisibility("testerteam", "f6");
         assertThat(json.get("status").asText()).isEqualTo("VISIBLE");
 
         currentUserCredentials = TESTERTEAM_CREDENTIALS;
-        postNewSubmission("testerteam", "f2", "FIGHTER1");
+        postNewSubmission("testerteam", "f3", "FIGHTER1");
         currentUserCredentials = ADMIN_CREDENTIALS;
         postUpdateSubmission(2, "CORRECT");
 
         assertThat(getInventoryItems()).isEmpty();
-        json = getVisibility("testerteam", "f3");
+        json = getVisibility("testerteam", "f1");
         assertThat(json.get("status").asText()).isEqualTo("UNLOCKED");
-        json = getVisibility("testerteam", "f4");
-        assertThat(json.get("status").asText()).isEqualTo("UNLOCKED");
-        json = getVisibility("testerteam", "f5");
+        json = getVisibility("testerteam", "f8");
         assertThat(json.get("status").asText()).isEqualTo("VISIBLE");
         json = getVisibility("testerteam", "f6");
         assertThat(json.get("status").asText()).isEqualTo("VISIBLE");
@@ -125,7 +123,7 @@ public class Setec2017HuntRunTest extends RestletTest {
                 "/hintrequests",
                 HintRequest.builder()
                         .setTeamId("testerteam")
-                        .setPuzzleId("f3")
+                        .setPuzzleId("f1")
                         .setRequest("help")
                         .build()
         );
