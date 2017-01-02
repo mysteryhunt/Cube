@@ -9,6 +9,7 @@ import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Table;
 
+import java.sql.BatchUpdateException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -357,6 +358,11 @@ public class DatabaseHelper {
             try {
                 return function.run();
             } catch (SQLException e) {
+                if (e instanceof BatchUpdateException) {
+                    // If this error is from a batch execution, get the error from the individual
+                    // statement that had a problem.
+                    e = e.getNextException();
+                }
                 // 40001 is the SQLSTATE error for a serialization failure.
                 if (e.getSQLState() != null && e.getSQLState().equals("40001")) {
                     ++retryCount;
