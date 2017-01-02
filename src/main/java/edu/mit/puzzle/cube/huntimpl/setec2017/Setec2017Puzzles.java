@@ -2357,7 +2357,7 @@ public class Setec2017Puzzles {
                 .setId("encounter")
                 .setDisplayId("the_ensnaring_encounter")
                 .setDisplayName("The Ensnaring Encounter")
-                .setSingleAnswer("ENCOUNTERDUMMYANSWER")
+                .setSingleAnswer("HIVE MIND")
                 .setVisibleConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("fighter","SOLVED")
                         .addPuzzleVisibilityStatusConstraint("wizard","SOLVED")
