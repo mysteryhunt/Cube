@@ -675,7 +675,7 @@ public class Setec2017HuntDefinition extends HuntDefinition {
                 huntStatusStore.mutateTeamProperty(
                         teamId,
                         GoldProperty.class,
-                        goldProperty -> GoldProperty.create(goldProperty.getGold() + 1)
+                        goldProperty -> GoldProperty.create(goldProperty.getGold() + 100)
                 );
             }
         });
@@ -690,7 +690,7 @@ public class Setec2017HuntDefinition extends HuntDefinition {
                 goldProperty -> {
                     if (goldProperty.getGold() > 0) {
                         deductedGold.set(true);
-                        return GoldProperty.create(goldProperty.getGold() - 1);
+                        return GoldProperty.create(goldProperty.getGold() - 100);
                     }
                     return goldProperty;
                 }
