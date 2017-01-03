@@ -140,3 +140,34 @@ CREATE TABLE interaction_requests (
        FOREIGN KEY(puzzleId) REFERENCES puzzles(puzzleId),
        FOREIGN KEY(callerUsername) REFERENCES users(username)
 );
+
+CREATE VIEW submissions_with_display_ids AS
+SELECT
+  submissions.submissionId as submissionId,
+  submissions.teamId as teamId,
+  submissions.puzzleId as canonicalPuzzleId,
+  puzzle_indexable_properties.propertyValue as displayPuzzleId,
+  submissions.submission as submission,
+  submissions.timestamp as timestamp,
+  submissions.status as status,
+  submissions.callerUsername as callerUsername,
+  submissions.canonicalAnswer as canonicalAnswer
+FROM submissions
+JOIN puzzle_indexable_properties
+ON submissions.puzzleId = puzzle_indexable_properties.puzzleId
+WHERE
+  puzzle_indexable_properties.propertyKey = 'DisplayIdProperty'
+;
+
+CREATE VIEW visibilities_with_display_ids AS
+SELECT
+  visibilities.teamId as teamId,
+  visibilities.puzzleId as canonicalPuzzleId,
+  puzzle_indexable_properties.propertyValue as displayPuzzleId,
+  visibilities.status as status
+FROM visibilities
+JOIN puzzle_indexable_properties
+ON visibilities.puzzleId = puzzle_indexable_properties.puzzleId
+WHERE
+  puzzle_indexable_properties.propertyKey = 'DisplayIdProperty'
+;

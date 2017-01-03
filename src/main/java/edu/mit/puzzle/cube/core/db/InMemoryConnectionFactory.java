@@ -128,7 +128,7 @@ public class InMemoryConnectionFactory implements ConnectionFactory {
         try (Connection connection = getConnection()) {
             connection.createStatement().executeUpdate("PRAGMA writable_schema = 1");
             connection.createStatement().executeUpdate(
-                    "delete from sqlite_master where type in ('table', 'index', 'trigger')");
+                    "delete from sqlite_master where type in ('table', 'index', 'trigger', 'view')");
             connection.createStatement().executeUpdate("PRAGMA writable_schema = 0");
             connection.createStatement().executeUpdate("VACUUM");
             connection.createStatement().executeUpdate("PRAGMA INTEGRITY_CHECK");
