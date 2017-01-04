@@ -816,8 +816,8 @@ public class Setec2017Puzzles {
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("ch1")
-                .setDisplayId("you_blew_it")
-                .setDisplayName("You Blew It!")
+                .setDisplayId("the_most_interesting_puzzle_in_the_world")
+                .setDisplayName("The Most Interesting Puzzle in the World")
                 .setSingleAnswer("CROC")
                 .setVisibleConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("chemist", "UNLOCKED")
@@ -984,8 +984,8 @@ public class Setec2017Puzzles {
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("dynast2")
-                .setDisplayId("first_things_first")
-                .setDisplayName("First Things First")
+                .setDisplayId("motion_picture")
+                .setDisplayName("Motion Picture")
                 .setSingleAnswer("FANTASMAGORIE")
                 .setVisibleConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("dynast", "UNLOCKED")
@@ -1615,8 +1615,8 @@ public class Setec2017Puzzles {
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("bridge8")
-                .setDisplayId("a_hunt_mit_mystery_puzzle")
-                .setDisplayName("A Hunt MIT Mystery Puzzle")
+                .setDisplayId("an_hunt_mit_mystery_puzzle")
+                .setDisplayName("An Hunt MIT Mystery Puzzle")
                 .setSingleAnswer("DESPEREAUX")
                 .setVisibleConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("bridge", "UNLOCKED")
