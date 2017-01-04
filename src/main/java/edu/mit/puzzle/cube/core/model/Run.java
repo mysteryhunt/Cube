@@ -19,10 +19,10 @@ public abstract class Run {
         @JsonDeserialize(using=InstantDeserializer.class)
         public abstract Builder setStartTimestamp(Instant startTimestamp);
 
-        abstract Run build();
+        public abstract Run build();
     }
 
-    public Builder builder() {
+    public static Builder builder() {
         return new AutoValue_Run.Builder();
     }
 
