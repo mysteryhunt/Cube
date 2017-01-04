@@ -61,9 +61,15 @@ public class LinearHuntRunTest extends RestletTest {
         json = get("/puzzles?teamId=testerteam");
         assertEquals(0, json.get("puzzles").size());
 
+        json = get("/run");
+        assertThat(json.get("startTimestamp").isNull()).isTrue();
+
         currentUserCredentials = ADMIN_CREDENTIALS;
 
         postHuntStart();
+
+        json = get("/run");
+        assertThat(json.get("startTimestamp").isNull()).isFalse();
 
         json = getVisibility("testerteam","puzzle1");
         assertEquals("UNLOCKED", json.get("status").asText());

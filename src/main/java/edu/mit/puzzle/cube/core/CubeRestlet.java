@@ -54,6 +54,7 @@ public class CubeRestlet extends Filter {
         router.attach("/interactionrequests/{id}", InteractionRequestResource.class);
         router.attach("/puzzles", PuzzlesResource.class);
         router.attach("/puzzles/{id}", PuzzleResource.class);
+        router.attach("/run", RunResource.class);
         router.attach("/submissions", SubmissionsResource.class);
         router.attach("/submissions/{id}", SubmissionResource.class);
         router.attach("/teams", TeamsResource.class);
