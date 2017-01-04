@@ -51,7 +51,7 @@ public abstract class RolesAndInstanceLevelPermissions {
                 ImmutableList.<CubeRole>of(CubeRole.SOLVING_TEAM),
                 ImmutableList.of(
                         new UsersPermission(teamId, PermissionAction.READ),
-                        new TeamsPermission(teamId, PermissionAction.READ),
+                        new TeamsPermission(teamId, PermissionAction.READ, PermissionAction.UPDATE),
                         new SubmissionsPermission(teamId, PermissionAction.CREATE, PermissionAction.READ),
                         new VisibilitiesPermission(teamId, PermissionAction.READ),
                         new HintsPermission(teamId, PermissionAction.CREATE, PermissionAction.READ),
