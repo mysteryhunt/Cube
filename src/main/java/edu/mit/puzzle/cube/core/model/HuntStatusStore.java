@@ -27,7 +27,6 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.util.HashMap;
@@ -678,6 +677,16 @@ public class HuntStatusStore {
                 "SELECT * FROM visibility_history WHERE " +
                         "teamId = ? AND puzzleId = ? ORDER BY timestamp ASC",
                 Lists.newArrayList(teamId, puzzleId),
+                VisibilityChange.class
+        );
+    }
+
+    public List<VisibilityChange> getTeamVisibilityHistory(String teamId) {
+        return DatabaseHelper.query(
+                connectionFactory,
+                "SELECT * FROM visibility_history WHERE " +
+                        "teamId = ? ORDER BY visibilityHistoryId",
+                Lists.newArrayList(teamId),
                 VisibilityChange.class
         );
     }
