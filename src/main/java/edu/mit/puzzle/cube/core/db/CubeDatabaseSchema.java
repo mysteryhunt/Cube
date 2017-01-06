@@ -21,6 +21,8 @@ import java.util.Map;
 public class CubeDatabaseSchema {
     private static final String VAR_AUTO_INCREMENT_TYPE = "auto_increment_type";
     private static final String VAR_DEFAULT_VISIBILITY_STATUS = "default_visibility_status";
+    private static final String VAR_TIMESTAMP_TO_NUMBER_PREFIX = "timestamp_to_number_prefix";
+    private static final String VAR_TIMESTAMP_TO_NUMBER_SUFFIX = "timestamp_to_number_suffix";
 
     private final String schema;
 
@@ -33,12 +35,18 @@ public class CubeDatabaseSchema {
         switch (jdbcDriverClassName) {
         case "org.sqlite.JDBC":
             schemaTemplateMap.put(VAR_AUTO_INCREMENT_TYPE, "INTEGER");
+            schemaTemplateMap.put(VAR_TIMESTAMP_TO_NUMBER_PREFIX, "CAST(");
+            schemaTemplateMap.put(VAR_TIMESTAMP_TO_NUMBER_SUFFIX, " AS REAL)");
             break;
         case "org.postgresql.Driver":
             schemaTemplateMap.put(VAR_AUTO_INCREMENT_TYPE, "SERIAL");
+            schemaTemplateMap.put(VAR_TIMESTAMP_TO_NUMBER_PREFIX, "EXTRACT(EPOCH FROM ");
+            schemaTemplateMap.put(VAR_TIMESTAMP_TO_NUMBER_SUFFIX, ")");
             break;
         case "com.mysql.jdbc.Driver":
             schemaTemplateMap.put(VAR_AUTO_INCREMENT_TYPE, "INT NOT NULL AUTO_INCREMENT");
+            schemaTemplateMap.put(VAR_TIMESTAMP_TO_NUMBER_PREFIX, "CAST(");
+            schemaTemplateMap.put(VAR_TIMESTAMP_TO_NUMBER_SUFFIX, " AS REAL)");
             break;
         default:
             throw new RuntimeException(
