@@ -15,6 +15,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.sql.Types;
 import java.time.Instant;
 import java.time.temporal.ChronoField;
@@ -174,9 +175,14 @@ public class DatabaseHelper {
                     Object value;
                     switch (rs.getMetaData().getColumnType(i)) {
                     case Types.TIMESTAMP:
-                        Instant instant = rs.getTimestamp(i).toInstant();
-                        value = instant.getLong(ChronoField.INSTANT_SECONDS) * 1000
-                                + instant.getLong(ChronoField.MILLI_OF_SECOND);
+                        Timestamp timestamp = rs.getTimestamp(i);
+                        if (timestamp != null) {
+                            Instant instant = timestamp.toInstant();
+                            value = instant.getLong(ChronoField.INSTANT_SECONDS) * 1000
+                                    + instant.getLong(ChronoField.MILLI_OF_SECOND);
+                        } else {
+                            value = null;
+                        }
                         break;
                     default:
                         value = rs.getObject(i);
