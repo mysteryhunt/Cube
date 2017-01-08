@@ -444,12 +444,13 @@ public class HuntStatusStore {
                 try (
                         Connection connection = connectionFactory.getConnection();
                         PreparedStatement insertTeamStatement = connection.prepareStatement(
-                                "INSERT INTO teams (teamId, email, primaryPhone, secondaryPhone) VALUES (?,?,?,?)")
+                                "INSERT INTO teams (teamId, email, headquarters, primaryPhone, secondaryPhone) VALUES (?,?,?,?,?)")
                 ) {
                     insertTeamStatement.setString(1, team.getTeamId());
                     insertTeamStatement.setString(2, team.getEmail());
-                    insertTeamStatement.setString(3, team.getPrimaryPhone());
-                    insertTeamStatement.setString(4, team.getSecondaryPhone());
+                    insertTeamStatement.setString(3, team.getHeadquarters());
+                    insertTeamStatement.setString(4, team.getPrimaryPhone());
+                    insertTeamStatement.setString(5, team.getSecondaryPhone());
                     insertTeamStatement.executeUpdate();
                 }
                 return null;
@@ -468,13 +469,14 @@ public class HuntStatusStore {
                 try (
                         Connection connection = connectionFactory.getConnection();
                         PreparedStatement insertTeamStatement = connection.prepareStatement(
-                                "UPDATE teams SET email = ?, primaryPhone = ?, secondaryPhone = ? " +
+                                "UPDATE teams SET email = ?, headquarters = ?, primaryPhone = ?, secondaryPhone = ? " +
                                 "WHERE teamId = ?")
                 ) {
                     insertTeamStatement.setString(1, team.getEmail());
-                    insertTeamStatement.setString(2, team.getPrimaryPhone());
-                    insertTeamStatement.setString(3, team.getSecondaryPhone());
-                    insertTeamStatement.setString(4, team.getTeamId());
+                    insertTeamStatement.setString(2, team.getHeadquarters());
+                    insertTeamStatement.setString(3, team.getPrimaryPhone());
+                    insertTeamStatement.setString(4, team.getSecondaryPhone());
+                    insertTeamStatement.setString(5, team.getTeamId());
                     return insertTeamStatement.executeUpdate() > 0;
                 }
             });
