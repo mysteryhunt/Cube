@@ -63,6 +63,7 @@ public class TeamTest extends RestletTest {
         Team team = Team.builder()
                 .setTeamId("team")
                 .setEmail("team@team.com")
+                .setHeadquarters("10-250")
                 .setPrimaryPhone("555-1212")
                 .setSecondaryPhone("555-1213")
                 .build();
@@ -71,6 +72,7 @@ public class TeamTest extends RestletTest {
         post("/teams/team", team);
         JsonNode teamJson = get("/teams/team");
         assertThat(teamJson.get("email").asText()).isEqualTo(team.getEmail());
+        assertThat(teamJson.get("headquarters").asText()).isEqualTo(team.getHeadquarters());
         assertThat(teamJson.get("primaryPhone").asText()).isEqualTo(team.getPrimaryPhone());
         assertThat(teamJson.get("secondaryPhone").asText()).isEqualTo(team.getSecondaryPhone());
     }

@@ -49,6 +49,9 @@ public abstract class Team {
         @JsonProperty("email") public abstract Builder setEmail(@Nullable String email);
 
         @Nullable
+        @JsonProperty("headquarters") public abstract Builder setHeadquarters(@Nullable String headquarters);
+
+        @Nullable
         @JsonProperty("primaryPhone") public abstract Builder setPrimaryPhone(@Nullable String primaryPhone);
 
         @Nullable
@@ -108,6 +111,11 @@ public abstract class Team {
     @JsonProperty("email")
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public abstract String getEmail();
+
+    @Nullable
+    @JsonProperty("headquarters")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public abstract String getHeadquarters();
 
     @Nullable
     @JsonProperty("primaryPhone")
