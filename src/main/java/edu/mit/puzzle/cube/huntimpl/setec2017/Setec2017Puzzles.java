@@ -2354,9 +2354,9 @@ public class Setec2017Puzzles {
                         .build()));
 
         add.accept(Setec2017PuzzleBuilder.builder()
-                .setId("encounter")
-                .setDisplayId("the_ensnaring_encounter")
-                .setDisplayName("The Ensnaring Encounter")
+                .setId("battle")
+                .setDisplayId("the_big_battle")
+                .setDisplayName("The Big Battle")
                 .setSingleAnswer("HIVE MIND")
                 .setVisibleConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("fighter","SOLVED")
