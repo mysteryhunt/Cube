@@ -1,7 +1,15 @@
 package edu.mit.puzzle.cube.huntimpl.setec2017;
 
+import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.services.sns.AmazonSNSAsyncClient;
+import com.amazonaws.services.sns.AmazonSNSClient;
+import com.amazonaws.services.sns.model.PublishRequest;
+import com.amazonaws.services.sns.model.PublishResult;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.auto.value.AutoValue;
 import com.google.common.collect.HashBasedTable;
@@ -49,6 +57,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 public class Setec2017HuntDefinition extends HuntDefinition {
     private static final Logger LOGGER = LoggerFactory.getLogger(Setec2017HuntDefinition.class);
+    private static final ObjectMapper MAPPER = new ObjectMapper();
 
     private static final VisibilityStatusSet VISIBILITY_STATUS_SET = new StandardVisibilityStatusSet();
 
@@ -677,6 +686,20 @@ public class Setec2017HuntDefinition extends HuntDefinition {
                         GoldProperty.class,
                         goldProperty -> GoldProperty.create(goldProperty.getGold() + 100)
                 );
+            }
+        });
+
+        AWSCredentials awsCredentials = new BasicAWSCredentials("AKIAJ5CFE4WJXW6DHSMA","ZW5Ea+kq4BfuHxGbUy4It/J2bqpZKEnyis4+F/6u");
+        AmazonSNSClient amazonSNSClient = new AmazonSNSAsyncClient(awsCredentials);
+        String topicArn = "arn:aws:sns:us-east-1:202024749287:eastern-toys-hunt-status";
+        eventProcessor.addEventProcessor(VisibilityChangeEvent.class, event -> {
+            if (event.getVisibility().getStatus().equalsIgnoreCase("SOLVED")) {
+                try {
+                    PublishRequest publishRequest = new PublishRequest(topicArn, MAPPER.writeValueAsString(event));
+                    PublishResult publishResult = amazonSNSClient.publish(publishRequest);
+                } catch (JsonProcessingException e) {
+                    e.printStackTrace();
+                }
             }
         });
     }
