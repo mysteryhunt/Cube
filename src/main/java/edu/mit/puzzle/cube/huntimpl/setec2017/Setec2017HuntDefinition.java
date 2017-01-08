@@ -2,6 +2,7 @@ package edu.mit.puzzle.cube.huntimpl.setec2017;
 
 import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.services.sns.AmazonSNSAsync;
 import com.amazonaws.services.sns.AmazonSNSAsyncClient;
 import com.amazonaws.services.sns.AmazonSNSClient;
 import com.amazonaws.services.sns.model.PublishRequest;
@@ -689,19 +690,61 @@ public class Setec2017HuntDefinition extends HuntDefinition {
             }
         });
 
-        AWSCredentials awsCredentials = new BasicAWSCredentials("AKIAJ5CFE4WJXW6DHSMA","ZW5Ea+kq4BfuHxGbUy4It/J2bqpZKEnyis4+F/6u");
-        AmazonSNSClient amazonSNSClient = new AmazonSNSAsyncClient(awsCredentials);
-        String topicArn = "arn:aws:sns:us-east-1:202024749287:eastern-toys-hunt-status";
-        eventProcessor.addEventProcessor(VisibilityChangeEvent.class, event -> {
-            if (event.getVisibility().getStatus().equalsIgnoreCase("SOLVED")) {
-                try {
-                    PublishRequest publishRequest = new PublishRequest(topicArn, MAPPER.writeValueAsString(event));
-                    PublishResult publishResult = amazonSNSClient.publish(publishRequest);
-                } catch (JsonProcessingException e) {
-                    e.printStackTrace();
+        if (true) {//Should be if client exists
+            AWSCredentials awsCredentials = new BasicAWSCredentials("AKIAJ5CFE4WJXW6DHSMA","ZW5Ea+kq4BfuHxGbUy4It/J2bqpZKEnyis4+F/6u");
+            AmazonSNSAsync amazonSNSClient = new AmazonSNSAsyncClient(awsCredentials);
+            String topicArn = "arn:aws:sns:us-east-1:202024749287:eastern-toys-hunt-status";
+
+            ImmutableSet<String> metaChannelPuzzleIds = ImmutableSet.<String>builder()
+                    .add("fighter","wizard","cleric","linguist","economist","chemist")
+                    .add("dynast","dungeon","thespians","bridge","criminal","minstrels","cube","warlord")
+                    .add("merchants","battle","fortress")
+                    .build();
+            ImmutableSet<String> interactionChannelPuzzleIds = ImmutableSet.<String>builder()
+                    .add("rescue_the_linguist","rescue_the_economist","rescue_the_chemist")
+                    .add("battle","fortress")
+                    .build();
+            eventProcessor.addEventProcessor(VisibilityChangeEvent.class, event -> {
+                if (event.getVisibility().getStatus().equalsIgnoreCase("SOLVED")) {
+                    Puzzle puzzle = puzzleStore.getPuzzle(event.getVisibility().getPuzzleId());
+                    ImmutableList.Builder<String> channels = ImmutableList.<String>builder()
+                            .add("all","solves");
+                    if (metaChannelPuzzleIds.contains(event.getVisibility().getPuzzleId())) {
+                        channels.add("meta-solves");
+                    }
+                    try {
+                        PublishRequest publishRequest = new PublishRequest(
+                                topicArn,
+                                MAPPER.writeValueAsString(ImmutableMap.of(
+                                        "raw_event", event,
+                                        "channels", channels.build(),
+                                        "message", String.format("%s solved %s", event.getVisibility().getTeamId(), puzzle.getDisplayName())
+                                )));
+                        amazonSNSClient.publishAsync(publishRequest);
+                    } catch (JsonProcessingException e) {
+                        e.printStackTrace();
+                    }
                 }
-            }
-        });
+                if (event.getVisibility().getStatus().equalsIgnoreCase("UNLOCKED") &&
+                        interactionChannelPuzzleIds.contains(event.getVisibility().getPuzzleId())) {
+                    Puzzle puzzle = puzzleStore.getPuzzle(event.getVisibility().getPuzzleId());
+                    ImmutableList.Builder<String> channels = ImmutableList.<String>builder()
+                            .add("all","interaction-unlocks");
+                    try {
+                        PublishRequest publishRequest = new PublishRequest(
+                                topicArn,
+                                MAPPER.writeValueAsString(ImmutableMap.of(
+                                        "raw_event", event,
+                                        "channels", channels.build(),
+                                        "message", String.format("%s unlocked %s", event.getVisibility().getTeamId(), puzzle.getDisplayName())
+                                )));
+                        amazonSNSClient.publishAsync(publishRequest);
+                    } catch (JsonProcessingException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+        }
     }
 
     @Override
