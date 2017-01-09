@@ -1,14 +1,16 @@
 package edu.mit.puzzle.cube.core;
 
 import com.codahale.metrics.graphite.Graphite;
-import com.google.common.base.Optional;
 
+import edu.mit.puzzle.cube.core.CubeConfig.AmazonSNSConfig;
 import edu.mit.puzzle.cube.core.environments.DevelopmentEnvironment;
 import edu.mit.puzzle.cube.core.environments.ProductionEnvironment;
 import edu.mit.puzzle.cube.core.environments.ServiceEnvironment;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Optional;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -52,12 +54,20 @@ public class CubeConfigModule {
         if (config.getGraphiteHost() != null) {
             return Optional.of(new Graphite(config.getGraphiteHost(), 2003));
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Provides
     @Named("graphitePrefix")
     Optional<String> provideGraphitePrefix() {
-        return Optional.fromNullable(config.getGraphitePrefix());
+        return Optional.ofNullable(config.getGraphitePrefix());
+    }
+
+    @Provides
+    Optional<AmazonSNSConfig> provideAmazonSNSConfig() {
+        if (config.getAmazonSNSConfig() == null) {
+            return Optional.empty();
+        }
+        return Optional.of(config.getAmazonSNSConfig());
     }
 }

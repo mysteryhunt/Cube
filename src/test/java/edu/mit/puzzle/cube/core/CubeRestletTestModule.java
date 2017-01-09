@@ -1,10 +1,12 @@
 package edu.mit.puzzle.cube.core;
 
 import com.codahale.metrics.graphite.Graphite;
-import com.google.common.base.Optional;
 
+import edu.mit.puzzle.cube.core.CubeConfig.AmazonSNSConfig;
 import edu.mit.puzzle.cube.core.environments.DevelopmentEnvironment;
 import edu.mit.puzzle.cube.core.environments.ServiceEnvironment;
+
+import java.util.Optional;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -34,12 +36,17 @@ public class CubeRestletTestModule {
 
     @Provides
     Optional<Graphite> provideGraphite() {
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Provides
     @Named("graphitePrefix")
     Optional<String> provideGraphitePrefix() {
-        return Optional.absent();
+        return Optional.empty();
+    }
+
+    @Provides
+    Optional<AmazonSNSConfig> provideAmazonSNSConfig() {
+        return Optional.empty();
     }
 }
