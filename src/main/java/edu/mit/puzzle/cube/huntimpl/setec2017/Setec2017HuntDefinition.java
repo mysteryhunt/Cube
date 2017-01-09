@@ -483,6 +483,27 @@ public class Setec2017HuntDefinition extends HuntDefinition {
         }
     }
 
+    @AutoValue
+    @JsonDeserialize(builder = AutoValue_Setec2017HuntDefinition_GrantGoldEvent.Builder.class)
+    public static abstract class GrantGoldEvent extends Event {
+        @AutoValue.Builder
+        public static abstract class Builder {
+            @JsonProperty("teamId") public abstract Builder setTeamId(String teamId);
+            @JsonProperty("gold") public abstract Builder setGold(int gold);
+            public abstract GrantGoldEvent build();
+        }
+
+        public static Builder builder() {
+            return new AutoValue_Setec2017HuntDefinition_GrantGoldEvent.Builder();
+        }
+
+        @JsonProperty("teamId") public abstract String getTeamId();
+        @JsonProperty("gold") public abstract int getGold();
+    }
+    static {
+        Event.registerEventClass(GrantGoldEvent.class);
+    }
+
     @Override
     public List<Puzzle> getPuzzles() {
         return ImmutableList.copyOf(Setec2017Puzzles.PUZZLES.values());
@@ -677,6 +698,14 @@ public class Setec2017HuntDefinition extends HuntDefinition {
                         goldProperty -> GoldProperty.create(goldProperty.getGold() + 100)
                 );
             }
+        });
+
+        eventProcessor.addEventProcessor(GrantGoldEvent.class, event -> {
+            huntStatusStore.mutateTeamProperty(
+                    event.getTeamId(),
+                    GoldProperty.class,
+                    goldProperty -> GoldProperty.create(goldProperty.getGold() + event.getGold())
+            );
         });
     }
 
