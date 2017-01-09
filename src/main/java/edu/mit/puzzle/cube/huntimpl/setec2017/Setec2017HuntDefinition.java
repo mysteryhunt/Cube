@@ -2,6 +2,7 @@ package edu.mit.puzzle.cube.huntimpl.setec2017;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.auto.value.AutoValue;
 import com.google.common.collect.HashBasedTable;
@@ -17,6 +18,7 @@ import edu.mit.puzzle.cube.core.events.Event;
 import edu.mit.puzzle.cube.core.events.FullReleaseEvent;
 import edu.mit.puzzle.cube.core.events.FullSolveEvent;
 import edu.mit.puzzle.cube.core.events.HintCompleteEvent;
+import edu.mit.puzzle.cube.core.events.HuntSpecificEvent;
 import edu.mit.puzzle.cube.core.events.HuntStartEvent;
 import edu.mit.puzzle.cube.core.events.SubmissionCompleteEvent;
 import edu.mit.puzzle.cube.core.events.VisibilityChangeEvent;
@@ -34,10 +36,12 @@ import edu.mit.puzzle.cube.modules.model.StandardVisibilityStatusSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
@@ -488,6 +492,32 @@ public class Setec2017HuntDefinition extends HuntDefinition {
         return ImmutableList.copyOf(Setec2017Puzzles.PUZZLES.values());
     }
 
+    private static Optional<Event> generateTypedHuntSpecificEvent(HuntSpecificEvent huntSpecificEvent) {
+        if (huntSpecificEvent.getHuntSpecificType().equals("GoldTransactionEvent")) {
+            return Optional.of(GoldTransactionEvent.builder()
+                    .setTeamId(String.class.cast(huntSpecificEvent.getSpecification().get("teamId")))
+                    .setGoldChange(Integer.class.cast(huntSpecificEvent.getSpecification().get("goldChange")))
+                    .build());
+        }
+        return Optional.empty();
+    }
+
+    @AutoValue
+    abstract static class GoldTransactionEvent extends Event {
+        @AutoValue.Builder
+        static abstract class Builder {
+            abstract Builder setTeamId(String teamId);
+            abstract Builder setGoldChange(int goldChange);
+            abstract GoldTransactionEvent build();
+        }
+        static Builder builder() {
+            return new AutoValue_Setec2017HuntDefinition_GoldTransactionEvent.Builder();
+        }
+
+        abstract String getTeamId();
+        abstract int getGoldChange();
+    }
+
     private class Setec2017CompositeEventProcessor extends CompositeEventProcessor {
         private Set<String> getVisibilityAffectedTeams(Event event) {
             if (event instanceof HuntStartEvent || event instanceof FullReleaseEvent) {
@@ -502,6 +532,9 @@ public class Setec2017HuntDefinition extends HuntDefinition {
 
         @Override
         public void process(Event event) {
+            if (HuntSpecificEvent.class.isInstance(event)) {
+                event = generateTypedHuntSpecificEvent(HuntSpecificEvent.class.cast(event)).orElse(event);
+            }
             super.process(event);
             updateVisibility(getVisibilityAffectedTeams(event));
         }
@@ -677,6 +710,16 @@ public class Setec2017HuntDefinition extends HuntDefinition {
                         goldProperty -> GoldProperty.create(goldProperty.getGold() + 100)
                 );
             }
+        });
+
+        eventProcessor.addEventProcessor(GoldTransactionEvent.class, event -> {
+            String teamId = event.getTeamId();
+            int goldChange = event.getGoldChange();
+            huntStatusStore.mutateTeamProperty(
+                    teamId,
+                    GoldProperty.class,
+                    goldProperty -> GoldProperty.create(goldProperty.getGold() + goldChange)
+            );
         });
     }
 
