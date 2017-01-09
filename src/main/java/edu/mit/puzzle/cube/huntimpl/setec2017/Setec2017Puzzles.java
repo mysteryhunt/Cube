@@ -2385,6 +2385,8 @@ public class Setec2017Puzzles {
                                 .build())
                         .setUnlockedConstraint(VisibilityConstraint.builder()
                                 .addSumConstraint(140, Character.values())
+                                .addPuzzleVisibilityStatusConstraint("battle","SOLVED")
+                                .addPuzzleVisibilityStatusConstraint("merchants","SOLVED")
                                 .build()));
 
         SolveRewardProperty.Builder solveRewardBuilder = SolveRewardProperty.builder();

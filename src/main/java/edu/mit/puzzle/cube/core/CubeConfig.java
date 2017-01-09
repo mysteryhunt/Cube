@@ -46,6 +46,26 @@ public abstract class CubeConfig {
         @JsonProperty("password") public abstract String getPassword();
     }
 
+    @AutoValue
+    public static abstract class AmazonSNSConfig {
+        @JsonCreator
+        public static AmazonSNSConfig create(
+                @JsonProperty("accessKey") String accessKey,
+                @JsonProperty("secretKey") String secretKey,
+                @JsonProperty("topicArn") String topicArn
+        ) {
+            return new AutoValue_CubeConfig_AmazonSNSConfig(
+                    accessKey,
+                    secretKey,
+                    topicArn
+            );
+        }
+
+        @JsonProperty("accessKey") public abstract String getAccessKey();
+        @JsonProperty("secretKey") public abstract String getSecretKey();
+        @JsonProperty("topicArn") public abstract String getTopicArn();
+    }
+
     @AutoValue.Builder
     public static abstract class Builder {
         @JsonProperty("port") public abstract Builder setPort(int port);
@@ -55,6 +75,7 @@ public abstract class CubeConfig {
         @Nullable @JsonProperty("graphiteHost") public abstract Builder setGraphiteHost(String graphiteHost);
         @Nullable @JsonProperty("graphitePrefix") public abstract Builder setGraphitePrefix(String graphitePrefix);
         @Nullable @JsonProperty("databaseConfig") public abstract Builder setDatabaseConfig(DatabaseConfig databaseConfig);
+        @Nullable @JsonProperty("amazonSNSConfig") public abstract Builder setAmazonSNSConfig(AmazonSNSConfig amazonSNSConfig);
 
         public abstract CubeConfig build();
     }
@@ -88,4 +109,5 @@ public abstract class CubeConfig {
     @Nullable @JsonProperty("graphiteHost") public abstract String getGraphiteHost();
     @Nullable @JsonProperty("graphitePrefix") public abstract String getGraphitePrefix();
     @Nullable @JsonProperty("databaseConfig") public abstract DatabaseConfig getDatabaseConfig();
+    @Nullable @JsonProperty("amazonSNSConfig") public abstract AmazonSNSConfig getAmazonSNSConfig();
 }
