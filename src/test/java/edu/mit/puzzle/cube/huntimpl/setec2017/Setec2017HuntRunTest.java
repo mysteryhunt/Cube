@@ -130,19 +130,27 @@ public class Setec2017HuntRunTest extends RestletTest {
         assertThat(json.get("created").asBoolean()).isFalse();
         assertThat(getGold()).isEqualTo(0);
 
+        post(
+                "/events",
+                "{\"eventType\": \"GrantGold\", \"teamId\": \"testerteam\", \"gold\": 10}"
+        );
+        assertThat(getGold()).isEqualTo(10);
+
+        post(
+                "/events",
+                "{\"eventType\": \"GrantGold\", \"teamId\": \"testerteam\", \"gold\": 20}"
+        );
+        assertThat(getGold()).isEqualTo(30);
+
         assertThat(getCharacterLevel(Character.FIGHTER)).isEqualTo(2);
         assertThat(getCharacterLevel(Character.CLERIC)).isEqualTo(0);
         post(
                 "/events",
-                FullReleaseEvent.builder()
-                       .setPuzzleId("eventa")
-                       .build()
+                "{\"eventType\": \"FullRelease\", \"puzzleId\": \"eventa\"}"
         );
         post(
                 "/events",
-                FullSolveEvent.builder()
-                       .setPuzzleId("eventa")
-                       .build()
+                "{\"eventType\": \"FullSolve\", \"puzzleId\": \"eventa\"}"
         );
         json = getVisibility("testerteam", "eventa");
         assertThat(json.get("solvedAnswers").size()).isEqualTo(1);
