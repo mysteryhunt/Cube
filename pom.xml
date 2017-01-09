@@ -20,6 +20,7 @@
     <properties>
         <restlet-version>2.3.7</restlet-version>
         <metrics-version>3.1.0</metrics-version>
+        <aws-version>1.11.76</aws-version>
     </properties>
 
     <build>
@@ -225,6 +226,17 @@
             <groupId>io.dropwizard.metrics</groupId>
             <artifactId>metrics-jvm</artifactId>
             <version>${metrics-version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk-core</artifactId>
+            <version>${aws-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk-sns</artifactId>
+            <version>${aws-version}</version>
         </dependency>
     </dependencies>
 

@@ -1,5 +1,7 @@
 package edu.mit.puzzle.cube.core;
 
+import com.amazonaws.services.sns.AmazonSNSAsync;
+
 import edu.mit.puzzle.cube.core.events.CompositeEventProcessor;
 import edu.mit.puzzle.cube.core.model.HintRequest;
 import edu.mit.puzzle.cube.core.model.HintRequestStore;
@@ -12,14 +14,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.Optional;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 public abstract class HuntDefinition {
     @Inject public CompositeEventProcessor eventProcessor;
     @Inject public HintRequestStore hintRequestStore;
     @Inject public HuntStatusStore huntStatusStore;
     @Inject public PuzzleStore puzzleStore;
+
+    @Inject public Optional<AmazonSNSAsync> amazonSNSAsync;
+    @Inject @Named("amazonSNSTopicArn") public Optional<String> amazonSNSTopicArn;
 
     public abstract VisibilityStatusSet getVisibilityStatusSet();
 
