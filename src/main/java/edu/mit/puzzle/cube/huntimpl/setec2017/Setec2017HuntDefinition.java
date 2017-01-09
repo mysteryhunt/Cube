@@ -689,11 +689,7 @@ public class Setec2017HuntDefinition extends HuntDefinition {
             }
         });
 
-        if (true) {//Should be if client exists
-            AWSCredentials awsCredentials = new BasicAWSCredentials("AKIAJ5CFE4WJXW6DHSMA","ZW5Ea+kq4BfuHxGbUy4It/J2bqpZKEnyis4+F/6u");
-            AmazonSNSAsync amazonSNSClient = new AmazonSNSAsyncClient(awsCredentials);
-            String topicArn = "arn:aws:sns:us-east-1:202024749287:eastern-toys-hunt-status";
-
+        if (amazonSNSAsync.isPresent()) {
             ImmutableSet<String> metaChannelPuzzleIds = ImmutableSet.<String>builder()
                     .add("fighter","wizard","cleric","linguist","economist","chemist")
                     .add("dynast","dungeon","thespians","bridge","criminal","minstrels","cube","warlord")
@@ -713,13 +709,13 @@ public class Setec2017HuntDefinition extends HuntDefinition {
                     }
                     try {
                         PublishRequest publishRequest = new PublishRequest(
-                                topicArn,
+                                amazonSNSTopicArn.get(),
                                 MAPPER.writeValueAsString(ImmutableMap.of(
                                         "raw_event", event,
                                         "channels", channels.build(),
                                         "message", String.format("%s solved %s", event.getVisibility().getTeamId(), puzzle.getDisplayName())
                                 )));
-                        amazonSNSClient.publishAsync(publishRequest);
+                        amazonSNSAsync.get().publishAsync(publishRequest);
                     } catch (JsonProcessingException e) {
                         e.printStackTrace();
                     }
@@ -731,13 +727,13 @@ public class Setec2017HuntDefinition extends HuntDefinition {
                             .add("all","interaction-unlocks");
                     try {
                         PublishRequest publishRequest = new PublishRequest(
-                                topicArn,
+                                amazonSNSTopicArn.get(),
                                 MAPPER.writeValueAsString(ImmutableMap.of(
                                         "raw_event", event,
                                         "channels", channels.build(),
                                         "message", String.format("%s unlocked %s", event.getVisibility().getTeamId(), puzzle.getDisplayName())
                                 )));
-                        amazonSNSClient.publishAsync(publishRequest);
+                        amazonSNSAsync.get().publishAsync(publishRequest);
                     } catch (JsonProcessingException e) {
                         e.printStackTrace();
                     }
