@@ -1380,7 +1380,7 @@ public class Setec2017Puzzles {
                         .addSumConstraint(7, Character.LINGUIST)
                         .build())
                 .setSolveRewardProperty(SolveRewardProperty.builder()
-                        .setInventoryItem(InventoryItem.ITEM38)
+                        .setInventoryItem(InventoryItem.ITEM24)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("thespians-l4")
@@ -2263,7 +2263,7 @@ public class Setec2017Puzzles {
                         .addSumConstraint(14, Character.LINGUIST)
                         .build())
                 .setSolveRewardProperty(SolveRewardProperty.builder()
-                        .setInventoryItem(InventoryItem.ITEM24)
+                        .setInventoryItem(InventoryItem.ITEM38)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("warlord-cc")
