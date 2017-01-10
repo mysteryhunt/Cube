@@ -24,7 +24,7 @@ public class CompositeEventProcessor implements EventProcessor<Event> {
     @SuppressWarnings({"rawtypes", "unchecked"})
     public void process(Event event) {
         //Loops over all entries in case we subclass Event types
-        for (Class<? extends Event> eventKeyClass : eventProcessors.keys()) {
+        for (Class<? extends Event> eventKeyClass : eventProcessors.keySet()) {
             if (eventKeyClass.isInstance(event)) {
                 Collection<EventProcessor> eventTypeProcessors = eventProcessors.get(eventKeyClass);
                 for (EventProcessor eventProcessor : eventTypeProcessors) {

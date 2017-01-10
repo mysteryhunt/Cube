@@ -1,7 +1,9 @@
 package edu.mit.puzzle.cube.huntimpl.setec2017;
 
+import com.amazonaws.services.sns.model.PublishRequest;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.auto.value.AutoValue;
 import com.google.common.collect.HashBasedTable;
@@ -48,6 +50,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 public class Setec2017HuntDefinition extends HuntDefinition {
     private static final Logger LOGGER = LoggerFactory.getLogger(Setec2017HuntDefinition.class);
+    private static final ObjectMapper MAPPER = new ObjectMapper();
 
     private static final VisibilityStatusSet VISIBILITY_STATUS_SET = new StandardVisibilityStatusSet();
 
@@ -707,6 +710,58 @@ public class Setec2017HuntDefinition extends HuntDefinition {
                     goldProperty -> GoldProperty.create(goldProperty.getGold() + event.getGold())
             );
         });
+
+        if (amazonSNSAsync.isPresent()) {
+            ImmutableSet<String> metaChannelPuzzleIds = ImmutableSet.<String>builder()
+                    .add("fighter","wizard","cleric","linguist","economist","chemist")
+                    .add("dynast","dungeon","thespians","bridge","criminal","minstrels","cube","warlord")
+                    .add("merchants","battle","fortress")
+                    .build();
+            ImmutableSet<String> interactionChannelPuzzleIds = ImmutableSet.<String>builder()
+                    .add("rescue_the_linguist","rescue_the_economist","rescue_the_chemist")
+                    .add("battle","fortress")
+                    .build();
+            eventProcessor.addEventProcessor(VisibilityChangeEvent.class, event -> {
+                if (event.getVisibility().getStatus().equalsIgnoreCase("SOLVED")) {
+                    Puzzle puzzle = puzzleStore.getPuzzle(event.getVisibility().getPuzzleId());
+                    ImmutableList.Builder<String> channels = ImmutableList.<String>builder()
+                            .add("all","solves");
+                    if (metaChannelPuzzleIds.contains(event.getVisibility().getPuzzleId())) {
+                        channels.add("meta-solves");
+                    }
+                    try {
+                        PublishRequest publishRequest = new PublishRequest(
+                                amazonSNSTopicArn.get(),
+                                MAPPER.writeValueAsString(ImmutableMap.of(
+                                        "raw_event", event,
+                                        "channels", channels.build(),
+                                        "message", String.format("%s solved %s", event.getVisibility().getTeamId(), puzzle.getDisplayName())
+                                )));
+                        amazonSNSAsync.get().publishAsync(publishRequest);
+                    } catch (Exception e) {
+                        LOGGER.error("Error in publishing to SNS", e);
+                    }
+                }
+                if (event.getVisibility().getStatus().equalsIgnoreCase("UNLOCKED") &&
+                        interactionChannelPuzzleIds.contains(event.getVisibility().getPuzzleId())) {
+                    Puzzle puzzle = puzzleStore.getPuzzle(event.getVisibility().getPuzzleId());
+                    ImmutableList.Builder<String> channels = ImmutableList.<String>builder()
+                            .add("all","interaction-unlocks");
+                    try {
+                        PublishRequest publishRequest = new PublishRequest(
+                                amazonSNSTopicArn.get(),
+                                MAPPER.writeValueAsString(ImmutableMap.of(
+                                        "raw_event", event,
+                                        "channels", channels.build(),
+                                        "message", String.format("%s unlocked %s", event.getVisibility().getTeamId(), puzzle.getDisplayName())
+                                )));
+                        amazonSNSAsync.get().publishAsync(publishRequest);
+                    } catch (Exception e) {
+                        LOGGER.error("Error in publishing to SNS", e);
+                    }
+                }
+            });
+        }
     }
 
     @Override
