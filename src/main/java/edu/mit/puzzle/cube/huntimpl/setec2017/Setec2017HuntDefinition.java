@@ -745,8 +745,8 @@ public class Setec2017HuntDefinition extends HuntDefinition {
                                         "message", String.format("%s solved %s", event.getVisibility().getTeamId(), puzzle.getDisplayName())
                                 )));
                         amazonSNSAsync.get().publishAsync(publishRequest);
-                    } catch (JsonProcessingException e) {
-                        e.printStackTrace();
+                    } catch (Exception e) {
+                        LOGGER.error("Error in publishing to SNS", e);
                     }
                 }
                 if (event.getVisibility().getStatus().equalsIgnoreCase("UNLOCKED") &&
@@ -763,8 +763,8 @@ public class Setec2017HuntDefinition extends HuntDefinition {
                                         "message", String.format("%s unlocked %s", event.getVisibility().getTeamId(), puzzle.getDisplayName())
                                 )));
                         amazonSNSAsync.get().publishAsync(publishRequest);
-                    } catch (JsonProcessingException e) {
-                        e.printStackTrace();
+                    } catch (Exception e) {
+                        LOGGER.error("Error in publishing to SNS", e);
                     }
                 }
             });
