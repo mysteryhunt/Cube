@@ -190,6 +190,10 @@ public class ScoreExampleHuntDefinition extends HuntDefinition {
 
     @AutoValue
     static abstract class ScoreUpdateEvent extends Event {
+        public String getEventType() {
+            return this.getClass().getSimpleName();
+        }
+
         @AutoValue.Builder
         static abstract class Builder {
             abstract Builder setTeamId(String teamId);
@@ -199,10 +203,6 @@ public class ScoreExampleHuntDefinition extends HuntDefinition {
 
         static Builder builder() {
             return new AutoValue_ScoreExampleHuntDefinition_ScoreUpdateEvent.Builder();
-        }
-
-        public String getType() {
-            return "ScoreUpdate";
         }
 
         abstract String getTeamId();

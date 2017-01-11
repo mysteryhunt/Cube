@@ -11,6 +11,10 @@ import edu.mit.puzzle.cube.core.model.Puzzle;
 @JsonDeserialize(builder = AutoValue_PuzzlePropertyChangeEvent.Builder.class)
 @JsonTypeName("PuzzlePropertyChange")
 public abstract class PuzzlePropertyChangeEvent extends Event {
+    public String getEventType() {
+        return this.getClass().getSimpleName();
+    }
+
     @AutoValue.Builder
     public static abstract class Builder {
         @JsonProperty("puzzle") public abstract Builder setPuzzle(Puzzle puzzle);

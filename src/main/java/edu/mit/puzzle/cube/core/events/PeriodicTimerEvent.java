@@ -8,6 +8,10 @@ import com.google.auto.value.AutoValue;
 @JsonDeserialize(builder = AutoValue_PeriodicTimerEvent.Builder.class)
 @JsonTypeName("PeriodicTimer")
 public abstract class PeriodicTimerEvent extends Event {
+    public String getEventType() {
+        return this.getClass().getSimpleName();
+    }
+
     @AutoValue.Builder
     public static abstract class Builder {
         public abstract PeriodicTimerEvent build();

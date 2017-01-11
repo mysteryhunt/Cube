@@ -8,6 +8,10 @@ import com.google.auto.value.AutoValue;
 @JsonDeserialize(builder = AutoValue_HuntStartEvent.Builder.class)
 @JsonTypeName("HuntStart")
 public abstract class HuntStartEvent extends Event {
+    public String getEventType() {
+        return this.getClass().getSimpleName();
+    }
+
     @AutoValue.Builder
     public static abstract class Builder {
         public abstract HuntStartEvent build();

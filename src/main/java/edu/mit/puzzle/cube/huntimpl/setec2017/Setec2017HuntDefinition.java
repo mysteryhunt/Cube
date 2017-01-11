@@ -489,6 +489,10 @@ public class Setec2017HuntDefinition extends HuntDefinition {
     @AutoValue
     @JsonDeserialize(builder = AutoValue_Setec2017HuntDefinition_GrantGoldEvent.Builder.class)
     public static abstract class GrantGoldEvent extends Event {
+        public String getEventType() {
+            return this.getClass().getSimpleName();
+        }
+
         @AutoValue.Builder
         public static abstract class Builder {
             @JsonProperty("teamId") public abstract Builder setTeamId(String teamId);
