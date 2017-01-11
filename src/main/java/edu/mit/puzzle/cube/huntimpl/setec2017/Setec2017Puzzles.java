@@ -1199,8 +1199,8 @@ public class Setec2017Puzzles {
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("dungeon4")
-                .setDisplayId("elf_dwarf_brawl")
-                .setDisplayName("Elf/Dwarf Brawl")
+                .setDisplayId("hamiltonian_path")
+                .setDisplayName("Hamiltonian Path")
                 .setSingleAnswer("SEAN LENNON")
                 .setVisibleConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("dungeon", "UNLOCKED")
@@ -1940,8 +1940,8 @@ public class Setec2017Puzzles {
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("minstrels1")
-                .setDisplayId("back_work_for_zeke_nixed")
-                .setDisplayName("Back Work for Zeke? Nixed")
+                .setDisplayId("elf_dwarf_brawl")
+                .setDisplayName("Elf/Dwarf Brawl")
                 .setSingleAnswer("SWALLOW")
                 .setVisibleConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("minstrels", "UNLOCKED")
