@@ -11,6 +11,10 @@ import edu.mit.puzzle.cube.core.model.Visibility;
 @JsonDeserialize(builder = AutoValue_VisibilityChangeEvent.Builder.class)
 @JsonTypeName("VisibilityChange")
 public abstract class VisibilityChangeEvent extends Event {
+    public String getEventType() {
+        return VisibilityChangeEvent.class.getSimpleName();
+    }
+
     @AutoValue.Builder
     public static abstract class Builder {
         @JsonProperty("visibility") public abstract Builder setVisibility(Visibility visibility);

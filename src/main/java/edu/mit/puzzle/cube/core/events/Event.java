@@ -52,4 +52,6 @@ public abstract class Event {
         }
         throw new IllegalArgumentException("unknown eventType: " + eventType);
     }
+
+    public abstract String getEventType();
 }

@@ -11,6 +11,10 @@ import edu.mit.puzzle.cube.core.model.HintRequest;
 @JsonDeserialize(builder = AutoValue_HintCompleteEvent.Builder.class)
 @JsonTypeName("HintComplete")
 public abstract class HintCompleteEvent extends Event {
+    public String getEventType() {
+        return HintCompleteEvent.class.getSimpleName();
+    }
+
     @AutoValue.Builder
     public static abstract class Builder {
         @JsonProperty("hintRequest") public abstract Builder setHintRequest(HintRequest hintRequest);

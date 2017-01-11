@@ -6,10 +6,10 @@ public class EventsPermission extends InstanceLevelPermission {
     private static final long serialVersionUID = 1L;
 
     public EventsPermission(Event event, PermissionAction... actions) {
-        this(event.getClass(), actions);
+        this(event.getEventType(), actions);
     }
 
-    public EventsPermission(Class<? extends Event> eventClass, PermissionAction... actions) {
-        super("events", eventClass.getSimpleName(), actions);
+    public EventsPermission(String eventType, PermissionAction... actions) {
+        super("events", eventType, actions);
     }
 }

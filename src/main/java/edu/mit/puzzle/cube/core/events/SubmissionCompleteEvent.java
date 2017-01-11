@@ -11,6 +11,10 @@ import edu.mit.puzzle.cube.core.model.Submission;
 @JsonDeserialize(builder = AutoValue_SubmissionCompleteEvent.Builder.class)
 @JsonTypeName("SubmissionComplete")
 public abstract class SubmissionCompleteEvent extends Event {
+    public String getEventType() {
+        return SubmissionCompleteEvent.class.getSimpleName();
+    }
+
     @AutoValue.Builder
     public static abstract class Builder {
         @JsonProperty("submission") public abstract Builder setSubmission(Submission submission);

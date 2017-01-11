@@ -9,6 +9,10 @@ import com.google.auto.value.AutoValue;
 @JsonDeserialize(builder = AutoValue_FullSolveEvent.Builder.class)
 @JsonTypeName("FullSolve")
 public abstract class FullSolveEvent extends Event {
+    public String getEventType() {
+        return FullSolveEvent.class.getSimpleName();
+    }
+
     @AutoValue.Builder
     public static abstract class Builder {
         @JsonProperty("puzzleId") public abstract Builder setPuzzleId(String puzzleId);
