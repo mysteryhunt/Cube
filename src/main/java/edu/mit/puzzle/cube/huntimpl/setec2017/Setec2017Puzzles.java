@@ -980,7 +980,7 @@ public class Setec2017Puzzles {
                         .addSumConstraint(4, Character.WIZARD)
                         .build())
                 .setSolveRewardProperty(SolveRewardProperty.builder()
-                        .setInventoryItem(InventoryItem.ITEM26)
+                        .setInventoryItem(InventoryItem.ITEM17)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("dynast2")
@@ -995,7 +995,7 @@ public class Setec2017Puzzles {
                         .addSumConstraint(5, Character.WIZARD)
                         .build())
                 .setSolveRewardProperty(SolveRewardProperty.builder()
-                        .setInventoryItem(InventoryItem.ITEM12)
+                        .setInventoryItem(InventoryItem.ITEM28)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("dynast3")
@@ -1025,7 +1025,7 @@ public class Setec2017Puzzles {
                         .addSumConstraint(2, Character.CLERIC)
                         .build())
                 .setSolveRewardProperty(SolveRewardProperty.builder()
-                        .setInventoryItem(InventoryItem.ITEM04)
+                        .setInventoryItem(InventoryItem.ITEM34)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("dynast5")
@@ -1055,7 +1055,7 @@ public class Setec2017Puzzles {
                         .addSumConstraint(4, Character.FIGHTER)
                         .build())
                 .setSolveRewardProperty(SolveRewardProperty.builder()
-                        .setInventoryItem(InventoryItem.ITEM29)
+                        .setInventoryItem(InventoryItem.ITEM16)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("dynast7")
@@ -1100,7 +1100,7 @@ public class Setec2017Puzzles {
                         .addSumConstraint(3, Character.WIZARD)
                         .build())
                 .setSolveRewardProperty(SolveRewardProperty.builder()
-                        .setInventoryItem(InventoryItem.ITEM34)
+                        .setInventoryItem(InventoryItem.ITEM37)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("dynast10")
@@ -1115,7 +1115,7 @@ public class Setec2017Puzzles {
                         .addSumConstraint(2, Character.WIZARD)
                         .build())
                 .setSolveRewardProperty(SolveRewardProperty.builder()
-                        .setInventoryItem(InventoryItem.ITEM09)
+                        .setInventoryItem(InventoryItem.ITEM36)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("dynast11")
@@ -1210,7 +1210,7 @@ public class Setec2017Puzzles {
                         .addSumConstraint(5, Character.FIGHTER)
                         .build())
                 .setSolveRewardProperty(SolveRewardProperty.builder()
-                        .setInventoryItem(InventoryItem.ITEM18)
+                        .setInventoryItem(InventoryItem.ITEM39)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("dungeon5")
@@ -1225,7 +1225,7 @@ public class Setec2017Puzzles {
                         .addSumConstraint(6, Character.CLERIC)
                         .build())
                 .setSolveRewardProperty(SolveRewardProperty.builder()
-                        .setInventoryItem(InventoryItem.ITEM02)
+                        .setInventoryItem(InventoryItem.ITEM38)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("dungeon6")
@@ -1255,7 +1255,7 @@ public class Setec2017Puzzles {
                         .addSumConstraint(6, Character.FIGHTER)
                         .build())
                 .setSolveRewardProperty(SolveRewardProperty.builder()
-                        .setInventoryItem(InventoryItem.ITEM03)
+                        .setInventoryItem(InventoryItem.ITEM15)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("dungeon8")
@@ -1285,7 +1285,7 @@ public class Setec2017Puzzles {
                         .addSumConstraint(5, Character.LINGUIST)
                         .build())
                 .setSolveRewardProperty(SolveRewardProperty.builder()
-                        .setInventoryItem(InventoryItem.ITEM21)
+                        .setInventoryItem(InventoryItem.ITEM22)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("dungeon10")
@@ -1315,7 +1315,7 @@ public class Setec2017Puzzles {
                         .addSumConstraint(7, Character.FIGHTER)
                         .build())
                 .setSolveRewardProperty(SolveRewardProperty.builder()
-                        .setInventoryItem(InventoryItem.ITEM11)
+                        .setInventoryItem(InventoryItem.ITEM06)
                         .build()));
 
         add.accept(Setec2017PuzzleBuilder.builder()
@@ -1350,7 +1350,7 @@ public class Setec2017Puzzles {
                         .addSumConstraint(9, Character.WIZARD)
                         .build())
                 .setSolveRewardProperty(SolveRewardProperty.builder()
-                        .setInventoryItem(InventoryItem.ITEM39)
+                        .setInventoryItem(InventoryItem.ITEM20)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("thespians-l2")
@@ -1410,7 +1410,7 @@ public class Setec2017Puzzles {
                         .addSumConstraint(9, Character.CLERIC)
                         .build())
                 .setSolveRewardProperty(SolveRewardProperty.builder()
-                        .setInventoryItem(InventoryItem.ITEM28)
+                        .setInventoryItem(InventoryItem.ITEM07)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("thespians-r1")
@@ -1440,7 +1440,7 @@ public class Setec2017Puzzles {
                         .addSumConstraint(8, Character.CLERIC)
                         .build())
                 .setSolveRewardProperty(SolveRewardProperty.builder()
-                        .setInventoryItem(InventoryItem.ITEM08)
+                        .setInventoryItem(InventoryItem.ITEM14)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("thespians-r3")
@@ -1485,7 +1485,7 @@ public class Setec2017Puzzles {
                         .addSumConstraint(8, Character.FIGHTER)
                         .build())
                 .setSolveRewardProperty(SolveRewardProperty.builder()
-                        .setInventoryItem(InventoryItem.ITEM35)
+                        .setInventoryItem(InventoryItem.ITEM09)
                         .build()));
 
 
@@ -1536,7 +1536,7 @@ public class Setec2017Puzzles {
                         .addSumConstraint(10, Character.CLERIC)
                         .build())
                 .setSolveRewardProperty(SolveRewardProperty.builder()
-                        .setInventoryItem(InventoryItem.ITEM36)
+                        .setInventoryItem(InventoryItem.ITEM00)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("bridge3")
@@ -1551,7 +1551,7 @@ public class Setec2017Puzzles {
                         .addSumConstraint(8, Character.LINGUIST)
                         .build())
                 .setSolveRewardProperty(SolveRewardProperty.builder()
-                        .setInventoryItem(InventoryItem.ITEM37)
+                        .setInventoryItem(InventoryItem.ITEM30)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("bridge4")
@@ -1581,7 +1581,7 @@ public class Setec2017Puzzles {
                         .addSumConstraint(11, Character.WIZARD)
                         .build())
                 .setSolveRewardProperty(SolveRewardProperty.builder()
-                        .setInventoryItem(InventoryItem.ITEM01)
+                        .setInventoryItem(InventoryItem.ITEM18)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("bridge6")
@@ -1596,7 +1596,7 @@ public class Setec2017Puzzles {
                         .addSumConstraint(7, Character.ECONOMIST)
                         .build())
                 .setSolveRewardProperty(SolveRewardProperty.builder()
-                        .setInventoryItem(InventoryItem.ITEM05)
+                        .setInventoryItem(InventoryItem.ITEM02)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("bridge7")
@@ -1626,7 +1626,7 @@ public class Setec2017Puzzles {
                         .addSumConstraint(12, Character.WIZARD)
                         .build())
                 .setSolveRewardProperty(SolveRewardProperty.builder()
-                        .setInventoryItem(InventoryItem.ITEM06)
+                        .setInventoryItem(InventoryItem.ITEM25)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("bridge9")
@@ -1641,7 +1641,7 @@ public class Setec2017Puzzles {
                         .addSumConstraint(5, Character.CHEMIST)
                         .build())
                 .setSolveRewardProperty(SolveRewardProperty.builder()
-                        .setInventoryItem(InventoryItem.ITEM07)
+                        .setInventoryItem(InventoryItem.ITEM11)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("bridge10")
@@ -1701,7 +1701,7 @@ public class Setec2017Puzzles {
                         .addSumConstraint(10, Character.LINGUIST)
                         .build())
                 .setSolveRewardProperty(SolveRewardProperty.builder()
-                        .setInventoryItem(InventoryItem.ITEM13)
+                        .setInventoryItem(InventoryItem.ITEM19)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("bridge14")
@@ -1716,7 +1716,7 @@ public class Setec2017Puzzles {
                         .addSumConstraint(6, Character.ECONOMIST)
                         .build())
                 .setSolveRewardProperty(SolveRewardProperty.builder()
-                        .setInventoryItem(InventoryItem.ITEM19)
+                        .setInventoryItem(InventoryItem.ITEM04)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("bridge15")
@@ -1811,7 +1811,7 @@ public class Setec2017Puzzles {
                         .addSumConstraint(11, Character.LINGUIST)
                         .build())
                 .setSolveRewardProperty(SolveRewardProperty.builder()
-                        .setInventoryItem(InventoryItem.ITEM22)
+                        .setInventoryItem(InventoryItem.ITEM05)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("criminal4")
@@ -1826,7 +1826,7 @@ public class Setec2017Puzzles {
                         .addSumConstraint(7, Character.ECONOMIST)
                         .build())
                 .setSolveRewardProperty(SolveRewardProperty.builder()
-                        .setInventoryItem(InventoryItem.ITEM27)
+                        .setInventoryItem(InventoryItem.ITEM23)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("criminal5")
@@ -1841,7 +1841,7 @@ public class Setec2017Puzzles {
                         .addSumConstraint(10, Character.LINGUIST)
                         .build())
                 .setSolveRewardProperty(SolveRewardProperty.builder()
-                        .setInventoryItem(InventoryItem.ITEM15)
+                        .setInventoryItem(InventoryItem.ITEM33)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("criminal6")
@@ -1886,7 +1886,7 @@ public class Setec2017Puzzles {
                         .addSumConstraint(9, Character.LINGUIST)
                         .build())
                 .setSolveRewardProperty(SolveRewardProperty.builder()
-                        .setInventoryItem(InventoryItem.ITEM00)
+                        .setInventoryItem(InventoryItem.ITEM21)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("criminal9")
@@ -1916,7 +1916,7 @@ public class Setec2017Puzzles {
                         .addSumConstraint(12, Character.FIGHTER)
                         .build())
                 .setSolveRewardProperty(SolveRewardProperty.builder()
-                        .setInventoryItem(InventoryItem.ITEM31)
+                        .setInventoryItem(InventoryItem.ITEM08)
                         .build()));
 
         add.accept(Setec2017PuzzleBuilder.builder()
@@ -1951,7 +1951,7 @@ public class Setec2017Puzzles {
                         .addSumConstraint(13, Character.CLERIC)
                         .build())
                 .setSolveRewardProperty(SolveRewardProperty.builder()
-                        .setInventoryItem(InventoryItem.ITEM33)
+                        .setInventoryItem(InventoryItem.ITEM01)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("minstrels2")
@@ -1996,7 +1996,7 @@ public class Setec2017Puzzles {
                         .addSumConstraint(13, Character.WIZARD)
                         .build())
                 .setSolveRewardProperty(SolveRewardProperty.builder()
-                        .setInventoryItem(InventoryItem.ITEM14)
+                        .setInventoryItem(InventoryItem.ITEM35)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("minstrels5")
@@ -2026,7 +2026,7 @@ public class Setec2017Puzzles {
                         .addSumConstraint(7, Character.CHEMIST)
                         .build())
                 .setSolveRewardProperty(SolveRewardProperty.builder()
-                        .setInventoryItem(InventoryItem.ITEM25)
+                        .setInventoryItem(InventoryItem.ITEM12)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("minstrels7")
@@ -2076,7 +2076,7 @@ public class Setec2017Puzzles {
                         .addSumConstraint(13, Character.ECONOMIST)
                         .build())
                 .setSolveRewardProperty(SolveRewardProperty.builder()
-                        .setInventoryItem(InventoryItem.ITEM16)
+                        .setInventoryItem(InventoryItem.ITEM32)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("cube2")
@@ -2121,7 +2121,7 @@ public class Setec2017Puzzles {
                         .addSumConstraint(14, Character.CLERIC)
                         .build())
                 .setSolveRewardProperty(SolveRewardProperty.builder()
-                        .setInventoryItem(InventoryItem.ITEM17)
+                        .setInventoryItem(InventoryItem.ITEM29)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("cube5")
@@ -2166,7 +2166,7 @@ public class Setec2017Puzzles {
                         .addSumConstraint(10, Character.CHEMIST)
                         .build())
                 .setSolveRewardProperty(SolveRewardProperty.builder()
-                        .setInventoryItem(InventoryItem.ITEM30)
+                        .setInventoryItem(InventoryItem.ITEM03)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("cube8")
@@ -2181,7 +2181,7 @@ public class Setec2017Puzzles {
                         .addSumConstraint(14, Character.FIGHTER)
                         .build())
                 .setSolveRewardProperty(SolveRewardProperty.builder()
-                        .setInventoryItem(InventoryItem.ITEM23)
+                        .setInventoryItem(InventoryItem.ITEM26)
                         .build()));
 
 
@@ -2218,7 +2218,7 @@ public class Setec2017Puzzles {
                         .addSumConstraint(14, Character.ECONOMIST)
                         .build())
                 .setSolveRewardProperty(SolveRewardProperty.builder()
-                        .setInventoryItem(InventoryItem.ITEM32)
+                        .setInventoryItem(InventoryItem.ITEM13)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("warlord-nc")
@@ -2263,7 +2263,7 @@ public class Setec2017Puzzles {
                         .addSumConstraint(14, Character.LINGUIST)
                         .build())
                 .setSolveRewardProperty(SolveRewardProperty.builder()
-                        .setInventoryItem(InventoryItem.ITEM38)
+                        .setInventoryItem(InventoryItem.ITEM10)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("warlord-cc")
@@ -2278,7 +2278,7 @@ public class Setec2017Puzzles {
                         .addSumConstraint(15, Character.CHEMIST)
                         .build())
                 .setSolveRewardProperty(SolveRewardProperty.builder()
-                        .setInventoryItem(InventoryItem.ITEM10)
+                        .setInventoryItem(InventoryItem.ITEM31)
                         .build()));
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("warlord-ce")
@@ -2338,7 +2338,7 @@ public class Setec2017Puzzles {
                         .addSumConstraint(15, Character.FIGHTER)
                         .build())
                 .setSolveRewardProperty(SolveRewardProperty.builder()
-                        .setInventoryItem(InventoryItem.ITEM20)
+                        .setInventoryItem(InventoryItem.ITEM27)
                         .build()));
 
         add.accept(Setec2017PuzzleBuilder.builder()
