@@ -2379,7 +2379,7 @@ public class Setec2017Puzzles {
                         .setId("fortress")
                         .setDisplayId("the_final_fortress")
                         .setDisplayName("The Final Fortress")
-                        .setSingleAnswer("FORTRESSDUMMYANSWER")
+                        .setSingleAnswer("GROUP HUG")
                         .setVisibleConstraint(VisibilityConstraint.builder()
                                 .addSumConstraint(140, Character.values())
                                 .build())
