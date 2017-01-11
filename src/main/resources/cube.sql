@@ -173,6 +173,25 @@ WHERE
   puzzle_indexable_properties.propertyKey = 'DisplayIdProperty'
 ;
 
+CREATE VIEW open_times AS
+SELECT
+  visibility_history.teamId AS teamId,
+  visibility_history.puzzleId AS canonicalPuzzleId,
+  puzzle_indexable_properties.propertyValue AS displayPuzzleId,
+  ${timestamp_to_number_prefix}${current_timestamp} - visibility_history.timestamp${timestamp_to_number_suffix} / 60 AS unlockedMinutes
+FROM visibility_history
+INNER JOIN visibilities
+ON
+  visibility_history.teamId = visibilities.teamId AND
+  visibility_history.puzzleId = visibilities.puzzleId
+JOIN puzzle_indexable_properties
+ON visibility_history.puzzleId = puzzle_indexable_properties.puzzleId
+WHERE
+  visibility_history.status = 'UNLOCKED' AND
+  visibilities.status = 'UNLOCKED' AND
+  puzzle_indexable_properties.propertyKey = 'DisplayIdProperty'
+;
+
 CREATE VIEW solve_times AS
 SELECT
   unlock_history.teamId AS teamId,

@@ -23,6 +23,7 @@ public class CubeDatabaseSchema {
     private static final String VAR_DEFAULT_VISIBILITY_STATUS = "default_visibility_status";
     private static final String VAR_TIMESTAMP_TO_NUMBER_PREFIX = "timestamp_to_number_prefix";
     private static final String VAR_TIMESTAMP_TO_NUMBER_SUFFIX = "timestamp_to_number_suffix";
+    private static final String VAR_CURRENT_TIMESTAMP = "current_timestamp";
 
     private final String schema;
 
@@ -37,16 +38,19 @@ public class CubeDatabaseSchema {
             schemaTemplateMap.put(VAR_AUTO_INCREMENT_TYPE, "INTEGER");
             schemaTemplateMap.put(VAR_TIMESTAMP_TO_NUMBER_PREFIX, "CAST(");
             schemaTemplateMap.put(VAR_TIMESTAMP_TO_NUMBER_SUFFIX, " AS REAL)");
+            schemaTemplateMap.put(VAR_CURRENT_TIMESTAMP, "DATETIME('now')");
             break;
         case "org.postgresql.Driver":
             schemaTemplateMap.put(VAR_AUTO_INCREMENT_TYPE, "SERIAL");
             schemaTemplateMap.put(VAR_TIMESTAMP_TO_NUMBER_PREFIX, "EXTRACT(EPOCH FROM ");
             schemaTemplateMap.put(VAR_TIMESTAMP_TO_NUMBER_SUFFIX, ")");
+            schemaTemplateMap.put(VAR_CURRENT_TIMESTAMP, "CURRENT_TIMESTAMP");
             break;
         case "com.mysql.jdbc.Driver":
             schemaTemplateMap.put(VAR_AUTO_INCREMENT_TYPE, "INT NOT NULL AUTO_INCREMENT");
             schemaTemplateMap.put(VAR_TIMESTAMP_TO_NUMBER_PREFIX, "CAST(");
             schemaTemplateMap.put(VAR_TIMESTAMP_TO_NUMBER_SUFFIX, " AS REAL)");
+            schemaTemplateMap.put(VAR_CURRENT_TIMESTAMP, "NOW()");
             break;
         default:
             throw new RuntimeException(
