@@ -490,7 +490,7 @@ public class Setec2017HuntDefinition extends HuntDefinition {
     @JsonDeserialize(builder = AutoValue_Setec2017HuntDefinition_GrantGoldEvent.Builder.class)
     public static abstract class GrantGoldEvent extends Event {
         public String getEventType() {
-            return this.getClass().getSimpleName();
+            return GrantGoldEvent.class.getSimpleName();
         }
 
         @AutoValue.Builder

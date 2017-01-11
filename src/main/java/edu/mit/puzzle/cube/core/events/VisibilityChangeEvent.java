@@ -12,7 +12,7 @@ import edu.mit.puzzle.cube.core.model.Visibility;
 @JsonTypeName("VisibilityChange")
 public abstract class VisibilityChangeEvent extends Event {
     public String getEventType() {
-        return this.getClass().getSimpleName();
+        return VisibilityChangeEvent.class.getSimpleName();
     }
 
     @AutoValue.Builder

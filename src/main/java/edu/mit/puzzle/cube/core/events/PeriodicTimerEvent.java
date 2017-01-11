@@ -9,7 +9,7 @@ import com.google.auto.value.AutoValue;
 @JsonTypeName("PeriodicTimer")
 public abstract class PeriodicTimerEvent extends Event {
     public String getEventType() {
-        return this.getClass().getSimpleName();
+        return PeriodicTimerEvent.class.getSimpleName();
     }
 
     @AutoValue.Builder

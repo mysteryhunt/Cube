@@ -12,7 +12,7 @@ import edu.mit.puzzle.cube.core.model.Puzzle;
 @JsonTypeName("PuzzlePropertyChange")
 public abstract class PuzzlePropertyChangeEvent extends Event {
     public String getEventType() {
-        return this.getClass().getSimpleName();
+        return PuzzlePropertyChangeEvent.class.getSimpleName();
     }
 
     @AutoValue.Builder

@@ -9,7 +9,7 @@ import com.google.auto.value.AutoValue;
 @JsonTypeName("HuntStart")
 public abstract class HuntStartEvent extends Event {
     public String getEventType() {
-        return this.getClass().getSimpleName();
+        return HuntStartEvent.class.getSimpleName();
     }
 
     @AutoValue.Builder

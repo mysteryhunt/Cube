@@ -12,7 +12,7 @@ import edu.mit.puzzle.cube.core.model.Submission;
 @JsonTypeName("SubmissionComplete")
 public abstract class SubmissionCompleteEvent extends Event {
     public String getEventType() {
-        return this.getClass().getSimpleName();
+        return SubmissionCompleteEvent.class.getSimpleName();
     }
 
     @AutoValue.Builder

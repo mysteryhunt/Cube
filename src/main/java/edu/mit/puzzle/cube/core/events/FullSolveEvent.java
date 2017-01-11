@@ -10,7 +10,7 @@ import com.google.auto.value.AutoValue;
 @JsonTypeName("FullSolve")
 public abstract class FullSolveEvent extends Event {
     public String getEventType() {
-        return this.getClass().getSimpleName();
+        return FullSolveEvent.class.getSimpleName();
     }
 
     @AutoValue.Builder

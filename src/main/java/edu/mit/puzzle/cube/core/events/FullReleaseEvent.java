@@ -10,7 +10,7 @@ import com.google.auto.value.AutoValue;
 @JsonTypeName("FullRelease")
 public abstract class FullReleaseEvent extends Event {
     public String getEventType() {
-        return this.getClass().getSimpleName();
+        return FullReleaseEvent.class.getSimpleName();
     }
 
     @AutoValue.Builder

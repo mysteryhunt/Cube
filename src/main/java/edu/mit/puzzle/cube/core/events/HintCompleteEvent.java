@@ -12,7 +12,7 @@ import edu.mit.puzzle.cube.core.model.HintRequest;
 @JsonTypeName("HintComplete")
 public abstract class HintCompleteEvent extends Event {
     public String getEventType() {
-        return this.getClass().getSimpleName();
+        return HintCompleteEvent.class.getSimpleName();
     }
 
     @AutoValue.Builder

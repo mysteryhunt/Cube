@@ -191,7 +191,7 @@ public class ScoreExampleHuntDefinition extends HuntDefinition {
     @AutoValue
     static abstract class ScoreUpdateEvent extends Event {
         public String getEventType() {
-            return this.getClass().getSimpleName();
+            return ScoreUpdateEvent.class.getSimpleName();
         }
 
         @AutoValue.Builder
@@ -207,5 +207,8 @@ public class ScoreExampleHuntDefinition extends HuntDefinition {
 
         abstract String getTeamId();
         abstract int getScore();
+    }
+    static {
+        Event.registerEventClass(ScoreUpdateEvent.class);
     }
 }
