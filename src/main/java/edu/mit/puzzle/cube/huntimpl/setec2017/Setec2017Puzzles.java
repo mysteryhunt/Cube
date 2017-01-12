@@ -2355,8 +2355,8 @@ public class Setec2017Puzzles {
 
         add.accept(Setec2017PuzzleBuilder.builder()
                 .setId("battle")
-                .setDisplayId("the_big_battle")
-                .setDisplayName("The Big Battle")
+                .setDisplayId("the_big_bad_battle")
+                .setDisplayName("The Big Bad Battle")
                 .setSingleAnswer("HIVE MIND")
                 .setVisibleConstraint(VisibilityConstraint.builder()
                         .addPuzzleVisibilityStatusConstraint("fighter","SOLVED")
@@ -2377,8 +2377,8 @@ public class Setec2017Puzzles {
 
         add.accept(Setec2017PuzzleBuilder.builder()
                         .setId("fortress")
-                        .setDisplayId("the_final_fortress")
-                        .setDisplayName("The Final Fortress")
+                        .setDisplayId("the_foreboding_final_fortress")
+                        .setDisplayName("The Foreboding Final Fortress")
                         .setSingleAnswer("GROUP HUG")
                         .setVisibleConstraint(VisibilityConstraint.builder()
                                 .addSumConstraint(140, Character.values())
