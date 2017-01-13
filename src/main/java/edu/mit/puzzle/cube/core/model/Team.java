@@ -43,6 +43,9 @@ public abstract class Team {
         @JsonProperty("teamId") public abstract Builder setTeamId(String teamId);
 
         @Nullable
+        @JsonProperty("teamName") public abstract Builder setTeamName(String teamName);
+
+        @Nullable
         @JsonProperty("password") public abstract Builder setPassword(@Nullable String password);
 
         @Nullable
@@ -101,6 +104,11 @@ public abstract class Team {
     }
 
     @JsonProperty("teamId") public abstract String getTeamId();
+
+    @Nullable
+    @JsonProperty("teamName")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public abstract String getTeamName();
 
     @Nullable
     @JsonProperty("password")
