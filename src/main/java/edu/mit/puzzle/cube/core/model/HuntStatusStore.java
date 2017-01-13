@@ -444,7 +444,7 @@ public class HuntStatusStore {
                 try (
                         Connection connection = connectionFactory.getConnection();
                         PreparedStatement insertTeamStatement = connection.prepareStatement(
-                                "INSERT INTO teams (teamId, teamName, email, headquarters, primaryPhone, secondaryPhone) VALUES (?,?,?,?,?)")
+                                "INSERT INTO teams (teamId, teamName, email, headquarters, primaryPhone, secondaryPhone) VALUES (?,?,?,?,?,?)")
                 ) {
                     insertTeamStatement.setString(1, team.getTeamId());
                     insertTeamStatement.setString(2, team.getTeamName());
