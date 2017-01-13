@@ -231,20 +231,37 @@ public class SubmissionStore {
             @Nullable String callerUsername,
             @Nullable String canonicalAnswer
     ) {
-        boolean updated = DatabaseHelper.update(
-                connectionFactory,
-                "UPDATE submissions SET status = ?, callerUsername = ?, canonicalAnswer = ? " +
-                "WHERE submissionId = ? AND (status <> ? OR callerUsername <> ? OR canonicalAnswer <> ?)",
-                Lists.newArrayList(
-                        status.toString(),
-                        callerUsername,
-                        canonicalAnswer,
-                        submissionId,
-                        status.toString(),
-                        callerUsername,
-                        canonicalAnswer
-                )
-        ) > 0;
+        boolean updated;
+        if (status.equals(SubmissionStatus.ASSIGNED)) {
+            String updateSql = "UPDATE submissions SET status = ?, callerUsername = ?, canonicalAnswer = ? " +
+                "WHERE submissionId = ? AND status <> 'ASSIGNED'";
+            updated = DatabaseHelper.update(
+                    connectionFactory,
+                    updateSql,
+                    Lists.newArrayList(
+                            status.toString(),
+                            callerUsername,
+                            canonicalAnswer,
+                            submissionId
+                    )
+            ) > 0;
+        } else {
+            String updateSql = "UPDATE submissions SET status = ?, callerUsername = ?, canonicalAnswer = ? " +
+                    "WHERE submissionId = ? AND (status <> ? OR callerUsername <> ? OR canonicalAnswer <> ?)";
+            updated = DatabaseHelper.update(
+                    connectionFactory,
+                    updateSql,
+                    Lists.newArrayList(
+                            status.toString(),
+                            callerUsername,
+                            canonicalAnswer,
+                            submissionId,
+                            status.toString(),
+                            callerUsername,
+                            canonicalAnswer
+                    )
+            ) > 0;
+        }
 
         if (updated && status.isTerminal()) {
             Submission submission = this.getSubmission(submissionId).get();
