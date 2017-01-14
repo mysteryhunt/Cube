@@ -1923,7 +1923,7 @@ public class Setec2017Puzzles {
                 .setId("minstrels")
                 .setDisplayId("the_modest_minstrels")
                 .setDisplayName("The Modest Minstrels")
-                .setSingleAnswer("WE DON'T TOOT OUR HORNS")
+                .setSingleAnswer("WE DON'T TOOT OUR OWN HORNS")
                 .setVisibleConstraint(VisibilityConstraint.builder()
                         .addSumConstraint(64, Character.values())
                         .build())
