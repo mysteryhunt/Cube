@@ -5,6 +5,10 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import com.beust.jcommander.Parameters;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
@@ -14,7 +18,9 @@ import edu.mit.puzzle.cube.core.db.CubeDatabaseSchema;
 import edu.mit.puzzle.cube.core.environments.ProductionEnvironment;
 import edu.mit.puzzle.cube.core.environments.ServiceEnvironment;
 import edu.mit.puzzle.cube.core.events.CompositeEventProcessor;
+import edu.mit.puzzle.cube.core.model.Answer;
 import edu.mit.puzzle.cube.core.model.Puzzle;
+import edu.mit.puzzle.cube.core.model.Puzzle.DisplayIdProperty;
 import edu.mit.puzzle.cube.core.model.PuzzleStore;
 import edu.mit.puzzle.cube.core.model.User;
 import edu.mit.puzzle.cube.core.model.UserStore;
@@ -221,12 +227,58 @@ public class CubeTool {
         }
     }
 
+    @Parameters(
+            commandNames = {"generateanswerjson"},
+            commandDescription = "Generate a JSON file containing hashes of all puzzle answers"
+    )
+    private class CommandGenerateAnswerJSON implements Command {
+        @Override
+        public void run() {
+            // Load HuntDefinition to force all puzzle property classes to be loaded.
+            HuntDefinition.forClassName(
+                    cubeConfig.getHuntDefinitionClassName()
+            );
+
+            PuzzleStore puzzleStore = new PuzzleStore(
+                    environment.getConnectionFactory(),
+                    new CompositeEventProcessor()
+            );
+
+            Map<String, Puzzle> puzzles = puzzleStore.getPuzzles();
+            ObjectNode puzzlesJson = JsonNodeFactory.instance.objectNode();
+            for (Puzzle puzzle : puzzles.values()) {
+                List<Answer> answers = puzzle.getAnswers();
+                if (answers.size() == 0) {
+                    continue;
+                }
+                String answer = answers.get(0).getCanonicalAnswer();
+                String strippedAnswer = answer.toUpperCase().replaceAll("[^A-Z0-9]", "");
+                DisplayIdProperty displayIdProperty = puzzle.getPuzzleProperty(DisplayIdProperty.class);
+                String puzzleId;
+                if (displayIdProperty != null) {
+                    puzzleId = displayIdProperty.getDisplayId();
+                } else {
+                    puzzleId = puzzle.getPuzzleId();
+                }
+                puzzlesJson.put(puzzleId, strippedAnswer.hashCode());
+            }
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            try {
+                System.out.print(objectMapper.writeValueAsString(puzzlesJson));
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     private void run(String[] args) {
         Map<String, Command> commands = ImmutableMap.of(
                 "initdb", new CommandInitDb(),
                 "resethunt", new CommandResetHunt(),
                 "adduser", new CommandAddUser(),
-                "updatepuzzle", new CommandUpdatePuzzle()
+                "updatepuzzle", new CommandUpdatePuzzle(),
+                "generateanswerjson", new CommandGenerateAnswerJSON()
         );
         for (Command command : commands.values()) {
             jCommander.addCommand(command);
