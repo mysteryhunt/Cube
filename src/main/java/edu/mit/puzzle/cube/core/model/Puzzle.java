@@ -260,9 +260,8 @@ public abstract class Puzzle {
     @JsonProperty("puzzleId")
     public abstract String getPuzzleId();
 
-    @Nullable
     @JsonProperty("puzzleProperties")
-    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     public abstract ImmutableMap<String, Property> getPuzzleProperties();
 
     @Nullable
