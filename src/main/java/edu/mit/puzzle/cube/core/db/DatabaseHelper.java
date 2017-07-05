@@ -77,6 +77,7 @@ public class DatabaseHelper {
      * @param <KEY_TYPE> The Class of the keyField, used to cast Objects into that Class.
      * @return A Table with results. Row keys are Integers, column keys are the SELECTed columns.
      */
+    @SuppressWarnings("unchecked")
     public static <KEY_TYPE> Table<KEY_TYPE,String,Object> query(
             ConnectionFactory connectionFactory,
             String preparedQuery,
