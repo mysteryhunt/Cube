@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.datatype.guava.GuavaModule;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.google.auto.value.AutoValue;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
@@ -56,7 +57,8 @@ public abstract class Puzzle {
     private static final Logger LOGGER = LoggerFactory.getLogger(Puzzle.class);
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
-            .registerModule(new GuavaModule());
+            .registerModule(new GuavaModule())
+            .registerModule(new Jdk8Module());
 
     public static abstract class Property {
         private static Map<String, Class<? extends Property>> propertyClasses = new HashMap<>();

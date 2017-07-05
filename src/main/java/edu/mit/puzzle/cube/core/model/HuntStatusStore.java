@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.datatype.guava.GuavaModule;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.google.auto.value.AutoValue;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
@@ -50,7 +51,8 @@ public class HuntStatusStore {
     private static Logger LOGGER = LoggerFactory.getLogger(HuntStatusStore.class);
 
     private static ObjectMapper OBJECT_MAPPER = new ObjectMapper()
-            .registerModule(new GuavaModule());
+            .registerModule(new GuavaModule())
+            .registerModule(new Jdk8Module());
 
     private final ConnectionFactory connectionFactory;
     private final Clock clock;
